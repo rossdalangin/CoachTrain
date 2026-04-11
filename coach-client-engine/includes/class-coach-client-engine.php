@@ -1,0 +1,145 @@
+<?php
+/**
+ * The core plugin class.
+ */
+class Coach_Client_Engine {
+
+	/**
+	 * The loader that's responsible for maintaining and registering all hooks.
+	 */
+	protected $loader;
+
+	/**
+	 * Define the core functionality of the plugin.
+	 */
+	public function __construct() {
+		$this->load_dependencies();
+		$this->define_admin_hooks();
+		$this->define_public_hooks();
+	}
+
+	/**
+	 * Load the required dependencies for this plugin.
+	 */
+	private function load_dependencies() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-rest-controller.php';
+
+        // Modules
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/leads/class-leads-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/crm/class-crm-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/bookings/class-bookings-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/clients/class-offer-model.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/clients/class-checkout-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/funnels/class-funnels-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/analytics/class-analytics-manager.php';
+	}
+
+	/**
+	 * Register all of the hooks related to the admin area functionality.
+	 */
+	private function define_admin_hooks() {
+		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+	}
+
+	/**
+	 * Register all of the hooks related to the public-facing functionality.
+	 */
+	private function define_public_hooks() {
+		// Public hooks will go here
+	}
+
+	/**
+	 * Add admin menu.
+	 */
+	public function add_plugin_admin_menu() {
+		add_menu_page(
+			'Coach Client Engine',
+			'Coach Engine',
+			'manage_options',
+			'coach-client-engine',
+			array( $this, 'display_plugin_admin_page' ),
+			'dashicons-performance',
+			25
+		);
+	}
+
+	/**
+	 * Display the admin page.
+	 */
+	public function display_plugin_admin_page() {
+		echo '<div id="cce-admin-app"></div>';
+	}
+
+    /**
+     * Enqueue admin assets.
+     */
+    public function enqueue_admin_assets( $hook ) {
+        if ( 'toplevel_page_coach-client-engine' !== $hook ) {
+            return;
+        }
+
+        $asset_file = include( plugin_dir_path( dirname( __FILE__ ) ) . 'build/index.asset.php' );
+
+        wp_enqueue_script(
+            'cce-admin-js',
+            plugin_dir_url( dirname( __FILE__ ) ) . 'build/index.js',
+            $asset_file['dependencies'],
+            $asset_file['version'],
+            true
+        );
+
+        wp_enqueue_style(
+            'cce-admin-css',
+            plugin_dir_url( dirname( __FILE__ ) ) . 'admin/css/cce-admin.css',
+            array(),
+            CCE_VERSION
+        );
+
+        wp_localize_script( 'cce-admin-js', 'cceData', array(
+            'root'  => esc_url_raw( rest_url() ),
+            'nonce' => wp_create_nonce( 'wp_rest' ),
+            'isPro' => $this->is_pro(),
+        ) );
+    }
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 */
+	public function run() {
+		// Initialization logic
+        add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+	}
+
+	/**
+	 * Check if the plugin has a valid pro license.
+	 */
+	public function is_pro() {
+		$license_key = get_option( 'cce_license_key' );
+		// Simple mock check for demonstration
+		return ! empty( $license_key ) && strpos( $license_key, 'PRO-' ) === 0;
+	}
+
+    /**
+     * Register REST API routes.
+     */
+    public function register_rest_routes() {
+        $leads_manager = new CCE_Leads_Manager();
+        $leads_manager->register_routes();
+
+        $crm_manager = new CCE_CRM_Manager();
+        $crm_manager->register_routes();
+
+        $bookings_manager = new CCE_Bookings_Manager();
+        $bookings_manager->register_routes();
+
+        $funnels_manager = new CCE_Funnels_Manager();
+        $funnels_manager->register_routes();
+
+        $analytics_manager = new CCE_Analytics_Manager();
+        $analytics_manager->register_routes();
+
+        $checkout_manager = new CCE_Checkout_Manager();
+        $checkout_manager->register_routes();
+    }
+}

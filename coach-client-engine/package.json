@@ -1,0 +1,15 @@
+{
+  "name": "coach-client-engine",
+  "version": "1.0.0",
+  "description": "Coach Client Engine Admin Interface",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js",
+    "lint:css": "wp-scripts lint-style"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.0.0"
+  }
+}
