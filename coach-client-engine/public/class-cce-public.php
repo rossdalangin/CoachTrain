@@ -32,12 +32,13 @@ class CCE_Public {
 		), $atts );
 
 		ob_start();
+        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
 		?>
 		<div class="cce-checkout-wrapper">
 			<h3>Complete Your Purchase</h3>
 			<form id="cce-public-checkout-form">
                 <input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
-                <input type="hidden" name="lead_id" value="1">
+                <input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
 				<select name="gateway" required>
                     <option value="stripe">Stripe</option>
                     <option value="paypal">PayPal</option>
@@ -94,11 +95,12 @@ class CCE_Public {
 		), $atts );
 
 		ob_start();
+        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
 		?>
 		<div class="cce-booking-form-wrapper">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form id="cce-public-booking-form">
-                <input type="hidden" name="lead_id" value="1"> <!-- Example lead ID -->
+                <input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
 				<input type="datetime-local" name="start_time" required>
 				<select name="timezone" required>
                     <option value="UTC">UTC</option>
@@ -141,6 +143,11 @@ class CCE_Public {
 	}
 
 	public function render_lead_capture_form( $atts ) {
+        // Start session if not started
+        if ( ! session_id() ) {
+            session_start();
+        }
+
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
 		), $atts );
@@ -176,6 +183,8 @@ class CCE_Public {
 				if (res.success) {
 					msg.innerHTML = '<p style="color:green">Success! Check your email.</p>';
 					this.reset();
+                    // Store lead ID in session via cookie or similar (simplified for demo)
+                    document.cookie = "cce_lead_id=" + res.data.id + ";path=/";
 				} else {
 					msg.innerHTML = '<p style="color:red">Something went wrong. Please try again.</p>';
 				}

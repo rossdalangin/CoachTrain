@@ -143,14 +143,39 @@ class Coach_Client_Engine {
      * Register REST API routes.
      */
     public function register_rest_routes() {
-        register_rest_route( 'cce/v1', '/settings/license', array(
-            'methods'             => 'POST',
-            'callback'            => function( $request ) {
-                $license = sanitize_text_field( $request->get_param( 'license_key' ) );
-                update_option( 'cce_license_key', $license );
-                return array( 'success' => true );
-            },
-            'permission_callback' => array( $this, 'check_rest_permission' ),
+        register_rest_route( 'cce/v1', '/settings', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => function() {
+                    return array(
+                        'success' => true,
+                        'data'    => array(
+                            'license_key'    => get_option( 'cce_license_key', '' ),
+                            'stripe_api_key' => get_option( 'cce_stripe_api_key', '' ),
+                            'paypal_client_id' => get_option( 'cce_paypal_client_id', '' ),
+                            'onboarding_step' => (int) get_option( 'cce_onboarding_step', 1 ),
+                        )
+                    );
+                },
+                'permission_callback' => array( $this, 'check_rest_permission' ),
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => function( $request ) {
+                    $params = $request->get_params();
+                    if ( isset( $params['license_key'] ) ) {
+                        update_option( 'cce_license_key', sanitize_text_field( $params['license_key'] ) );
+                    }
+                    if ( isset( $params['stripe_api_key'] ) ) {
+                        update_option( 'cce_stripe_api_key', sanitize_text_field( $params['stripe_api_key'] ) );
+                    }
+                    if ( isset( $params['onboarding_step'] ) ) {
+                        update_option( 'cce_onboarding_step', absint( $params['onboarding_step'] ) );
+                    }
+                    return array( 'success' => true );
+                },
+                'permission_callback' => array( $this, 'check_rest_permission' ),
+            )
         ) );
 
         $leads_manager = new CCE_Leads_Manager();

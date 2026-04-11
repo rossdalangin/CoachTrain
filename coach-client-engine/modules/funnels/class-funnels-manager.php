@@ -28,7 +28,56 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/funnels/(?P<id>\d+)/steps', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_funnel_steps' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'save_funnel_steps' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Get funnel steps.
+     */
+    public function get_funnel_steps( $request ) {
+        global $wpdb;
+        $funnel_id = absint( $request['id'] );
+        $table_name = $wpdb->prefix . 'cce_funnel_steps';
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
+        return $this->success( $steps );
+    }
+
+    /**
+     * Save funnel steps.
+     */
+    public function save_funnel_steps( $request ) {
+        global $wpdb;
+        $funnel_id = absint( $request['id'] );
+        $steps = $request->get_param( 'steps' );
+        $table_name = $wpdb->prefix . 'cce_funnel_steps';
+
+        // Simplified: Delete and re-insert for this version
+        $wpdb->delete( $table_name, array( 'funnel_id' => $funnel_id ) );
+
+        foreach ( $steps as $index => $step ) {
+            $wpdb->insert( $table_name, array(
+                'funnel_id'  => $funnel_id,
+                'title'      => sanitize_text_field( $step['title'] ),
+                'step_order' => $index + 1,
+                'step_type'  => sanitize_text_field( $step['type'] ),
+                'config'     => json_encode( $step['config'] ?? array() ),
+            ) );
+        }
+
+        return $this->success( array( 'message' => 'Steps saved' ) );
+    }
 
     /**
      * Get funnel templates.

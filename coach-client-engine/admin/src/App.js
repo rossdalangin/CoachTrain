@@ -317,18 +317,26 @@ const ProofView = () => (
 );
 
 const SettingsView = ({ setIsPro }) => {
-    const [licenseKey, setLicenseKey] = useState(window.cceData?.licenseKey || '');
+    const [settings, setSettings] = useState({ license_key: '', stripe_api_key: '' });
     const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        apiFetch({ path: '/cce/v1/settings' }).then(response => {
+            if (response.success) {
+                setSettings(response.data);
+            }
+        });
+    }, []);
 
     const handleSave = () => {
         setIsSaving(true);
         apiFetch({
-            path: '/cce/v1/settings/license',
+            path: '/cce/v1/settings',
             method: 'POST',
-            data: { license_key: licenseKey }
+            data: settings
         }).then(response => {
             if (response.success) {
-                setIsPro(licenseKey.startsWith('PRO-'));
+                setIsPro(settings.license_key.startsWith('PRO-'));
                 alert('Settings saved successfully!');
             }
             setIsSaving(false);
@@ -346,15 +354,20 @@ const SettingsView = ({ setIsPro }) => {
                 <input
                     type="text"
                     className="regular-text"
-                    value={licenseKey}
-                    onChange={(e) => setLicenseKey(e.target.value)}
+                    value={settings.license_key}
+                    onChange={(e) => setSettings({...settings, license_key: e.target.value})}
                     placeholder="PRO-XXXX-XXXX"
                 />
                 <p className="description">Enter your license key to unlock Pro features.</p>
             </div>
             <div className="form-group" style={{marginBottom: '20px'}}>
                 <label style={{display: 'block', marginBottom: '5px'}}>Stripe API Key</label>
-                <input type="password" title="Stripe API Key" className="regular-text" value="************" readOnly />
+                <input
+                    type="password"
+                    className="regular-text"
+                    value={settings.stripe_api_key}
+                    onChange={(e) => setSettings({...settings, stripe_api_key: e.target.value})}
+                />
             </div>
             <button
                 className="button button-primary"
