@@ -125,25 +125,66 @@ const DashboardView = () => {
     );
 };
 
-const FunnelsView = () => (
-    <div>
-        <div className="cce-card">
-            <h3>Pre-built Templates</h3>
-            <div className="cce-card-grid">
-                <div className="cce-card" style={{border: '1px solid #ddd'}}>
-                    <h4>Lead Magnet Funnel</h4>
-                    <p>Best for growing your list.</p>
-                    <button className="button button-primary">Use Template</button>
+const FunnelsView = () => {
+    const [funnelSteps, setFunnelSteps] = useState([
+        { id: 1, title: 'Opt-in Page', type: 'optin' },
+        { id: 2, title: 'Checkout Page', type: 'checkout' },
+        { id: 3, title: 'Thank You Page', type: 'thank_you' }
+    ]);
+
+    const addStep = () => {
+        const newStep = { id: Date.now(), title: 'New Step', type: 'optin' };
+        setFunnelSteps([...funnelSteps, newStep]);
+    };
+
+    const removeStep = (id) => {
+        setFunnelSteps(funnelSteps.filter(step => step.id !== id));
+    };
+
+    return (
+        <div>
+            <div className="cce-card" style={{marginBottom: '20px'}}>
+                <h3>Your Funnel Flow</h3>
+                <div className="funnel-steps" style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                    {funnelSteps.map((step, index) => (
+                        <div key={step.id} className="funnel-step-card" style={{
+                            background: '#fff',
+                            border: '1px solid #ddd',
+                            padding: '15px',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div>
+                                <span style={{fontWeight: 'bold', marginRight: '10px'}}>#{index + 1}</span>
+                                {step.title} <span style={{fontSize: '12px', color: '#666'}}>({step.type})</span>
+                            </div>
+                            <button className="button" onClick={() => removeStep(step.id)}>Remove</button>
+                        </div>
+                    ))}
                 </div>
-                <div className="cce-card" style={{border: '1px solid #ddd'}}>
-                    <h4>Consultation Funnel</h4>
-                    <p>Best for high-ticket bookings.</p>
-                    <button className="button button-primary">Use Template</button>
+                <button className="button button-primary" style={{marginTop: '20px'}} onClick={addStep}>+ Add Step</button>
+            </div>
+
+            <div className="cce-card">
+                <h3>Pre-built Templates</h3>
+                <div className="cce-card-grid">
+                    <div className="cce-card" style={{border: '1px solid #ddd'}}>
+                        <h4>Lead Magnet Funnel</h4>
+                        <p>Best for growing your list.</p>
+                        <button className="button button-primary">Use Template</button>
+                    </div>
+                    <div className="cce-card" style={{border: '1px solid #ddd'}}>
+                        <h4>Consultation Funnel</h4>
+                        <p>Best for high-ticket bookings.</p>
+                        <button className="button button-primary">Use Template</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const LeadsView = () => {
     const [leads, setLeads] = useState([]);
