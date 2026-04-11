@@ -56,7 +56,12 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 			return $this->error( 'Failed to create lead' );
 		}
 
-		$data['id'] = $wpdb->insert_id;
+		$lead_id = $wpdb->insert_id;
+		$data['id'] = $lead_id;
+
+        // Trigger action for automation
+        do_action( 'cce_lead_created', $lead_id );
+
 		return $this->success( $data );
 	}
 }

@@ -24,6 +24,8 @@ class Coach_Client_Engine {
 	private function load_dependencies() {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-rest-controller.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-webhooks-controller.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-mailer.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-cce-public.php';
 
         // Modules
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/leads/class-leads-manager.php';
@@ -50,7 +52,8 @@ class Coach_Client_Engine {
 	 * Register all of the hooks related to the public-facing functionality.
 	 */
 	private function define_public_hooks() {
-		// Public hooks will go here
+		$public = new CCE_Public();
+        add_action( 'init', array( $public, 'init' ) );
 	}
 
 	/**

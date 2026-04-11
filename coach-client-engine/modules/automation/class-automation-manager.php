@@ -5,6 +5,14 @@
 class CCE_Automation_Manager extends CCE_REST_Controller {
 
     /**
+     * Constructor.
+     */
+    public function __construct() {
+        add_action( 'cce_lead_created', array( $this, 'trigger_optin_automation' ) );
+        add_action( 'cce_booking_confirmed', array( $this, 'trigger_booking_automation' ) );
+    }
+
+    /**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -34,6 +42,10 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 	public function trigger_optin_automation( $lead_id ) {
 		// logic for email delivery and tagging
         error_log( "Automation triggered for lead: $lead_id" );
+
+        // Example: Send welcome email
+        // $mailer = new CCE_Mailer();
+        // $mailer->send_welcome_email( $lead_id );
 	}
 
 	/**
