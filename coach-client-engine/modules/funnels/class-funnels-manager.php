@@ -20,7 +20,27 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/funnels/templates', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_templates' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Get funnel templates.
+     */
+    public function get_templates( $request ) {
+        $templates = array(
+            array( 'id' => 'lead_magnet', 'title' => 'Lead Magnet Funnel', 'description' => 'Perfect for building your email list.' ),
+            array( 'id' => 'consultation', 'title' => 'Consultation Funnel', 'description' => 'Ideal for high-ticket coaching bookings.' ),
+            array( 'id' => 'webinar', 'title' => 'Webinar Funnel', 'description' => 'Best for automated sales presentations.' ),
+        );
+        return $this->success( $templates );
+    }
 
 	/**
 	 * Get funnels.

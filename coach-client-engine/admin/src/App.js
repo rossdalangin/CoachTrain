@@ -41,8 +41,9 @@ const App = () => {
                 {currentTab === 'Client Portal' && <PortalView />}
                 {currentTab === 'Proof' && <ProofView />}
                 {currentTab === 'Settings' && <SettingsView />}
+                {currentTab === 'Funnels' && <FunnelsView />}
 
-                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings'].includes(currentTab) &&
+                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings', 'Funnels'].includes(currentTab) &&
                     <div className="cce-card">
                         <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
                         <button className="button">Join the Beta</button>
@@ -55,6 +56,24 @@ const App = () => {
 
 const DashboardView = () => (
     <div>
+        <div className="cce-card onboarding-guide" style={{marginBottom: '30px', borderLeft: '4px solid #0073aa'}}>
+            <h2>🚀 Get Started: Your 3-Step Setup Guide</h2>
+            <div style={{display: 'flex', gap: '20px'}}>
+                <div style={{flex: 1}}>
+                    <strong>1. Create Your First Offer</strong>
+                    <p>Define what you sell (e.g., "90-Day High-Ticket Coaching").</p>
+                </div>
+                <div style={{flex: 1}}>
+                    <strong>2. Build Your Funnel</strong>
+                    <p>Use our pre-built templates to start getting leads.</p>
+                </div>
+                <div style={{flex: 1}}>
+                    <strong>3. Connect Payments</strong>
+                    <p>Link Stripe or PayPal to start receiving funds.</p>
+                </div>
+            </div>
+        </div>
+
         <div className="cce-card-grid">
             <div className="cce-card">
                 <h3>Leads today</h3>
@@ -79,6 +98,26 @@ const DashboardView = () => (
                 <button className="button button-primary button-hero">Create Funnel</button>
                 <button className="button button-hero">Add Offer</button>
                 <button className="button button-hero">Create Form</button>
+            </div>
+        </div>
+    </div>
+);
+
+const FunnelsView = () => (
+    <div>
+        <div className="cce-card">
+            <h3>Pre-built Templates</h3>
+            <div className="cce-card-grid">
+                <div className="cce-card" style={{border: '1px solid #ddd'}}>
+                    <h4>Lead Magnet Funnel</h4>
+                    <p>Best for growing your list.</p>
+                    <button className="button button-primary">Use Template</button>
+                </div>
+                <div className="cce-card" style={{border: '1px solid #ddd'}}>
+                    <h4>Consultation Funnel</h4>
+                    <p>Best for high-ticket bookings.</p>
+                    <button className="button button-primary">Use Template</button>
+                </div>
             </div>
         </div>
     </div>

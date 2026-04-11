@@ -121,5 +121,25 @@ class CCE_Activator {
                 );
             }
         }
+
+        // Seed default Funnel Templates if empty
+        $funnel_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels" );
+        if ( 0 == $funnel_count ) {
+            $templates = [
+                ['title' => 'Lead Magnet Funnel', 'type' => 'lead_magnet'],
+                ['title' => 'Consultation Funnel', 'type' => 'consultation'],
+                ['title' => 'Webinar Funnel', 'type' => 'webinar'],
+            ];
+            foreach ( $templates as $template ) {
+                $wpdb->insert(
+                    "{$wpdb->prefix}cce_funnels",
+                    [
+                        'title' => $template['title'],
+                        'type' => $template['type'],
+                        'status' => 'draft'
+                    ]
+                );
+            }
+        }
 	}
 }

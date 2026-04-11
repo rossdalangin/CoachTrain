@@ -23,6 +23,7 @@ class Coach_Client_Engine {
 	 */
 	private function load_dependencies() {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-rest-controller.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-webhooks-controller.php';
 
         // Modules
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/leads/class-leads-manager.php';
@@ -175,5 +176,8 @@ class Coach_Client_Engine {
 
         $automation_manager = new CCE_Automation_Manager();
         $automation_manager->register_routes();
+
+        $webhooks_controller = new CCE_Webhooks_Controller();
+        $webhooks_controller->register_routes();
     }
 }
