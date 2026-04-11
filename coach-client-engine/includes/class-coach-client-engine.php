@@ -112,6 +112,13 @@ class Coach_Client_Engine {
     }
 
 	/**
+	 * Check REST permission.
+	 */
+	public function check_rest_permission() {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 */
 	public function run() {
@@ -132,6 +139,16 @@ class Coach_Client_Engine {
      * Register REST API routes.
      */
     public function register_rest_routes() {
+        register_rest_route( 'cce/v1', '/settings/license', array(
+            'methods'             => 'POST',
+            'callback'            => function( $request ) {
+                $license = sanitize_text_field( $request->get_param( 'license_key' ) );
+                update_option( 'cce_license_key', $license );
+                return array( 'success' => true );
+            },
+            'permission_callback' => array( $this, 'check_rest_permission' ),
+        ) );
+
         $leads_manager = new CCE_Leads_Manager();
         $leads_manager->register_routes();
 
