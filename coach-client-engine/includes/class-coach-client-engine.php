@@ -32,6 +32,9 @@ class Coach_Client_Engine {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/clients/class-checkout-manager.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/funnels/class-funnels-manager.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/analytics/class-analytics-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/portal/class-portal-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/proof/class-proof-manager.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/automation/class-automation-manager.php';
 	}
 
 	/**
@@ -79,7 +82,12 @@ class Coach_Client_Engine {
             return;
         }
 
-        $asset_file = include( plugin_dir_path( dirname( __FILE__ ) ) . 'build/index.asset.php' );
+        $asset_path = plugin_dir_path( dirname( __FILE__ ) ) . 'build/index.asset.php';
+        if ( ! file_exists( $asset_path ) ) {
+            return;
+        }
+
+        $asset_file = include( $asset_path );
 
         wp_enqueue_script(
             'cce-admin-js',
@@ -141,5 +149,14 @@ class Coach_Client_Engine {
 
         $checkout_manager = new CCE_Checkout_Manager();
         $checkout_manager->register_routes();
+
+        $portal_manager = new CCE_Portal_Manager();
+        $portal_manager->register_routes();
+
+        $proof_manager = new CCE_Proof_Manager();
+        $proof_manager->register_routes();
+
+        $automation_manager = new CCE_Automation_Manager();
+        $automation_manager->register_routes();
     }
 }

@@ -4,8 +4,8 @@
   "description": "Coach Client Engine Admin Interface",
   "main": "index.js",
   "scripts": {
-    "build": "wp-scripts build",
-    "start": "wp-scripts start",
+    "build": "wp-scripts build admin/src/index.js --output-path=build",
+    "start": "wp-scripts start admin/src/index.js --output-path=build",
     "lint:js": "wp-scripts lint-js",
     "lint:css": "wp-scripts lint-style"
   },
