@@ -41,7 +41,79 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/funnels/create-from-template', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_from_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/funnels/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_funnel' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Delete funnel.
+     */
+    public function delete_funnel( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_funnels", array( 'id' => $id ) );
+        $wpdb->delete( "{$wpdb->prefix}cce_funnel_steps", array( 'funnel_id' => $id ) );
+        return $this->success( array( 'message' => 'Funnel deleted' ) );
+    }
+
+    /**
+     * Create from template.
+     */
+    public function create_from_template( $request ) {
+        global $wpdb;
+        $template_id = sanitize_text_field( $request->get_param( 'template_id' ) );
+
+        $title = 'New ' . ucwords( str_replace( '_', ' ', $template_id ) );
+        $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
+            'title' => $title,
+            'type'  => $template_id,
+            'status' => 'active'
+        ) );
+
+        $funnel_id = $wpdb->insert_id;
+
+        // Seed default steps
+        if ( 'lead_magnet' === $template_id ) {
+            $steps = [
+                ['title' => 'Opt-in Page', 'type' => 'optin'],
+                ['title' => 'Thank You', 'type' => 'thank_you']
+            ];
+        } elseif ( 'consultation' === $template_id ) {
+            $steps = [
+                ['title' => 'Application', 'type' => 'optin'],
+                ['title' => 'Schedule Call', 'type' => 'booking'],
+                ['title' => 'Confirmation', 'thank_you']
+            ];
+        }
+
+        if ( ! empty( $steps ) ) {
+            foreach ( $steps as $index => $step ) {
+                $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                    'funnel_id'  => $funnel_id,
+                    'title'      => $step['title'],
+                    'step_order' => $index + 1,
+                    'step_type'  => $step['type'] ?? 'thank_you',
+                    'config'     => '{}'
+                ) );
+            }
+        }
+
+        return $this->success( array( 'id' => $funnel_id ) );
+    }
 
     /**
      * Get funnel steps.

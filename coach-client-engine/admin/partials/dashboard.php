@@ -2,10 +2,16 @@
     <h1>Coach Client Engine - Dashboard</h1>
 
     <?php
-    $analytics = new CCE_Analytics_Manager();
-    $summary = $analytics->get_summary( new WP_REST_Request() )->get_data()['data'];
+    if ( class_exists( 'CCE_Analytics_Manager' ) ) {
+        $analytics = new CCE_Analytics_Manager();
+        $summary_res = $analytics->get_summary( new WP_REST_Request() );
+        $summary = is_wp_error($summary_res) ? [] : $summary_res->get_data()['data'];
+    } else {
+        $summary = [];
+    }
     ?>
 
+    <?php if ($summary): ?>
     <div class="cce-dashboard-grid">
         <div class="cce-card">
             <h3>Leads Today</h3>
@@ -32,6 +38,9 @@
             <?php endif; ?>
         </ul>
     </div>
+    <?php else: ?>
+        <div class="notice notice-warning"><p>No analytics data available. Start capturing leads to see insights!</p></div>
+    <?php endif; ?>
 
     <div class="cce-quick-actions">
         <h2>Quick Actions</h2>

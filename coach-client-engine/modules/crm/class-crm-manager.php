@@ -60,7 +60,24 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/activities', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_activities' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Get activities for a lead.
+     */
+    public function get_activities( $request ) {
+        $lead_id = absint( $request['id'] );
+        $activities = CCE_Activity_Logger::get_logs( $lead_id );
+        return $this->success( $activities );
+    }
 
     /**
      * Get tasks for a lead.

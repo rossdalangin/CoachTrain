@@ -42,18 +42,37 @@
                 <th>Title</th>
                 <th>Price</th>
                 <th>Type</th>
-                <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ( $offers as $offer ): ?>
+            <?php if ($offers): foreach ( $offers as $offer ): ?>
                 <tr>
                     <td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
                     <td>$<?php echo number_format( $offer->price, 2 ); ?></td>
                     <td><?php echo esc_html( strtoupper( $offer->type ) ); ?></td>
-                    <td>Active</td>
+                    <td>
+                        <button class="button button-link-delete cce-delete-offer" data-offer-id="<?php echo $offer->id; ?>" style="color:#d63638;">Delete</button>
+                    </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php endforeach; else: ?>
+                <tr><td colspan="4">No active offers.</td></tr>
+            <?php endif; ?>
         </tbody>
     </table>
+
+    <script>
+    jQuery(document).ready(function($) {
+        $('.cce-delete-offer').on('click', function() {
+            if(!confirm('Are you sure you want to delete this offer?')) return;
+            const offerId = $(this).data('offer-id');
+            $.ajax({
+                url: cceAdmin.restUrl + 'offers/' + offerId,
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function(res) { if(res.success) location.reload(); }
+            });
+        });
+    });
+    </script>
 </div>

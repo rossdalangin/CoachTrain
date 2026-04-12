@@ -35,17 +35,38 @@
                 <th>Email</th>
                 <th>Status</th>
                 <th>Date</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ( $leads as $lead ): ?>
+            <?php if ($leads): foreach ( $leads as $lead ): ?>
                 <tr>
                     <td><strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong></td>
                     <td><?php echo esc_html( $lead->email ); ?></td>
                     <td><span class="status-tag"><?php echo esc_html( strtoupper( $lead->status ) ); ?></span></td>
                     <td><?php echo esc_html( $lead->created_at ); ?></td>
+                    <td>
+                        <button class="button button-link-delete cce-delete-lead" data-lead-id="<?php echo $lead->id; ?>" style="color:#d63638;">Delete</button>
+                    </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php endforeach; else: ?>
+                <tr><td colspan="5">No leads found.</td></tr>
+            <?php endif; ?>
         </tbody>
     </table>
+
+    <script>
+    jQuery(document).ready(function($) {
+        $('.cce-delete-lead').on('click', function() {
+            if(!confirm('Are you sure you want to delete this lead?')) return;
+            const leadId = $(this).data('lead-id');
+            $.ajax({
+                url: cceAdmin.restUrl + 'leads/' + leadId,
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function(res) { if(res.success) location.reload(); }
+            });
+        });
+    });
+    </script>
 </div>

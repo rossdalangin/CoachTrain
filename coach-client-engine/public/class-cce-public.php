@@ -72,9 +72,6 @@ class CCE_Public {
 	}
 
 	/**
-	 * Render client portal.
-	 */
-    /**
 	 * Render funnel journey.
 	 */
 	public function render_funnel( $atts ) {
@@ -90,34 +87,30 @@ class CCE_Public {
             return '<p>Funnel not found or has no steps.</p>';
         }
 
-        $current_step_index = absint( $_GET['step'] ?? 0 );
+        $current_step_index = absint( $_GET['step_idx'] ?? 0 );
         $current_step = $steps[$current_step_index] ?? $steps[0];
+        $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
 
 		ob_start();
 		?>
-		<div class="cce-funnel-wrapper">
+		<div class="cce-funnel-wrapper" data-funnel-id="<?php echo $funnel_id; ?>" data-step-index="<?php echo $current_step_index; ?>">
 			<div class="cce-funnel-step">
                 <?php
                 switch ( $current_step->step_type ) {
                     case 'optin':
-                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title ) );
+                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url ) );
                         break;
                     case 'booking':
-                        echo $this->render_booking_form( array( 'title' => $current_step->title ) );
+                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url ) );
                         break;
                     case 'checkout':
-                        echo $this->render_checkout( array( 'offer_id' => 1 ) ); // offer_id logic
+                        echo $this->render_checkout( array( 'offer_id' => 1 ) );
                         break;
                     case 'thank_you':
                         echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>Success! You are all set.</p>";
                         break;
                 }
                 ?>
-                <?php if ( isset( $steps[$current_step_index + 1] ) ): ?>
-                    <div style="margin-top:20px;">
-                        <a href="?step=<?php echo $current_step_index + 1; ?>" class="button">Next Step →</a>
-                    </div>
-                <?php endif; ?>
             </div>
 		</div>
 		<?php
@@ -201,7 +194,7 @@ class CCE_Public {
 	public function render_testimonials( $atts ) {
         global $wpdb;
         $atts = shortcode_atts( array(
-			'type' => 'testimonial', // testimonial, case_study
+			'type' => 'testimonial',
 		), $atts );
 
 		ob_start();
@@ -233,6 +226,7 @@ class CCE_Public {
 		global $wpdb;
 		$atts = shortcode_atts( array(
 			'title' => 'Schedule Your Free Consultation',
+            'redirect' => ''
 		), $atts );
 
 		ob_start();
@@ -241,7 +235,7 @@ class CCE_Public {
 		?>
 		<div class="cce-booking-form-wrapper">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
-			<form id="cce-public-booking-form">
+			<form class="cce-public-booking-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
                 <div style="margin-bottom:15px;">
                     <label>Preferred Date & Time</label>
@@ -261,34 +255,37 @@ class CCE_Public {
                 </div>
 				<button type="submit" class="button">Book My Session</button>
 			</form>
-			<div id="cce-booking-message"></div>
+			<div class="cce-booking-message"></div>
 		</div>
 		<script>
-		document.getElementById('cce-public-booking-form').addEventListener('submit', function(e) {
-			e.preventDefault();
-			const formData = new FormData(this);
-			const data = Object.fromEntries(formData.entries());
-			data.end_time = data.start_time; // Simplified for this version
+		document.querySelectorAll('.cce-public-booking-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                const redirect = this.getAttribute('data-redirect');
+                data.end_time = data.start_time;
 
-			fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
-				},
-				body: JSON.stringify(data)
-			})
-			.then(res => res.json())
-			.then(res => {
-				const msg = document.getElementById('cce-booking-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Booking confirmed! We will contact you soon.</p>';
-					this.reset();
-				} else {
-					msg.innerHTML = '<p style="color:red">Failed to book session. Please try again.</p>';
-				}
-			});
-		});
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        if(redirect) {
+                            window.location.href = redirect;
+                        } else {
+                            this.nextElementSibling.innerHTML = '<p style="color:green">Booking confirmed!</p>';
+                        }
+                    }
+                });
+            });
+        });
 		</script>
 		<?php
 		return ob_get_clean();
@@ -298,14 +295,10 @@ class CCE_Public {
 	 * Render the lead capture form.
 	 */
 	public function render_lead_capture_form( $atts ) {
-		// Start session if not started
-		if ( ! session_id() ) {
-			session_start();
-		}
-
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
-			'type'  => 'inline', // inline, popup, sticky
+			'type'  => 'inline',
+            'redirect' => ''
 		), $atts );
 
 		ob_start();
@@ -313,40 +306,42 @@ class CCE_Public {
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
-			<form id="cce-public-lead-form">
+			<form class="cce-public-lead-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
 				<input type="text" name="first_name" placeholder="First Name" required>
 				<input type="email" name="email" placeholder="Email Address" required>
 				<button type="submit" class="button">Send Me the Guide</button>
 			</form>
-			<div id="cce-form-message"></div>
+			<div class="cce-form-message"></div>
 		</div>
 		<script>
-		document.getElementById('cce-public-lead-form').addEventListener('submit', function(e) {
-			e.preventDefault();
-			const formData = new FormData(this);
-			const data = Object.fromEntries(formData.entries());
+		document.querySelectorAll('.cce-public-lead-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                const redirect = this.getAttribute('data-redirect');
 
-			fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/leads' ) ); ?>', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
-				},
-				body: JSON.stringify(data)
-			})
-			.then(res => res.json())
-			.then(res => {
-				const msg = document.getElementById('cce-form-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Success! Check your email.</p>';
-					this.reset();
-					// Store secure token in session via cookie
-					document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
-				} else {
-					msg.innerHTML = '<p style="color:red">Something went wrong. Please try again.</p>';
-				}
-			});
-		});
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/leads' ) ); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
+                        if(redirect) {
+                            window.location.href = redirect;
+                        } else {
+                            this.nextElementSibling.innerHTML = '<p style="color:green">Success!</p>';
+                        }
+                    }
+                });
+            });
+        });
 		</script>
 		<?php
 		return ob_get_clean();

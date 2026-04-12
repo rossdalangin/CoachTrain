@@ -20,7 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $funnels as $funnel ): ?>
+                <?php if ($funnels): foreach ( $funnels as $funnel ): ?>
                     <tr>
                         <td><strong><?php echo esc_html( $funnel->title ); ?></strong></td>
                         <td><?php echo esc_html( strtoupper( $funnel->type ) ); ?></td>
@@ -31,6 +31,7 @@
                         </td>
                         <td>
                             <a href="#" class="button cce-view-steps" data-funnel-id="<?php echo $funnel->id; ?>">View Steps</a>
+                            <button class="button button-link-delete cce-delete-funnel" data-funnel-id="<?php echo $funnel->id; ?>" style="color:#d63638;">Delete</button>
                         </td>
                     </tr>
                     <tr id="funnel-steps-<?php echo $funnel->id; ?>" style="display:none;">
@@ -41,7 +42,9 @@
                             </div>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php endforeach; else: ?>
+                    <tr><td colspan="5">No funnels found. Create one from a template below!</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -52,18 +55,40 @@
             <div class="cce-card" style="border:1px solid #ddd;">
                 <h4>Lead Magnet Funnel</h4>
                 <p>Visitor -> Opt-in -> Thank You</p>
-                <button class="button button-primary">Use Template</button>
+                <button class="button button-primary cce-use-template" data-template="lead_magnet">Use Template</button>
             </div>
             <div class="cce-card" style="border:1px solid #ddd;">
                 <h4>Consultation Funnel</h4>
                 <p>Visitor -> Opt-in -> Booking -> Thank You</p>
-                <button class="button button-primary">Use Template</button>
+                <button class="button button-primary cce-use-template" data-template="consultation">Use Template</button>
             </div>
         </div>
     </div>
 
     <script>
     jQuery(document).ready(function($) {
+        $('.cce-use-template').on('click', function() {
+            const templateId = $(this).data('template');
+            $.ajax({
+                url: cceAdmin.restUrl + 'funnels/create-from-template',
+                method: 'POST',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                data: { template_id: templateId },
+                success: function(res) { if(res.success) location.reload(); }
+            });
+        });
+
+        $('.cce-delete-funnel').on('click', function() {
+            if(!confirm('Are you sure you want to delete this funnel?')) return;
+            const funnelId = $(this).data('funnel-id');
+            $.ajax({
+                url: cceAdmin.restUrl + 'funnels/' + funnelId,
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function(res) { if(res.success) location.reload(); }
+            });
+        });
+
         $('.cce-copy-shortcode').on('click', function() {
             const text = $(this).data('shortcode');
             navigator.clipboard.writeText(text).then(() => {
