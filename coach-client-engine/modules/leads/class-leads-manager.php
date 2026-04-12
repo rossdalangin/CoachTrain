@@ -31,7 +31,30 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/status', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_lead_status' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Update lead status (tag).
+     */
+    public function update_lead_status( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $status = sanitize_text_field( $request->get_param( 'status' ) );
+
+        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'status' => $status ), array( 'id' => $lead_id ) );
+
+        CCE_Activity_Logger::log( $lead_id, 'status_change', 'Lead tag updated to: ' . $status );
+
+        return $this->success( array( 'message' => 'Status updated' ) );
+    }
 
 	/**
 	 * Get leads.

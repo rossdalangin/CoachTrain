@@ -44,7 +44,7 @@ const App = () => {
                     </div>
                 </header>
 
-                {currentTab === 'Dashboard' && <DashboardView />}
+                {currentTab === 'Dashboard' && <DashboardView setCurrentTab={setCurrentTab} />}
                 {currentTab === 'Leads' && <LeadsView />}
                 {currentTab === 'CRM' && <CRMView />}
                 {currentTab === 'Automation' && <AutomationView />}
@@ -52,8 +52,9 @@ const App = () => {
                 {currentTab === 'Proof' && <ProofView />}
                 {currentTab === 'Settings' && <SettingsView setIsPro={setIsPro} />}
                 {currentTab === 'Funnels' && <FunnelsView />}
+                {currentTab === 'Clients' && <ClientsView />}
 
-                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings', 'Funnels'].includes(currentTab) &&
+                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings', 'Funnels', 'Clients'].includes(currentTab) &&
                     <div className="cce-card">
                         <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
                         <button className="button">Join the Beta</button>
@@ -64,7 +65,7 @@ const App = () => {
     );
 };
 
-const DashboardView = () => {
+const DashboardView = ({ setCurrentTab }) => {
     const [summary, setSummary] = useState({ leads_today: 0, bookings_today: 0, revenue_today: 0, sales_today: 0 });
 
     useEffect(() => {
@@ -116,9 +117,9 @@ const DashboardView = () => {
             <div className="quick-actions" style={{marginTop: '20px'}}>
                 <h2>Quick Actions</h2>
                 <div style={{display: 'flex', gap: '10px'}}>
-                    <button className="button button-primary button-hero">Create Funnel</button>
-                    <button className="button button-hero">Add Offer</button>
-                    <button className="button button-hero">Create Form</button>
+                    <button className="button button-primary button-hero" onClick={() => setCurrentTab('Funnels')}>Create Funnel</button>
+                    <button className="button button-hero" onClick={() => setCurrentTab('Clients')}>Add Offer</button>
+                    <button className="button button-hero" onClick={() => setCurrentTab('Funnels')}>Create Form</button>
                 </div>
             </div>
         </div>
@@ -205,6 +206,40 @@ const FunnelsView = () => {
     );
 };
 
+const ClientsView = () => {
+    const [offers, setOffers] = useState([
+        { id: 1, title: '90-Day Transformation', price: 2997, type: 'one-time' },
+        { id: 2, title: 'Monthly Mentorship', price: 497, type: 'subscription' }
+    ]);
+
+    return (
+        <div className="cce-card">
+            <h3>Your Coaching Offers</h3>
+            <table className="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {offers.map(offer => (
+                        <tr key={offer.id}>
+                            <td><strong>{offer.title}</strong></td>
+                            <td>${offer.price}</td>
+                            <td>{offer.type.toUpperCase()}</td>
+                            <td><button className="button button-small">Edit</button></td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <button className="button button-primary" style={{marginTop: '20px'}}>Create New Offer</button>
+        </div>
+    );
+};
+
 const LeadsView = () => {
     const [leads, setLeads] = useState([]);
 
@@ -273,6 +308,26 @@ const CRMView = () => {
         }
     };
 
+    const handleStageChange = (leadId, newStageId) => {
+        apiFetch({
+            path: `/cce/v1/crm/leads/${leadId}/stage`,
+            method: 'POST',
+            data: { stage_id: newStageId }
+        }).then(() => {
+            fetchPipeline();
+        });
+    };
+
+    const handleStatusChange = (leadId, newStatus) => {
+        apiFetch({
+            path: `/cce/v1/leads/${leadId}/status`,
+            method: 'POST',
+            data: { status: newStatus }
+        }).then(() => {
+            fetchPipeline();
+        });
+    };
+
     return (
         <div className="cce-kanban" style={{display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px'}}>
             {pipeline.map(item => (
@@ -281,15 +336,32 @@ const CRMView = () => {
                     <div className="kanban-cards">
                         {item.leads.map(lead => (
                             <div key={lead.id} className="cce-card" style={{marginBottom: '10px', fontSize: '14px', padding: '10px'}}>
-                                <strong>{lead.first_name} {lead.last_name}</strong>
-                                <div style={{fontSize: '12px', color: '#718096'}}>{lead.status?.toUpperCase()}</div>
+                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start'}}>
+                                    <strong>{lead.first_name} {lead.last_name}</strong>
+                                    <select
+                                        style={{fontSize: '10px', height: '20px', border: 'none', background: '#edf2f7'}}
+                                        value={lead.status}
+                                        onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                                    >
+                                        <option value="cold">COLD</option>
+                                        <option value="warm">WARM</option>
+                                        <option value="hot">HOT</option>
+                                    </select>
+                                </div>
                                 {lead.activities?.length > 0 && (
                                     <div style={{fontSize: '11px', marginTop: '5px', color: '#0073aa', fontStyle: 'italic'}}>
                                         Latest: {lead.activities[0].activity_type}
                                     </div>
                                 )}
-                                <div style={{marginTop: '10px'}}>
+                                <div style={{marginTop: '10px', display: 'flex', gap: '5px'}}>
                                     <button className="button button-small" onClick={() => handleContact(lead.id)}>Contact</button>
+                                    <select
+                                        style={{fontSize: '11px', height: '26px'}}
+                                        onChange={(e) => handleStageChange(lead.id, e.target.value)}
+                                        value={item.stage.id}
+                                    >
+                                        {pipeline.map(p => <option key={p.stage.id} value={p.stage.id}>{p.stage.name}</option>)}
+                                    </select>
                                 </div>
                             </div>
                         ))}
