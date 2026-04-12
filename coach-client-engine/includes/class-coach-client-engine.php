@@ -30,18 +30,18 @@ class Coach_Client_Engine {
         require_once $path . 'public/class-cce-public.php';
 
         // Modules
-        require_once $path . 'leads/class-leads-manager.php';
-        require_once $path . 'crm/class-crm-manager.php';
-        require_once $path . 'bookings/class-bookings-manager.php';
-        require_once $path . 'clients/class-offer-model.php';
-        require_once $path . 'clients/class-checkout-manager.php';
-        require_once $path . 'clients/class-stripe-wrapper.php';
-        require_once $path . 'clients/class-paypal-wrapper.php';
-        require_once $path . 'funnels/class-funnels-manager.php';
-        require_once $path . 'analytics/class-analytics-manager.php';
-        require_once $path . 'portal/class-portal-manager.php';
-        require_once $path . 'proof/class-proof-manager.php';
-        require_once $path . 'automation/class-automation-manager.php';
+        require_once $path . 'modules/leads/class-leads-manager.php';
+        require_once $path . 'modules/crm/class-crm-manager.php';
+        require_once $path . 'modules/bookings/class-bookings-manager.php';
+        require_once $path . 'modules/clients/class-offer-model.php';
+        require_once $path . 'modules/clients/class-checkout-manager.php';
+        require_once $path . 'modules/clients/class-stripe-wrapper.php';
+        require_once $path . 'modules/clients/class-paypal-wrapper.php';
+        require_once $path . 'modules/funnels/class-funnels-manager.php';
+        require_once $path . 'modules/analytics/class-analytics-manager.php';
+        require_once $path . 'modules/portal/class-portal-manager.php';
+        require_once $path . 'modules/proof/class-proof-manager.php';
+        require_once $path . 'modules/automation/class-automation-manager.php';
 	}
 
 	/**
