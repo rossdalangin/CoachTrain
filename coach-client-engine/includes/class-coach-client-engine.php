@@ -22,7 +22,7 @@ class Coach_Client_Engine {
 	 * Load the required dependencies for this plugin.
 	 */
 	private function load_dependencies() {
-        $path = plugin_dir_path( dirname( __FILE__, 1 ) );
+        $path = plugin_dir_path( dirname( __FILE__ ) );
 		require_once $path . 'includes/class-cce-rest-controller.php';
         require_once $path . 'includes/class-cce-webhooks-controller.php';
         require_once $path . 'includes/class-cce-mailer.php';
@@ -30,18 +30,18 @@ class Coach_Client_Engine {
         require_once $path . 'public/class-cce-public.php';
 
         // Modules
-        require_once $path . 'modules/leads/class-leads-manager.php';
-        require_once $path . 'modules/crm/class-crm-manager.php';
-        require_once $path . 'modules/bookings/class-bookings-manager.php';
-        require_once $path . 'modules/clients/class-offer-model.php';
-        require_once $path . 'modules/clients/class-checkout-manager.php';
-        require_once $path . 'modules/clients/class-stripe-wrapper.php';
-        require_once $path . 'modules/clients/class-paypal-wrapper.php';
-        require_once $path . 'modules/funnels/class-funnels-manager.php';
-        require_once $path . 'modules/analytics/class-analytics-manager.php';
-        require_once $path . 'modules/portal/class-portal-manager.php';
-        require_once $path . 'modules/proof/class-proof-manager.php';
-        require_once $path . 'modules/automation/class-automation-manager.php';
+        require_once $path . 'leads/class-leads-manager.php';
+        require_once $path . 'crm/class-crm-manager.php';
+        require_once $path . 'bookings/class-bookings-manager.php';
+        require_once $path . 'clients/class-offer-model.php';
+        require_once $path . 'clients/class-checkout-manager.php';
+        require_once $path . 'clients/class-stripe-wrapper.php';
+        require_once $path . 'clients/class-paypal-wrapper.php';
+        require_once $path . 'funnels/class-funnels-manager.php';
+        require_once $path . 'analytics/class-analytics-manager.php';
+        require_once $path . 'portal/class-portal-manager.php';
+        require_once $path . 'proof/class-proof-manager.php';
+        require_once $path . 'automation/class-automation-manager.php';
 	}
 
 	/**
@@ -75,7 +75,7 @@ class Coach_Client_Engine {
      * Enqueue public assets.
      */
     public function enqueue_public_assets() {
-        $url = plugin_dir_url( dirname( __FILE__, 1 ) );
+        $url = plugin_dir_url( dirname( __FILE__ ) );
         wp_enqueue_style( 'cce-public-css', $url . 'public/css/cce-public.css', array(), CCE_VERSION );
         wp_enqueue_script( 'cce-public-js', $url . 'public/js/cce-public.js', array(), CCE_VERSION, true );
     }
@@ -110,8 +110,8 @@ class Coach_Client_Engine {
             return;
         }
 
-        $path = plugin_dir_path( dirname( __FILE__, 1 ) );
-        $url = plugin_dir_url( dirname( __FILE__, 1 ) );
+        $path = plugin_dir_path( dirname( __FILE__ ) );
+        $url = plugin_dir_url( dirname( __FILE__ ) );
 
         $asset_path = $path . 'build/index.asset.php';
         if ( ! file_exists( $asset_path ) ) {
