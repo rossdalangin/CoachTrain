@@ -7,10 +7,12 @@ import Funnels from './components/Funnels';
 import Settings from './components/Settings';
 import Clients from './components/Clients';
 import Analytics from './components/Analytics';
+import Wizard from './components/Wizard';
 
 const App = () => {
     const [currentTab, setCurrentTab] = useState('Dashboard');
     const [isPro, setIsPro] = useState(window.cceData?.isPro || false);
+    const [onboardingStep, setOnboardingStep] = useState(window.cceData?.onboarding_step || 1);
 
     const tabs = [
         'Dashboard', 'Leads', 'Bookings', 'Clients', 'Funnels',
@@ -23,6 +25,16 @@ const App = () => {
             apiFetch.use(apiFetch.createRootURLMiddleware(window.cceData.root));
         }
     }, []);
+
+    const completeOnboarding = () => {
+        apiFetch({
+            path: '/cce/v1/settings',
+            method: 'POST',
+            data: { onboarding_step: 0 } // 0 means complete
+        }).then(() => {
+            setOnboardingStep(0);
+        });
+    };
 
     return (
         <div className="cce-admin-wrapper">
@@ -51,20 +63,26 @@ const App = () => {
                 </header>
 
                 <div className="cce-tab-content">
-                    {currentTab === 'Dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
-                    {currentTab === 'Leads' && <Leads />}
-                    {currentTab === 'CRM' && <CRM />}
-                    {currentTab === 'Funnels' && <Funnels />}
-                    {currentTab === 'Settings' && <Settings setIsPro={setIsPro} />}
-                    {currentTab === 'Clients' && <Clients />}
-                    {currentTab === 'Analytics' && <Analytics />}
+                    {onboardingStep > 0 && currentTab === 'Dashboard' ? (
+                        <Wizard onComplete={completeOnboarding} />
+                    ) : (
+                        <>
+                            {currentTab === 'Dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
+                            {currentTab === 'Leads' && <Leads />}
+                            {currentTab === 'CRM' && <CRM />}
+                            {currentTab === 'Funnels' && <Funnels />}
+                            {currentTab === 'Settings' && <Settings setIsPro={setIsPro} />}
+                            {currentTab === 'Clients' && <Clients />}
+                            {currentTab === 'Analytics' && <Analytics />}
 
-                    {!['Dashboard', 'Leads', 'CRM', 'Funnels', 'Settings', 'Clients', 'Analytics'].includes(currentTab) &&
-                        <div className="cce-card">
-                            <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
-                            <button className="button">Join the Beta</button>
-                        </div>
-                    }
+                            {!['Dashboard', 'Leads', 'CRM', 'Funnels', 'Settings', 'Clients', 'Analytics'].includes(currentTab) &&
+                                <div className="cce-card">
+                                    <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
+                                    <button className="button">Join the Beta</button>
+                                </div>
+                            }
+                        </>
+                    )}
                 </div>
             </main>
         </div>

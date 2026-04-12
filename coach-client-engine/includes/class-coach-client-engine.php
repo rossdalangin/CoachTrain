@@ -34,6 +34,7 @@ class Coach_Client_Engine {
         require_once $path . 'modules/crm/class-crm-manager.php';
         require_once $path . 'modules/bookings/class-bookings-manager.php';
         require_once $path . 'modules/clients/class-offer-model.php';
+        require_once $path . 'modules/clients/class-clients-manager.php';
         require_once $path . 'modules/clients/class-checkout-manager.php';
         require_once $path . 'modules/clients/class-stripe-wrapper.php';
         require_once $path . 'modules/clients/class-paypal-wrapper.php';
@@ -219,6 +220,9 @@ class Coach_Client_Engine {
 
         $analytics_manager = new CCE_Analytics_Manager();
         $analytics_manager->register_routes();
+
+        $clients_manager = new CCE_Clients_Manager();
+        $clients_manager->register_routes();
 
         $checkout_manager = new CCE_Checkout_Manager();
         $checkout_manager->register_routes();
