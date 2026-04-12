@@ -34,7 +34,7 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/stage', array(
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_lead_stage' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),

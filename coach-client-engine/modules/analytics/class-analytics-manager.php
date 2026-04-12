@@ -31,10 +31,11 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
         $sales_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed' AND DATE(created_at) = %s", $today ) );
 
 		return $this->success( array(
-			'leads_today'    => (int) $leads_count,
-			'bookings_today' => (int) $bookings_count,
-			'revenue_today'  => (float) ($revenue ?? 0),
-            'sales_today'    => (int) $sales_count,
+			'leads_today'     => (int) $leads_count,
+			'bookings_today'  => (int) $bookings_count,
+			'revenue_today'   => (float) ($revenue ?? 0),
+            'sales_today'     => (int) $sales_count,
+            'total_visitors'  => (int) get_option( 'cce_total_visitors', 0 ),
 		) );
 	}
 }

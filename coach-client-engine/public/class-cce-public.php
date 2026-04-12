@@ -200,12 +200,22 @@ class CCE_Public {
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form id="cce-public-booking-form">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
-				<input type="datetime-local" name="start_time" required>
-				<select name="timezone" required>
+                <div style="margin-bottom:15px;">
+                    <label>Preferred Date & Time</label>
+				    <input type="datetime-local" name="start_time" required>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label>Your Timezone</label>
+				    <select name="timezone" required>
 					<option value="UTC">UTC</option>
 					<option value="America/New_York">EST</option>
 					<option value="America/Los_Angeles">PST</option>
 				</select>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label>What is your #1 goal right now?</label>
+                    <textarea name="questionnaire[goal]" rows="3" required></textarea>
+                </div>
 				<button type="submit" class="button">Book My Session</button>
 			</form>
 			<div id="cce-booking-message"></div>

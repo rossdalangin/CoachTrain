@@ -59,7 +59,17 @@ class Coach_Client_Engine {
 		$public = new CCE_Public();
         add_action( 'init', array( $public, 'init' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_public_assets' ) );
+        add_action( 'wp', array( $this, 'track_visitor' ) );
 	}
+
+    /**
+     * Track visitor.
+     */
+    public function track_visitor() {
+        if ( is_admin() ) return;
+        $count = (int) get_option( 'cce_total_visitors', 0 );
+        update_option( 'cce_total_visitors', $count + 1 );
+    }
 
     /**
      * Enqueue public assets.

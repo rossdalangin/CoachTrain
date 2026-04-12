@@ -34,7 +34,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/status', array(
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_lead_status' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
