@@ -23,6 +23,7 @@ class CCE_Activator {
 				source varchar(100),
 				status varchar(50) DEFAULT 'cold',
 				crm_stage_id bigint(20),
+				onboarding_progress longtext,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
@@ -47,6 +48,10 @@ class CCE_Activator {
 				price decimal(10, 2),
 				currency varchar(3) DEFAULT 'USD',
 				type varchar(50) DEFAULT 'one-time',
+				dream_outcome text,
+				perceived_likelihood text,
+				time_delay text,
+				effort_sacrifice text,
 				is_active tinyint(1) DEFAULT 1,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)

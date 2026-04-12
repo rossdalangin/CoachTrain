@@ -23,9 +23,13 @@ class CCE_Post_Handler {
 
 		global $wpdb;
 		$data = array(
-			'title' => sanitize_text_field( $_POST['title'] ),
-			'price' => (float) $_POST['price'],
-			'type'  => sanitize_text_field( $_POST['type'] ),
+			'title'                => sanitize_text_field( $_POST['title'] ),
+			'price'                => (float) $_POST['price'],
+			'type'                 => sanitize_text_field( $_POST['type'] ),
+			'dream_outcome'        => sanitize_textarea_field( $_POST['dream_outcome'] ?? '' ),
+			'perceived_likelihood' => sanitize_textarea_field( $_POST['perceived_likelihood'] ?? '' ),
+			'time_delay'           => sanitize_textarea_field( $_POST['time_delay'] ?? '' ),
+			'effort_sacrifice'     => sanitize_textarea_field( $_POST['effort_sacrifice'] ?? '' ),
 		);
 
 		$wpdb->insert( "{$wpdb->prefix}cce_offers", $data );
@@ -51,6 +55,9 @@ class CCE_Post_Handler {
             'secure_token' => bin2hex( random_bytes( 32 ) ),
         ) );
 
+        $lead_id = $wpdb->insert_id;
+        do_action( 'cce_lead_created', $lead_id );
+
         wp_redirect( admin_url( 'admin.php?page=cce-leads&message=1' ) );
         exit;
     }
@@ -69,6 +76,9 @@ class CCE_Post_Handler {
             'timezone'   => sanitize_text_field( $_POST['timezone'] ),
             'status'     => 'confirmed',
         ) );
+
+        $booking_id = $wpdb->insert_id;
+        do_action( 'cce_booking_confirmed', $booking_id );
 
         wp_redirect( admin_url( 'admin.php?page=cce-bookings&message=1' ) );
         exit;

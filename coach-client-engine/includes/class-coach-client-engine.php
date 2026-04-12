@@ -156,8 +156,17 @@ class Coach_Client_Engine {
                     if ( isset( $params['stripe_api_key'] ) ) {
                         update_option( 'cce_stripe_api_key', sanitize_text_field( $params['stripe_api_key'] ) );
                     }
+                    if ( isset( $params['stripe_webhook_secret'] ) ) {
+                        update_option( 'cce_stripe_webhook_secret', sanitize_text_field( $params['stripe_webhook_secret'] ) );
+                    }
                     if ( isset( $params['onboarding_step'] ) ) {
                         update_option( 'cce_onboarding_step', absint( $params['onboarding_step'] ) );
+                    }
+                    if ( isset( $params['primary_color'] ) ) {
+                        update_option( 'cce_primary_color', sanitize_hex_color( $params['primary_color'] ) );
+                    }
+                    if ( isset( $params['coach_name'] ) ) {
+                        update_option( 'cce_coach_name', sanitize_text_field( $params['coach_name'] ) );
                     }
                     return array( 'success' => true );
                 },

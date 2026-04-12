@@ -10,6 +10,7 @@ Stores lead information.
 - `source`: VARCHAR(100) (e.g., Lead Magnet Funnel)
 - `status`: VARCHAR(50) (cold, warm, hot)
 - `crm_stage_id`: BIGINT(20)
+- `onboarding_progress`: LONGTEXT (JSON)
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 - `updated_at`: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
@@ -32,6 +33,10 @@ Stores coaching packages/offers.
 - `price`: DECIMAL(10, 2)
 - `currency`: VARCHAR(3) DEFAULT 'USD'
 - `type`: VARCHAR(50) (one-time, subscription)
+- `dream_outcome`: TEXT
+- `perceived_likelihood`: TEXT
+- `time_delay`: TEXT
+- `effort_sacrifice`: TEXT
 - `is_active`: TINYINT(1) DEFAULT 1
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 

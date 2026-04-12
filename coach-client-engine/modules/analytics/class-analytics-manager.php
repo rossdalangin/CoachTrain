@@ -30,15 +30,19 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
 		$revenue = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed' AND DATE(created_at) = %s", $today ) );
         $sales_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed' AND DATE(created_at) = %s", $today ) );
 
+        $total_leads = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" );
+        $total_clients = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" );
+
 		return $this->success( array(
 			'leads_today'     => (int) $leads_count,
 			'bookings_today'  => (int) $bookings_count,
 			'revenue_today'   => (float) ($revenue ?? 0),
             'sales_today'     => (int) $sales_count,
             'total_visitors'  => (int) get_option( 'cce_total_visitors', 0 ),
-            'total_leads'     => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" ),
+            'total_leads'     => $total_leads,
             'total_bookings'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings" ),
-            'total_clients'   => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" ),
+            'total_clients'   => $total_clients,
+            'lead_to_client'  => $total_leads > 0 ? round( ($total_clients / $total_leads) * 100, 1 ) : 0,
 		) );
 	}
 }

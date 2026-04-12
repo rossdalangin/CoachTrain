@@ -16,6 +16,14 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/tasks/(?P<task_id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_task' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
         register_rest_route( $this->namespace, '/crm/pipeline', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -107,13 +115,42 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     }
 
     /**
+     * Update task status.
+     */
+    public function update_task( $request ) {
+        global $wpdb;
+        $task_id = absint( $request['task_id'] );
+        $status = sanitize_text_field( $request->get_param( 'status' ) );
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_tasks",
+            array( 'status' => $status ),
+            array( 'id' => $task_id )
+        );
+
+        return $this->success( array( 'message' => 'Task updated' ) );
+    }
+
+    /**
      * Contact lead via email.
      */
     public function contact_lead( $request ) {
+        global $wpdb;
         $lead_id = absint( $request['id'] );
         $message = sanitize_textarea_field( $request->get_param( 'message' ) );
 
-        // logic for sending direct email...
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+        if ( ! $lead ) {
+            return $this->error( 'Lead not found' );
+        }
+
+        $mailer = new CCE_Mailer();
+        $subject = 'Regarding your coaching application';
+        $mailer->send( $lead->email, $subject, wpautop( $message ) );
+
+        // Automatically move to 'Contacted' stage (ID 2)
+        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => 2 ), array( 'id' => $lead_id ) );
+
         CCE_Activity_Logger::log( $lead_id, 'contacted', 'Manual email sent: ' . $message );
 
         return $this->success( array( 'message' => 'Email sent' ) );

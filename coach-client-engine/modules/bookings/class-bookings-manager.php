@@ -31,7 +31,51 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/bookings/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_booking' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/bookings/(?P<id>\d+)/status', array(
+			array(
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
+				'callback'            => array( $this, 'update_booking_status' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Delete booking.
+     */
+    public function delete_booking( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_bookings", array( 'id' => $id ) );
+        return $this->success( array( 'message' => 'Booking deleted' ) );
+    }
+
+    /**
+     * Update booking status.
+     */
+    public function update_booking_status( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $status = sanitize_text_field( $request->get_param( 'status' ) );
+
+        $wpdb->update( "{$wpdb->prefix}cce_bookings", array( 'status' => $status ), array( 'id' => $id ) );
+
+        $booking = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $id ) );
+        if ( $booking ) {
+            CCE_Activity_Logger::log( $booking->lead_id, 'booking_status', 'Booking status updated to: ' . strtoupper($status) );
+        }
+
+        return $this->success( array( 'message' => 'Status updated' ) );
+    }
 
 	/**
 	 * Get bookings.

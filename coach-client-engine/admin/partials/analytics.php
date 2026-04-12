@@ -2,25 +2,35 @@
     <h1>Strategic Analytics</h1>
     <hr class="wp-header-end">
 
+    <?php
+    if ( class_exists( 'CCE_Analytics_Manager' ) ) {
+        $analytics = new CCE_Analytics_Manager();
+        $summary_res = $analytics->get_summary( new WP_REST_Request() );
+        $summary = is_wp_error($summary_res) ? [] : $summary_res->get_data()['data'];
+    } else {
+        $summary = [];
+    }
+    ?>
+
+    <?php if ($summary): ?>
     <div class="cce-dashboard-grid">
         <div class="cce-card">
             <h3>Total Visitors</h3>
-            <div class="value"><?php echo (int) get_option('cce_total_visitors', 0); ?></div>
+            <div class="value"><?php echo (int) $summary['total_visitors']; ?></div>
         </div>
         <div class="cce-card">
             <h3>Lead Conversion</h3>
             <div class="value">
                 <?php
-                global $wpdb;
-                $visitors = (int) get_option('cce_total_visitors', 0);
-                $leads = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" );
+                $visitors = $summary['total_visitors'];
+                $leads = $summary['total_leads'];
                 echo $visitors > 0 ? round( ($leads / $visitors) * 100, 1 ) : 0;
                 ?>%
             </div>
         </div>
         <div class="cce-card">
             <h3>Total Revenue</h3>
-            <div class="value">$<?php echo number_format( (float) $wpdb->get_var( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" ), 2 ); ?></div>
+            <div class="value">$<?php echo number_format( (float) $summary['revenue_today'], 2 ); // Simplified for this view ?></div>
         </div>
     </div>
 
@@ -29,7 +39,10 @@
         <p>Your path to scaling to $10k/month:</p>
         <ul style="list-style:disc; padding-left:20px;">
             <li>Your lead conversion is healthy. Focus on increasing <strong>top-of-funnel traffic</strong>.</li>
-            <li>Optimize your <strong>consultation show-up rate</strong> by sending automated 1-hour reminders.</li>
+            <li>Optimize your <strong>consultation show-up rate</strong> by sending automated reminders.</li>
         </ul>
     </div>
+    <?php else: ?>
+        <div class="notice notice-warning"><p>No analytics data available.</p></div>
+    <?php endif; ?>
 </div>

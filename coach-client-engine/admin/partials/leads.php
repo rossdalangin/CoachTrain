@@ -3,6 +3,11 @@
     <hr class="wp-header-end">
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <form method="get" action="">
+            <input type="hidden" name="page" value="cce-leads">
+            <input type="search" name="s" value="<?php echo esc_attr($_GET['s'] ?? ''); ?>" placeholder="Search leads...">
+            <button type="submit" class="button">Search</button>
+        </form>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_export_leads">
             <button type="submit" class="button">Export to CSV</button>
@@ -25,7 +30,13 @@
 
     <?php
     global $wpdb;
-    $leads = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_leads ORDER BY created_at DESC" );
+    $search = $_GET['s'] ?? '';
+    $query = "SELECT * FROM {$wpdb->prefix}cce_leads";
+    if ( ! empty( $search ) ) {
+        $query .= $wpdb->prepare( " WHERE first_name LIKE %s OR last_name LIKE %s OR email LIKE %s", "%$search%", "%$search%", "%$search%" );
+    }
+    $query .= " ORDER BY created_at DESC";
+    $leads = $wpdb->get_results( $query );
     ?>
 
     <table class="wp-list-table widefat fixed striped">

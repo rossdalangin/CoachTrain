@@ -39,13 +39,25 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
     public function complete_onboarding_step( $request ) {
         global $wpdb;
         $token = $_COOKIE['cce_lead_token'] ?? '';
-        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
 
         if ( ! $lead ) {
             return $this->error( 'Unauthorized', 'unauthorized', 401 );
         }
 
         $step_name = sanitize_text_field( $request->get_param( 'step_name' ) );
+
+        $progress = json_decode( $lead->onboarding_progress ?: '[]', true );
+        if ( ! in_array( $step_name, $progress ) ) {
+            $progress[] = $step_name;
+        }
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_leads",
+            array( 'onboarding_progress' => json_encode( $progress ) ),
+            array( 'id' => $lead->id )
+        );
+
         CCE_Activity_Logger::log( $lead->id, 'milestone', "Onboarding step completed: $step_name" );
 
         return $this->success( array( 'message' => 'Step marked as complete' ) );
@@ -68,7 +80,7 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
             $lead->id
         ) );
 
-        return $this->success( array( 'notes' => $notes ) );
+        return $this->success( array( 'notes' => $notes, 'completed_steps' => json_decode( $lead->onboarding_progress ?: '[]' ) ) );
     }
 
 	/**

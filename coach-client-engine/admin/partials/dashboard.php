@@ -31,10 +31,12 @@
         <h3>💎 Master Architect Strategy Insights</h3>
         <p>Based on your current data, here is your path to 3–5 clients this month:</p>
         <ul style="list-style:disc; padding-left:20px;">
-            <li><strong>Focus on Lead Velocity:</strong> You captured <?php echo (int) $summary['leads_today']; ?> leads today. Increase this to 10+ to guarantee high-ticket bookings.</li>
-            <li><strong>Conversion Performance:</strong> Total leads captured: <?php echo (int) $summary['total_leads']; ?>. Total bookings: <?php echo (int) $summary['total_bookings']; ?>.</li>
-            <?php if ($summary['total_leads'] > 0): ?>
-                <li><strong>Booking Rate:</strong> <?php echo round( ($summary['total_bookings'] / $summary['total_leads']) * 100, 1 ); ?>%. Target 10-15% for optimal ROI.</li>
+            <li><strong>Lead Velocity:</strong> Captured <?php echo (int) $summary['leads_today']; ?> leads today. Increase this to 10+ to guarantee scale.</li>
+            <li><strong>Conversion Ratio:</strong> Your lead-to-client conversion is <strong><?php echo $summary['lead_to_client']; ?>%</strong>.</li>
+            <?php if ($summary['lead_to_client'] < 3): ?>
+                <li style="color:#d63638;"><strong>Action Required:</strong> Your conversion is below 3%. Review your Offer Builder and Questionnaire.</li>
+            <?php else: ?>
+                <li style="color:#00a32a;"><strong>Performing Well:</strong> Your funnel is converting efficiently. Scale traffic.</li>
             <?php endif; ?>
         </ul>
     </div>

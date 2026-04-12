@@ -96,7 +96,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
             $steps = [
                 ['title' => 'Application', 'type' => 'optin'],
                 ['title' => 'Schedule Call', 'type' => 'booking'],
-                ['title' => 'Confirmation', 'thank_you']
+                ['title' => 'Confirmation', 'type' => 'thank_you']
             ];
         }
 

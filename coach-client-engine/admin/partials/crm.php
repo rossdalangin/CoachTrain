@@ -17,8 +17,14 @@
                     if ($leads): foreach ( $leads as $lead ):
                     ?>
                         <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px;">
-                            <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
-                            <div style="font-size:11px; color:#718096; margin-top:5px;"><?php echo esc_html( strtoupper($lead->status) ); ?></div>
+                            <div style="display:flex; justify-content:space-between; align-items:start;">
+                                <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
+                                <select class="cce-status-toggle" data-lead-id="<?php echo $lead->id; ?>" style="font-size:9px; height:auto; padding:2px;">
+                                    <option value="cold" <?php selected($lead->status, 'cold'); ?>>COLD</option>
+                                    <option value="warm" <?php selected($lead->status, 'warm'); ?>>WARM</option>
+                                    <option value="hot" <?php selected($lead->status, 'hot'); ?>>HOT</option>
+                                </select>
+                            </div>
 
                             <div style="margin-top:10px;">
                                 <select class="cce-stage-select" data-lead-id="<?php echo $lead->id; ?>" style="font-size:11px; width:100%;">
@@ -30,13 +36,16 @@
                                 </select>
                             </div>
 
-                            <div style="margin-top:10px; display:flex; gap:5px;">
+                            <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
                                 <a href="#" class="button button-small cce-view-notes"
                                    data-lead-id="<?php echo $lead->id; ?>"
                                    data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Activity</a>
                                 <a href="#" class="button button-small cce-view-tasks"
                                    data-lead-id="<?php echo $lead->id; ?>"
                                    data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Tasks</a>
+                                <a href="#" class="button button-small cce-contact-btn"
+                                   data-lead-id="<?php echo $lead->id; ?>"
+                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Contact</a>
                             </div>
                         </div>
                     <?php endforeach; else: ?>
@@ -47,19 +56,20 @@
         <?php endforeach; ?>
     </div>
 
-    <!-- Leads Modal (Shared for Notes and Tasks) -->
+    <!-- Leads Modal (Shared for Notes, Tasks, Contact) -->
     <div id="cce-leads-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div style="background:#fff; margin:5% auto; padding:25px; width:50%; border-radius:12px; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+        <div style="background:#fff; margin:5% auto; padding:25px; width:500px; border-radius:12px; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
             <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px; color:#888;">&times;</span>
             <h2 id="cce-modal-title" style="margin-top:0;">Lead Details</h2>
 
             <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #eee; margin-bottom:20px;">
-                <button class="cce-tab-link active" data-tab="notes" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Activity</button>
-                <button class="cce-tab-link" data-tab="tasks" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Tasks</button>
+                <button class="cce-tab-link active" data-tab="notes" style="background:none; border:none; padding:10px 15px; cursor:pointer; border-bottom:2px solid #0073aa;">Activity</button>
+                <button class="cce-tab-link" data-tab="tasks" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Tasks</button>
+                <button class="cce-tab-link" data-tab="contact" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Contact</button>
             </div>
 
             <div id="cce-tab-notes" class="cce-tab-content">
-                <div id="cce-notes-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div id="cce-notes-content" style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
                 <div class="cce-add-note-section">
                     <form id="cce-add-note-form">
                         <input type="hidden" class="cce-lead-id-field">
@@ -70,7 +80,7 @@
             </div>
 
             <div id="cce-tab-tasks" class="cce-tab-content" style="display:none;">
-                <div id="cce-tasks-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div id="cce-tasks-content" style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
                 <div class="cce-add-task-section">
                     <form id="cce-add-task-form">
                         <input type="hidden" class="cce-lead-id-field">
@@ -80,6 +90,16 @@
                         </div>
                     </form>
                 </div>
+            </div>
+
+            <div id="cce-tab-contact" class="cce-tab-content" style="display:none;">
+                <p>Send a direct email to the lead.</p>
+                <form id="cce-contact-form">
+                    <input type="hidden" class="cce-lead-id-field">
+                    <textarea id="cce-contact-message" placeholder="Type your message here..." style="width:100%; border-radius:8px; margin-bottom:10px;" rows="5" required></textarea>
+                    <button type="submit" class="button button-primary">Send Email</button>
+                </form>
+                <div id="cce-contact-status" style="margin-top:10px;"></div>
             </div>
         </div>
     </div>

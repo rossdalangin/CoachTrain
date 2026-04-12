@@ -36,14 +36,23 @@ class CCE_Admin {
             'Portal'     => 'cce-portal',
             'Proof'      => 'cce-proof',
             'Analytics'  => 'cce-analytics',
+            'Payments'   => 'cce-payments',
             'Settings'   => 'cce-settings',
         ];
 
+        $engine = new Coach_Client_Engine();
+        $is_pro = $engine->is_pro();
+
         foreach ( $pages as $title => $slug ) {
+            $menu_title = $title;
+            if ( in_array($slug, ['cce-automation', 'cce-analytics']) && !$is_pro ) {
+                $menu_title .= ' (PRO)';
+            }
+
             add_submenu_page(
                 'coach-client-engine',
                 $title,
-                $title,
+                $menu_title,
                 'manage_options',
                 $slug,
                 array( $this, 'render_' . strtolower( str_replace( ' ', '_', $title ) ) )
@@ -128,6 +137,13 @@ class CCE_Admin {
      */
     public function render_analytics() {
         include plugin_dir_path( __FILE__ ) . '../admin/partials/analytics.php';
+    }
+
+    /**
+     * Render Payments.
+     */
+    public function render_payments() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/payments.php';
     }
 
     /**

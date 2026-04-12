@@ -51,6 +51,22 @@ class CCE_Webhooks_Controller extends CCE_REST_Controller {
             }
         }
 
+        if ( 'paypal' === $gateway && 'CHECKOUT.ORDER.APPROVED' === ( $data['event_type'] ?? '' ) ) {
+            $order_id = $data['resource']['id'];
+
+            $wpdb->update(
+                "{$wpdb->prefix}cce_payments",
+                array( 'status' => 'completed' ),
+                array( 'transaction_id' => 'PENDING_PAYPAL_' . $order_id )
+            );
+
+            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s", 'PENDING_PAYPAL_' . $order_id ) );
+            if ( $payment ) {
+                do_action( 'cce_payment_completed', $payment->lead_id );
+                CCE_Activity_Logger::log( $payment->lead_id, 'payment', 'High-ticket offer purchase completed via PayPal' );
+            }
+        }
+
 		return $this->success( array( 'received' => true ) );
 	}
 

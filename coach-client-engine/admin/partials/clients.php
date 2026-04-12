@@ -25,6 +25,23 @@
                         </select>
                     </td>
                 </tr>
+                <tr><th colspan="2" style="padding-bottom:0;"><strong>The Value Equation</strong></th></tr>
+                <tr>
+                    <th scope="row">Dream Outcome</th>
+                    <td><textarea name="dream_outcome" placeholder="What will they achieve?" class="large-text" rows="2"></textarea></td>
+                </tr>
+                <tr>
+                    <th scope="row">Perceived Likelihood</th>
+                    <td><textarea name="perceived_likelihood" placeholder="Why will it work for them?" class="large-text" rows="2"></textarea></td>
+                </tr>
+                <tr>
+                    <th scope="row">Time Delay</th>
+                    <td><textarea name="time_delay" placeholder="How fast will they see results?" class="large-text" rows="2"></textarea></td>
+                </tr>
+                <tr>
+                    <th scope="row">Effort & Sacrifice</th>
+                    <td><textarea name="effort_sacrifice" placeholder="What is removed from their plate?" class="large-text" rows="2"></textarea></td>
+                </tr>
             </table>
             <?php submit_button('Create Grand Slam Offer'); ?>
         </form>
@@ -50,7 +67,11 @@
                 <tr id="offer-row-<?php echo $offer->id; ?>"
                     data-title="<?php echo esc_attr($offer->title); ?>"
                     data-price="<?php echo esc_attr($offer->price); ?>"
-                    data-type="<?php echo esc_attr($offer->type); ?>">
+                    data-type="<?php echo esc_attr($offer->type); ?>"
+                    data-dream-outcome="<?php echo esc_attr($offer->dream_outcome); ?>"
+                    data-perceived-likelihood="<?php echo esc_attr($offer->perceived_likelihood); ?>"
+                    data-time-delay="<?php echo esc_attr($offer->time_delay); ?>"
+                    data-effort-sacrifice="<?php echo esc_attr($offer->effort_sacrifice); ?>">
                     <td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
                     <td>$<?php echo number_format( $offer->price, 2 ); ?></td>
                     <td><?php echo esc_html( strtoupper( $offer->type ) ); ?></td>
@@ -67,19 +88,23 @@
 
     <!-- Edit Offer Modal -->
     <div id="cce-edit-offer-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+        <div style="background:#fff; margin:5% auto; padding:25px; width:500px; border-radius:12px; position:relative; max-height:80vh; overflow-y:auto;">
             <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
             <h2>Edit Offer</h2>
             <form id="cce-edit-offer-form">
                 <input type="hidden" name="id" id="edit-offer-id">
-                <p><label>Offer Title</label><br><input type="text" name="title" id="edit-offer-title" class="widefat" required></p>
-                <p><label>Price ($)</label><br><input type="number" name="price" id="edit-offer-price" class="widefat" required></p>
+                <p><label>Offer Title</label><br><input type="text" id="edit-offer-title" class="widefat" required></p>
+                <p><label>Price ($)</label><br><input type="number" id="edit-offer-price" class="widefat" required></p>
                 <p><label>Type</label><br>
-                    <select name="type" id="edit-offer-type" class="widefat">
+                    <select id="edit-offer-type" class="widefat">
                         <option value="one-time">One-Time</option>
                         <option value="subscription">Subscription</option>
                     </select>
                 </p>
+                <p><label>Dream Outcome</label><br><textarea id="edit-offer-dream-outcome" class="widefat"></textarea></p>
+                <p><label>Perceived Likelihood</label><br><textarea id="edit-offer-perceived-likelihood" class="widefat"></textarea></p>
+                <p><label>Time Delay</label><br><textarea id="edit-offer-time-delay" class="widefat"></textarea></p>
+                <p><label>Effort & Sacrifice</label><br><textarea id="edit-offer-effort-sacrifice" class="widefat"></textarea></p>
                 <button type="submit" class="button button-primary">Update Offer</button>
             </form>
         </div>
