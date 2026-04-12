@@ -2,18 +2,72 @@
     <h1>Social Proof & Testimonials</h1>
     <hr class="wp-header-end">
 
+    <div class="cce-card" style="margin-bottom: 20px;">
+        <h3>Add New Testimonial</h3>
+        <form id="cce-add-testimonial-form">
+            <div style="margin-bottom:15px;">
+                <label>Client Name</label><br>
+                <input type="text" name="client_name" class="regular-text" required>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label>Testimonial Content</label><br>
+                <textarea name="content" rows="4" style="width:100%; max-width:500px;" required></textarea>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label>Rating (1-5)</label><br>
+                <input type="number" name="rating" min="1" max="5" value="5" required>
+            </div>
+            <button type="submit" class="button button-primary">Save Testimonial</button>
+        </form>
+    </div>
+
     <div class="cce-card">
         <h3>Active Testimonials</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-            <div class="cce-card" style="border-top:none; background:#f9f9f9;">
-                <p>"The Coach Client Engine tripled my revenue in 90 days!"</p>
-                <strong>- Sarah Jenkins</strong>
-            </div>
-            <div class="cce-card" style="border-top:none; background:#f9f9f9;">
-                <p>"Best investment I ever made for my consulting business."</p>
-                <strong>- John Doe</strong>
-            </div>
+        <div id="cce-testimonials-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <?php
+            global $wpdb;
+            $testimonials = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' ORDER BY created_at DESC" );
+            if ( $testimonials ):
+                foreach ( $testimonials as $t ):
+                ?>
+                <div class="cce-card" style="border-top:none; background:#f9f9f9;">
+                    <p>"<?php echo esc_html( $t->content ); ?>"</p>
+                    <strong>- <?php echo esc_html( $t->client_name ); ?></strong>
+                    <div style="color:#ffb700; margin-top:5px;">
+                        <?php echo str_repeat('★', $t->rating); ?>
+                    </div>
+                </div>
+                <?php
+                endforeach;
+            else:
+                echo "<p>No testimonials found. Add your first one above!</p>";
+            endif;
+            ?>
         </div>
-        <button class="button button-primary" style="margin-top:20px;">Add New Testimonial</button>
     </div>
+
+    <script>
+    document.getElementById('cce-add-testimonial-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/proof/testimonials' ) ); ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert('Failed to save testimonial');
+            }
+        });
+    });
+    </script>
 </div>

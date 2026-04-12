@@ -64,6 +64,15 @@ Stores transaction records.
 - `status`: VARCHAR(50)
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
+## Table: `cce_testimonials`
+Stores client testimonials and social proof.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `client_name`: VARCHAR(255)
+- `content`: TEXT
+- `rating`: INT DEFAULT 5
+- `status`: VARCHAR(50) DEFAULT 'active'
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
 ## Table: `cce_crm_stages`
 Stores CRM pipeline stages.
 - `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY

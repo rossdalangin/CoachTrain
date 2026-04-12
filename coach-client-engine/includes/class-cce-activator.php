@@ -109,6 +109,16 @@ class CCE_Activator {
 				status varchar(50) DEFAULT 'pending',
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_testimonials (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				client_name varchar(255),
+				content text,
+				rating int DEFAULT 5,
+				status varchar(50) DEFAULT 'active',
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

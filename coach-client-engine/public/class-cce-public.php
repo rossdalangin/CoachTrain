@@ -136,18 +136,23 @@ class CCE_Public {
 		}
 		?>
 		<div class="cce-client-portal">
-			<h3>Your Client Dashboard</h3>
+			<h3>Welcome, <?php echo esc_html( $lead->first_name ); ?></h3>
 			<div style="display:flex; gap:20px;">
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
-					<h4>Resources</h4>
-					<ul>
-						<li>Welcome Pack (PDF)</li>
-						<li>High-Ticket Training (Video)</li>
-					</ul>
+					<h4>Your Coaching Roadmap</h4>
+                    <div id="cce-onboarding-tasks">
+                        <p>
+                            <input type="checkbox" class="cce-portal-complete" data-step="Welcome Training">
+                            Watch Welcome Training
+                        </p>
+                        <p>
+                            <input type="checkbox" class="cce-portal-complete" data-step="Community Access">
+                            Join Community Group
+                        </p>
+                    </div>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
 					<h4>Your Progress</h4>
-					<p>Onboarding: <strong>Complete</strong></p>
 					<?php
                         $has_booking = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d AND status != 'cancelled'", $lead->id ) );
                         if ( ! $has_booking ) {
@@ -155,11 +160,37 @@ class CCE_Public {
                             echo $this->render_booking_form( array( 'title' => '' ) );
                         } else {
                             echo '<p>Next Step: <strong>Attend Your Call</strong></p>';
+                            $booking = $wpdb->get_row( $wpdb->prepare( "SELECT start_time FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d ORDER BY created_at DESC LIMIT 1", $lead->id ) );
+                            echo '<p>Scheduled for: ' . esc_html( $booking->start_time ) . '</p>';
                         }
                     ?>
 				</div>
 			</div>
 		</div>
+        <script>
+        document.querySelectorAll('.cce-portal-complete').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    const stepName = this.getAttribute('data-step');
+                    fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/onboarding/complete' ) ); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                        },
+                        body: JSON.stringify({ step_name: stepName })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            this.parentElement.style.textDecoration = 'line-through';
+                            this.disabled = true;
+                        }
+                    });
+                }
+            });
+        });
+        </script>
 		<?php
 		return ob_get_clean();
 	}
@@ -168,18 +199,22 @@ class CCE_Public {
 	 * Render testimonials.
 	 */
 	public function render_testimonials( $atts ) {
+        global $wpdb;
         $atts = shortcode_atts( array(
 			'type' => 'testimonial', // testimonial, case_study
 		), $atts );
 
 		ob_start();
+        $testimonials = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' ORDER BY RAND() LIMIT 3" );
 		?>
 		<div class="cce-testimonials-display">
-            <?php if ( 'case_study' === $atts['type'] ): ?>
-                <div class="cce-case-study" style="border:1px solid #ddd; padding:20px; margin-bottom:10px; background:#fff;">
-                    <h4>How Sarah Doubled Her Revenue</h4>
-                    <p>Before using the Engine, Sarah was struggling to get 1 client/month. Now she gets 5 consistently.</p>
-                </div>
+            <?php if ( ! empty( $testimonials ) ): ?>
+                <?php foreach ( $testimonials as $t ): ?>
+                    <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
+                        <p>"<?php echo esc_html( $t->content ); ?>"</p>
+                        <strong>- <?php echo esc_html( $t->client_name ); ?></strong>
+                    </div>
+                <?php endforeach; ?>
             <?php else: ?>
                 <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
                     <p>"The Coach Client Engine tripled my bookings in one month!"</p>

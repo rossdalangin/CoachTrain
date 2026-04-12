@@ -19,13 +19,35 @@
                         <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa;">
                             <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
                             <div style="font-size:11px; color:#718096; margin-top:5px;"><?php echo esc_html( strtoupper($lead->status) ); ?></div>
+
                             <div style="margin-top:10px;">
-                                <a href="#" class="button button-small">View Notes</a>
+                                <select class="cce-stage-select" data-lead-id="<?php echo $lead->id; ?>" style="font-size:11px; width:100%;">
+                                    <?php foreach ( $stages as $s ): ?>
+                                        <option value="<?php echo $s->id; ?>" <?php selected( $lead->crm_stage_id, $s->id ); ?>>
+                                            Move to: <?php echo esc_html( $s->name ); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div style="margin-top:10px;">
+                                <a href="#" class="button button-small cce-view-notes"
+                                   data-lead-id="<?php echo $lead->id; ?>"
+                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">View Activity</a>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
         <?php endforeach; ?>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="cce-notes-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:20px; width:50%; border-radius:10px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:10px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 id="cce-modal-title">Lead Notes</h2>
+            <div id="cce-notes-content" style="max-height:400px; overflow-y:auto;"></div>
+        </div>
     </div>
 </div>
