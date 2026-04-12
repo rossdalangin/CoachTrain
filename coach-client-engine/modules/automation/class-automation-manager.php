@@ -45,9 +45,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 		// logic for email delivery and tagging
         error_log( "Automation triggered for lead: $lead_id" );
 
-        // Example: Send welcome email
-        // $mailer = new CCE_Mailer();
-        // $mailer->send_welcome_email( $lead_id );
+        // Send welcome email
+        $mailer = new CCE_Mailer();
+        $mailer->send_welcome_email( $lead_id );
 	}
 
 	/**

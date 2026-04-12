@@ -148,7 +148,15 @@ class CCE_Public {
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
 					<h4>Your Progress</h4>
 					<p>Onboarding: <strong>Complete</strong></p>
-					<p>Next Step: <strong>Consultation Call</strong></p>
+					<?php
+                        $has_booking = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d AND status != 'cancelled'", $lead->id ) );
+                        if ( ! $has_booking ) {
+                            echo '<p>Next Step: <strong>Schedule Consultation</strong></p>';
+                            echo $this->render_booking_form( array( 'title' => '' ) );
+                        } else {
+                            echo '<p>Next Step: <strong>Attend Your Call</strong></p>';
+                        }
+                    ?>
 				</div>
 			</div>
 		</div>

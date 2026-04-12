@@ -99,6 +99,16 @@ class CCE_Activator {
 				description text,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_tasks (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				lead_id bigint(20),
+				title varchar(255),
+				due_date datetime,
+				status varchar(50) DEFAULT 'pending',
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

@@ -47,7 +47,47 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/tasks', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_tasks' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_task' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Get tasks for a lead.
+     */
+    public function get_tasks( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $tasks = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d", $lead_id ) );
+        return $this->success( $tasks );
+    }
+
+    /**
+     * Add task.
+     */
+    public function add_task( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $title = sanitize_text_field( $request->get_param( 'title' ) );
+
+        $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
+            'lead_id' => $lead_id,
+            'title'   => $title,
+            'status'  => 'pending',
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
 
     /**
      * Contact lead via email.

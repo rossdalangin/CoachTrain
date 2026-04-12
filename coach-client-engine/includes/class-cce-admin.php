@@ -72,7 +72,63 @@ class CCE_Admin {
         include plugin_dir_path( __FILE__ ) . '../admin/partials/settings.php';
     }
 
+    /**
+     * Render Automation.
+     */
+    public function render_automation() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/automation.php';
+    }
+
     // Additional render methods for other pages...
+
+    /**
+     * Render Bookings.
+     */
+    public function render_bookings() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/bookings.php';
+    }
+
+    /**
+     * Render Clients.
+     */
+    public function render_clients() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/clients.php';
+    }
+
+    /**
+     * Render Funnels.
+     */
+    public function render_funnels() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/funnels.php';
+    }
+
+    /**
+     * Render CRM.
+     */
+    public function render_crm() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/crm.php';
+    }
+
+    /**
+     * Render Portal.
+     */
+    public function render_portal() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/portal.php';
+    }
+
+    /**
+     * Render Proof.
+     */
+    public function render_proof() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/proof.php';
+    }
+
+    /**
+     * Render Analytics.
+     */
+    public function render_analytics() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/analytics.php';
+    }
 
     /**
      * Enqueue admin assets.
