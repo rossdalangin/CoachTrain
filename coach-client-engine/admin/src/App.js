@@ -8,6 +8,10 @@ import Settings from './components/Settings';
 import Clients from './components/Clients';
 import Analytics from './components/Analytics';
 import Wizard from './components/Wizard';
+import Bookings from './components/Bookings';
+import Automation from './components/Automation';
+import Portal from './components/Portal';
+import Proof from './components/Proof';
 
 const App = () => {
     const [currentTab, setCurrentTab] = useState('Dashboard');
@@ -30,7 +34,7 @@ const App = () => {
         apiFetch({
             path: '/cce/v1/settings',
             method: 'POST',
-            data: { onboarding_step: 0 } // 0 means complete
+            data: { onboarding_step: 0 }
         }).then(() => {
             setOnboardingStep(0);
         });
@@ -74,13 +78,10 @@ const App = () => {
                             {currentTab === 'Settings' && <Settings setIsPro={setIsPro} />}
                             {currentTab === 'Clients' && <Clients />}
                             {currentTab === 'Analytics' && <Analytics />}
-
-                            {!['Dashboard', 'Leads', 'CRM', 'Funnels', 'Settings', 'Clients', 'Analytics'].includes(currentTab) &&
-                                <div className="cce-card">
-                                    <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
-                                    <button className="button">Join the Beta</button>
-                                </div>
-                            }
+                            {currentTab === 'Bookings' && <Bookings />}
+                            {currentTab === 'Automation' && <Automation />}
+                            {currentTab === 'Client Portal' && <Portal />}
+                            {currentTab === 'Proof' && <Proof />}
                         </>
                     )}
                 </div>

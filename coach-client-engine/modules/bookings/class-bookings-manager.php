@@ -38,8 +38,15 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 	 */
 	public function get_bookings( $request ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'cce_bookings';
-		$bookings = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY start_time ASC" );
+		$bookings_table = $wpdb->prefix . 'cce_bookings';
+        $leads_table = $wpdb->prefix . 'cce_leads';
+
+		$bookings = $wpdb->get_results( "
+            SELECT b.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
+            FROM $bookings_table b
+            LEFT JOIN $leads_table l ON b.lead_id = l.id
+            ORDER BY b.start_time ASC
+        " );
 		return $this->success( $bookings );
 	}
 
