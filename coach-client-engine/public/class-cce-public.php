@@ -12,6 +12,7 @@ class CCE_Public {
         add_shortcode( 'cce_booking', array( $this, 'render_booking_form' ) );
         add_shortcode( 'cce_testimonials', array( $this, 'render_testimonials' ) );
         add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
+        add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
 	}
 
 	/**
@@ -72,6 +73,37 @@ class CCE_Public {
 			});
 		});
 		</script>
+		<?php
+		return ob_get_clean();
+	}
+
+    /**
+	 * Render client portal.
+	 */
+	public function render_client_portal( $atts ) {
+		ob_start();
+        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
+        if ( ! $lead_id ) {
+            return '<p>Please log in or capture your lead info first.</p>';
+        }
+		?>
+		<div class="cce-client-portal">
+			<h3>Your Client Dashboard</h3>
+            <div style="display:flex; gap:20px;">
+                <div style="flex:1; border:1px solid #ddd; padding:20px;">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li>Welcome Pack (PDF)</li>
+                        <li>High-Ticket Training (Video)</li>
+                    </ul>
+                </div>
+                <div style="flex:1; border:1px solid #ddd; padding:20px;">
+                    <h4>Your Progress</h4>
+                    <p>Onboarding: <strong>Complete</strong></p>
+                    <p>Next Step: <strong>Consultation Call</strong></p>
+                </div>
+            </div>
+		</div>
 		<?php
 		return ob_get_clean();
 	}
@@ -150,11 +182,13 @@ class CCE_Public {
 
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
+            'type'  => 'inline', // inline, popup, sticky
 		), $atts );
 
 		ob_start();
+        $wrapper_class = 'cce-lead-form-wrapper cce-form-' . esc_attr( $atts['type'] );
 		?>
-		<div class="cce-lead-form-wrapper">
+		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form id="cce-public-lead-form">
 				<input type="text" name="first_name" placeholder="First Name" required>

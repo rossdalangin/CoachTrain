@@ -23,7 +23,27 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/notes', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_note' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Add note to a lead.
+     */
+    public function add_note( $request ) {
+        $lead_id = absint( $request['id'] );
+        $note = sanitize_text_field( $request->get_param( 'note' ) );
+
+        CCE_Activity_Logger::log( $lead_id, 'note', $note );
+
+        return $this->success( array( 'message' => 'Note added' ) );
+    }
 
 	/**
 	 * Get CRM stages.
