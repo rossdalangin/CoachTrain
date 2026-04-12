@@ -13,6 +13,7 @@ class CCE_Public {
 		add_shortcode( 'cce_testimonials', array( $this, 'render_testimonials' ) );
 		add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
 		add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
+        add_shortcode( 'cce_funnel', array( $this, 'render_funnel' ) );
 	}
 
 	/**
@@ -73,6 +74,56 @@ class CCE_Public {
 	/**
 	 * Render client portal.
 	 */
+    /**
+	 * Render funnel journey.
+	 */
+	public function render_funnel( $atts ) {
+		global $wpdb;
+		$atts = shortcode_atts( array(
+			'id' => 1,
+		), $atts );
+
+        $funnel_id = absint( $atts['id'] );
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
+
+        if ( ! $steps ) {
+            return '<p>Funnel not found or has no steps.</p>';
+        }
+
+        $current_step_index = absint( $_GET['step'] ?? 0 );
+        $current_step = $steps[$current_step_index] ?? $steps[0];
+
+		ob_start();
+		?>
+		<div class="cce-funnel-wrapper">
+			<div class="cce-funnel-step">
+                <?php
+                switch ( $current_step->step_type ) {
+                    case 'optin':
+                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title ) );
+                        break;
+                    case 'booking':
+                        echo $this->render_booking_form( array( 'title' => $current_step->title ) );
+                        break;
+                    case 'checkout':
+                        echo $this->render_checkout( array( 'offer_id' => 1 ) ); // offer_id logic
+                        break;
+                    case 'thank_you':
+                        echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>Success! You are all set.</p>";
+                        break;
+                }
+                ?>
+                <?php if ( isset( $steps[$current_step_index + 1] ) ): ?>
+                    <div style="margin-top:20px;">
+                        <a href="?step=<?php echo $current_step_index + 1; ?>" class="button">Next Step →</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
 	public function render_client_portal( $atts ) {
 		global $wpdb;
 		ob_start();

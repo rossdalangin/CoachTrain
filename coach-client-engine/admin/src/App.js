@@ -247,13 +247,31 @@ const LeadsView = () => {
 const CRMView = () => {
     const [pipeline, setPipeline] = useState([]);
 
-    useEffect(() => {
+    const fetchPipeline = () => {
         apiFetch({ path: '/cce/v1/crm/pipeline' }).then(response => {
             if (response.success) {
                 setPipeline(response.data);
             }
         });
+    };
+
+    useEffect(() => {
+        fetchPipeline();
     }, []);
+
+    const handleContact = (id) => {
+        const message = prompt('Enter message to send:');
+        if (message) {
+            apiFetch({
+                path: `/cce/v1/crm/leads/${id}/contact`,
+                method: 'POST',
+                data: { message }
+            }).then(() => {
+                alert('Contact logged!');
+                fetchPipeline();
+            });
+        }
+    };
 
     return (
         <div className="cce-kanban" style={{display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px'}}>
@@ -270,6 +288,9 @@ const CRMView = () => {
                                         Latest: {lead.activities[0].activity_type}
                                     </div>
                                 )}
+                                <div style={{marginTop: '10px'}}>
+                                    <button className="button button-small" onClick={() => handleContact(lead.id)}>Contact</button>
+                                </div>
                             </div>
                         ))}
                         <button className="button button-small" style={{width: '100%', borderStyle: 'dashed'}}>+ Add Lead</button>

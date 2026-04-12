@@ -55,7 +55,15 @@ class Coach_Client_Engine {
 	private function define_public_hooks() {
 		$public = new CCE_Public();
         add_action( 'init', array( $public, 'init' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_public_assets' ) );
 	}
+
+    /**
+     * Enqueue public assets.
+     */
+    public function enqueue_public_assets() {
+        wp_enqueue_style( 'cce-public-css', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/cce-public.css', array(), CCE_VERSION );
+    }
 
 	/**
 	 * Add admin menu.

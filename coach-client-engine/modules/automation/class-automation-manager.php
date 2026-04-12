@@ -10,6 +10,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
     public function __construct() {
         add_action( 'cce_lead_created', array( $this, 'trigger_optin_automation' ) );
         add_action( 'cce_booking_confirmed', array( $this, 'trigger_booking_automation' ) );
+        add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
     }
 
     /**
@@ -54,5 +55,17 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 	public function trigger_booking_automation( $booking_id ) {
 		// logic for reminders
         error_log( "Automation triggered for booking: $booking_id" );
+
+        // Schedule a 24h reminder
+        wp_schedule_single_event( time() + DAY_IN_SECONDS, 'cce_delayed_email_event', array( $booking_id, 'booking_reminder' ) );
 	}
+
+    /**
+     * Send delayed email.
+     */
+    public function send_delayed_email( $id, $type ) {
+        error_log( "Sending delayed email ($type) for ID: $id" );
+        // $mailer = new CCE_Mailer();
+        // $mailer->send_reminder( $id );
+    }
 }

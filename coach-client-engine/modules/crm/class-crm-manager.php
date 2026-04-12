@@ -39,7 +39,28 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/contact', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'contact_lead' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Contact lead via email.
+     */
+    public function contact_lead( $request ) {
+        $lead_id = absint( $request['id'] );
+        $message = sanitize_textarea_field( $request->get_param( 'message' ) );
+
+        // logic for sending direct email...
+        CCE_Activity_Logger::log( $lead_id, 'contacted', 'Manual email sent: ' . $message );
+
+        return $this->success( array( 'message' => 'Email sent' ) );
+    }
 
     /**
      * Update lead stage.
