@@ -36,6 +36,9 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
 			'revenue_today'   => (float) ($revenue ?? 0),
             'sales_today'     => (int) $sales_count,
             'total_visitors'  => (int) get_option( 'cce_total_visitors', 0 ),
+            'total_leads'     => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" ),
+            'total_bookings'  => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings" ),
+            'total_clients'   => (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" ),
 		) );
 	}
 }

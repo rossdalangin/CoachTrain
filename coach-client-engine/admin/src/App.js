@@ -43,8 +43,8 @@ const App = () => {
     return (
         <div className="cce-admin-wrapper">
             <aside className="cce-sidebar">
-                <div className="cce-logo" style={{padding: '20px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid #333'}}>
-                    Coach Client Engine
+                <div className="cce-logo cce-brand-logo" style={{padding: '20px', fontSize: '20px', borderBottom: '1px solid #333', textAlign: 'center'}}>
+                    Coach Engine
                 </div>
                 <ul>
                     {tabs.map(tab => (

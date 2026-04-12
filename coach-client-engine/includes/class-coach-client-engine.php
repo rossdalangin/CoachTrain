@@ -136,6 +136,13 @@ class Coach_Client_Engine {
             CCE_VERSION
         );
 
+        wp_enqueue_style(
+            'cce-brand-css',
+            $url . 'assets/brand.css',
+            array(),
+            CCE_VERSION
+        );
+
         wp_localize_script( 'cce-admin-js', 'cceData', array(
             'root'  => esc_url_raw( rest_url() ),
             'nonce' => wp_create_nonce( 'wp_rest' ),

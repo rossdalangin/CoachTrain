@@ -20,7 +20,25 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/offers/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_offer' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Delete offer.
+     */
+    public function delete_offer( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->update( "{$wpdb->prefix}cce_offers", array( 'is_active' => 0 ), array( 'id' => $id ) );
+        return $this->success( array( 'message' => 'Offer deleted' ) );
+    }
 
 	/**
 	 * Get offers.

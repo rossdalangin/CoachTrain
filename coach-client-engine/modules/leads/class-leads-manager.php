@@ -39,7 +39,25 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/leads/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_lead' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Delete lead.
+     */
+    public function delete_lead( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_leads", array( 'id' => $lead_id ) );
+        return $this->success( array( 'message' => 'Lead deleted' ) );
+    }
 
     /**
      * Update lead status (tag).
