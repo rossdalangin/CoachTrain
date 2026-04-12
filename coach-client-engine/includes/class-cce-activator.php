@@ -19,6 +19,7 @@ class CCE_Activator {
 				last_name varchar(100),
 				email varchar(100) UNIQUE,
 				phone varchar(20),
+				secure_token varchar(100),
 				source varchar(100),
 				status varchar(50) DEFAULT 'cold',
 				crm_stage_id bigint(20),

@@ -23,14 +23,18 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
 	public function get_summary( $request ) {
 		global $wpdb;
 
-		$leads_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" );
-		$bookings_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings" );
-		$revenue = $wpdb->get_var( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" );
+        $today = date('Y-m-d');
+
+		$leads_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads WHERE DATE(created_at) = %s", $today ) );
+		$bookings_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE DATE(created_at) = %s", $today ) );
+		$revenue = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed' AND DATE(created_at) = %s", $today ) );
+        $sales_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed' AND DATE(created_at) = %s", $today ) );
 
 		return $this->success( array(
-			'leads'    => (int) $leads_count,
-			'bookings' => (int) $bookings_count,
-			'revenue'  => (float) ($revenue ?? 0),
+			'leads_today'    => (int) $leads_count,
+			'bookings_today' => (int) $bookings_count,
+			'revenue_today'  => (float) ($revenue ?? 0),
+            'sales_today'    => (int) $sales_count,
 		) );
 	}
 }

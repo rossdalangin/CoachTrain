@@ -31,7 +31,30 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/stage', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_lead_stage' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Update lead stage.
+     */
+    public function update_lead_stage( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $stage_id = absint( $request['stage_id'] );
+
+        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id ) );
+
+        CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead moved to stage ID: ' . $stage_id );
+
+        return $this->success( array( 'message' => 'Stage updated' ) );
+    }
 
     /**
      * Add note to a lead.

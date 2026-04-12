@@ -65,7 +65,7 @@ const App = () => {
 };
 
 const DashboardView = () => {
-    const [summary, setSummary] = useState({ leads: 0, bookings: 0, revenue: 0 });
+    const [summary, setSummary] = useState({ leads_today: 0, bookings_today: 0, revenue_today: 0, sales_today: 0 });
 
     useEffect(() => {
         apiFetch({ path: '/cce/v1/analytics/summary' }).then(response => {
@@ -97,20 +97,20 @@ const DashboardView = () => {
 
             <div className="cce-card-grid">
                 <div className="cce-card">
-                    <h3>Total Leads</h3>
-                    <div className="value">{summary.leads}</div>
+                    <h3>Leads Today</h3>
+                    <div className="value">{summary.leads_today}</div>
                 </div>
                 <div className="cce-card">
-                    <h3>Total Bookings</h3>
-                    <div className="value">{summary.bookings}</div>
+                    <h3>Bookings Today</h3>
+                    <div className="value">{summary.bookings_today}</div>
                 </div>
                 <div className="cce-card">
-                    <h3>Revenue</h3>
-                    <div className="value">${summary.revenue.toLocaleString()}</div>
+                    <h3>Sales Today</h3>
+                    <div className="value">{summary.sales_today}</div>
                 </div>
                 <div className="cce-card">
-                    <h3>Conversion Rate</h3>
-                    <div className="value">{summary.leads > 0 ? ((summary.bookings / summary.leads) * 100).toFixed(1) : 0}%</div>
+                    <h3>Revenue Today</h3>
+                    <div className="value">${summary.revenue_today.toLocaleString()}</div>
                 </div>
             </div>
             <div className="quick-actions" style={{marginTop: '20px'}}>
@@ -126,11 +126,15 @@ const DashboardView = () => {
 };
 
 const FunnelsView = () => {
-    const [funnelSteps, setFunnelSteps] = useState([
-        { id: 1, title: 'Opt-in Page', type: 'optin' },
-        { id: 2, title: 'Checkout Page', type: 'checkout' },
-        { id: 3, title: 'Thank You Page', type: 'thank_you' }
-    ]);
+    const [funnelSteps, setFunnelSteps] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        // Mock loading steps for funnel ID 1
+        apiFetch({ path: '/cce/v1/funnels/1/steps' }).then(res => {
+            if (res.success) setFunnelSteps(res.data);
+        });
+    }, []);
 
     const addStep = () => {
         const newStep = { id: Date.now(), title: 'New Step', type: 'optin' };
@@ -139,6 +143,18 @@ const FunnelsView = () => {
 
     const removeStep = (id) => {
         setFunnelSteps(funnelSteps.filter(step => step.id !== id));
+    };
+
+    const handleSave = () => {
+        setIsSaving(true);
+        apiFetch({
+            path: '/cce/v1/funnels/1/steps',
+            method: 'POST',
+            data: { steps: funnelSteps }
+        }).then(() => {
+            alert('Funnel steps saved!');
+            setIsSaving(false);
+        });
     };
 
     return (
@@ -158,13 +174,16 @@ const FunnelsView = () => {
                         }}>
                             <div>
                                 <span style={{fontWeight: 'bold', marginRight: '10px'}}>#{index + 1}</span>
-                                {step.title} <span style={{fontSize: '12px', color: '#666'}}>({step.type})</span>
+                                {step.title} <span style={{fontSize: '12px', color: '#666'}}>({step.type || step.step_type})</span>
                             </div>
                             <button className="button" onClick={() => removeStep(step.id)}>Remove</button>
                         </div>
                     ))}
                 </div>
-                <button className="button button-primary" style={{marginTop: '20px'}} onClick={addStep}>+ Add Step</button>
+                <div style={{marginTop: '20px', display: 'flex', gap: '10px'}}>
+                    <button className="button button-primary" onClick={addStep}>+ Add Step</button>
+                    <button className="button" onClick={handleSave} disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Flow'}</button>
+                </div>
             </div>
 
             <div className="cce-card">

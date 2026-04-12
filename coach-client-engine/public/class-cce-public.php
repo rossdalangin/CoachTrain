@@ -9,41 +9,34 @@ class CCE_Public {
 	 */
 	public function init() {
 		add_shortcode( 'cce_lead_capture', array( $this, 'render_lead_capture_form' ) );
-        add_shortcode( 'cce_booking', array( $this, 'render_booking_form' ) );
-        add_shortcode( 'cce_testimonials', array( $this, 'render_testimonials' ) );
-        add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
-        add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
+		add_shortcode( 'cce_booking', array( $this, 'render_booking_form' ) );
+		add_shortcode( 'cce_testimonials', array( $this, 'render_testimonials' ) );
+		add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
+		add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
 	}
 
 	/**
-	 * Render the lead capture form.
-	 */
-    /**
-	 * Render the booking form.
-	 */
-    /**
-	 * Render testimonials.
-	 */
-    /**
 	 * Render checkout form.
 	 */
 	public function render_checkout( $atts ) {
+		global $wpdb;
 		$atts = shortcode_atts( array(
 			'offer_id' => 1,
 		), $atts );
 
 		ob_start();
-        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
+		$token = $_COOKIE['cce_lead_token'] ?? '';
+		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
 		<div class="cce-checkout-wrapper">
 			<h3>Complete Your Purchase</h3>
 			<form id="cce-public-checkout-form">
-                <input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
-                <input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
+				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
 				<select name="gateway" required>
-                    <option value="stripe">Stripe</option>
-                    <option value="paypal">PayPal</option>
-                </select>
+					<option value="stripe">Stripe</option>
+					<option value="paypal">PayPal</option>
+				</select>
 				<button type="submit" class="button">Pay Now</button>
 			</form>
 			<div id="cce-checkout-message"></div>
@@ -77,37 +70,44 @@ class CCE_Public {
 		return ob_get_clean();
 	}
 
-    /**
+	/**
 	 * Render client portal.
 	 */
 	public function render_client_portal( $atts ) {
+		global $wpdb;
 		ob_start();
-        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
-        if ( ! $lead_id ) {
-            return '<p>Please log in or capture your lead info first.</p>';
-        }
+		$token = $_COOKIE['cce_lead_token'] ?? '';
+
+		$lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+
+		if ( ! $lead ) {
+			return '<p>Please log in or capture your lead info first.</p>';
+		}
 		?>
 		<div class="cce-client-portal">
 			<h3>Your Client Dashboard</h3>
-            <div style="display:flex; gap:20px;">
-                <div style="flex:1; border:1px solid #ddd; padding:20px;">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li>Welcome Pack (PDF)</li>
-                        <li>High-Ticket Training (Video)</li>
-                    </ul>
-                </div>
-                <div style="flex:1; border:1px solid #ddd; padding:20px;">
-                    <h4>Your Progress</h4>
-                    <p>Onboarding: <strong>Complete</strong></p>
-                    <p>Next Step: <strong>Consultation Call</strong></p>
-                </div>
-            </div>
+			<div style="display:flex; gap:20px;">
+				<div style="flex:1; border:1px solid #ddd; padding:20px;">
+					<h4>Resources</h4>
+					<ul>
+						<li>Welcome Pack (PDF)</li>
+						<li>High-Ticket Training (Video)</li>
+					</ul>
+				</div>
+				<div style="flex:1; border:1px solid #ddd; padding:20px;">
+					<h4>Your Progress</h4>
+					<p>Onboarding: <strong>Complete</strong></p>
+					<p>Next Step: <strong>Consultation Call</strong></p>
+				</div>
+			</div>
 		</div>
 		<?php
 		return ob_get_clean();
 	}
 
+	/**
+	 * Render testimonials.
+	 */
 	public function render_testimonials( $atts ) {
 		ob_start();
 		?>
@@ -121,24 +121,29 @@ class CCE_Public {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Render the booking form.
+	 */
 	public function render_booking_form( $atts ) {
+		global $wpdb;
 		$atts = shortcode_atts( array(
 			'title' => 'Schedule Your Free Consultation',
 		), $atts );
 
 		ob_start();
-        $lead_id = $_COOKIE['cce_lead_id'] ?? 0;
+		$token = $_COOKIE['cce_lead_token'] ?? '';
+		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
 		<div class="cce-booking-form-wrapper">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form id="cce-public-booking-form">
-                <input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
 				<input type="datetime-local" name="start_time" required>
 				<select name="timezone" required>
-                    <option value="UTC">UTC</option>
-                    <option value="America/New_York">EST</option>
-                    <option value="America/Los_Angeles">PST</option>
-                </select>
+					<option value="UTC">UTC</option>
+					<option value="America/New_York">EST</option>
+					<option value="America/Los_Angeles">PST</option>
+				</select>
 				<button type="submit" class="button">Book My Session</button>
 			</form>
 			<div id="cce-booking-message"></div>
@@ -148,7 +153,7 @@ class CCE_Public {
 			e.preventDefault();
 			const formData = new FormData(this);
 			const data = Object.fromEntries(formData.entries());
-            data.end_time = data.start_time; // Simplified for this version
+			data.end_time = data.start_time; // Simplified for this version
 
 			fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
 				method: 'POST',
@@ -174,19 +179,22 @@ class CCE_Public {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Render the lead capture form.
+	 */
 	public function render_lead_capture_form( $atts ) {
-        // Start session if not started
-        if ( ! session_id() ) {
-            session_start();
-        }
+		// Start session if not started
+		if ( ! session_id() ) {
+			session_start();
+		}
 
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
-            'type'  => 'inline', // inline, popup, sticky
+			'type'  => 'inline', // inline, popup, sticky
 		), $atts );
 
 		ob_start();
-        $wrapper_class = 'cce-lead-form-wrapper cce-form-' . esc_attr( $atts['type'] );
+		$wrapper_class = 'cce-lead-form-wrapper cce-form-' . esc_attr( $atts['type'] );
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
@@ -217,8 +225,8 @@ class CCE_Public {
 				if (res.success) {
 					msg.innerHTML = '<p style="color:green">Success! Check your email.</p>';
 					this.reset();
-                    // Store lead ID in session via cookie or similar (simplified for demo)
-                    document.cookie = "cce_lead_id=" + res.data.id + ";path=/";
+					// Store secure token in session via cookie
+					document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
 				} else {
 					msg.innerHTML = '<p style="color:red">Something went wrong. Please try again.</p>';
 				}
