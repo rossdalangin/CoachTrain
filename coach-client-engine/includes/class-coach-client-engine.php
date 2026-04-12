@@ -49,8 +49,13 @@ class Coach_Client_Engine {
 	 * Register all of the hooks related to the admin area functionality.
 	 */
 	private function define_admin_hooks() {
-		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+        require_once plugin_dir_path( __FILE__ ) . 'class-cce-admin.php';
+        $admin = new CCE_Admin();
+        $admin->init();
+
+        require_once plugin_dir_path( __FILE__ ) . 'class-cce-post-handler.php';
+        $post_handler = new CCE_Post_Handler();
+        $post_handler->init();
 	}
 
 	/**
@@ -96,59 +101,6 @@ class Coach_Client_Engine {
 		);
 	}
 
-	/**
-	 * Display the admin page.
-	 */
-	public function display_plugin_admin_page() {
-		echo '<div id="cce-admin-app"></div>';
-	}
-
-    /**
-     * Enqueue admin assets.
-     */
-    public function enqueue_admin_assets( $hook ) {
-        if ( 'toplevel_page_coach-client-engine' !== $hook ) {
-            return;
-        }
-
-        $path = plugin_dir_path( dirname( __FILE__ ) );
-        $url = plugin_dir_url( dirname( __FILE__ ) );
-
-        $asset_path = $path . 'build/index.asset.php';
-        if ( ! file_exists( $asset_path ) ) {
-            return;
-        }
-
-        $asset_file = include( $asset_path );
-
-        wp_enqueue_script(
-            'cce-admin-js',
-            $url . 'build/index.js',
-            $asset_file['dependencies'],
-            $asset_file['version'],
-            true
-        );
-
-        wp_enqueue_style(
-            'cce-admin-css',
-            $url . 'admin/css/cce-admin.css',
-            array(),
-            CCE_VERSION
-        );
-
-        wp_enqueue_style(
-            'cce-brand-css',
-            $url . 'assets/brand.css',
-            array(),
-            CCE_VERSION
-        );
-
-        wp_localize_script( 'cce-admin-js', 'cceData', array(
-            'root'  => esc_url_raw( rest_url() ),
-            'nonce' => wp_create_nonce( 'wp_rest' ),
-            'isPro' => $this->is_pro(),
-        ) );
-    }
 
 	/**
 	 * Check REST permission.

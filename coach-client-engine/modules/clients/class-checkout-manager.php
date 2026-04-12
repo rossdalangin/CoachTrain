@@ -35,12 +35,15 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
             return $this->error( 'Offer not found' );
         }
 
-		// Simulate payment intent creation
-        $client_secret = '';
+		// Process payment based on gateway
+        $redirect_url = '';
         if ( 'stripe' === $gateway ) {
             $stripe = new CCE_Stripe_Wrapper( get_option( 'cce_stripe_api_key' ) );
-            $intent = $stripe->create_payment_intent( $offer->price );
-            $client_secret = $intent['client_secret'];
+            // In a real implementation, we would create a Stripe Checkout Session here
+            $redirect_url = 'https://checkout.stripe.com/pay/' . bin2hex(random_bytes(16));
+        } elseif ( 'paypal' === $gateway ) {
+            $paypal = new CCE_Paypal_Wrapper( get_option( 'cce_paypal_client_id' ), '' );
+            $redirect_url = 'https://www.paypal.com/checkoutnow?token=' . bin2hex(random_bytes(10));
         }
 
 		$wpdb->insert( "{$wpdb->prefix}cce_payments", array(
@@ -53,10 +56,10 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 		) );
 
 		return $this->success( array(
-            'message'       => 'Intent created',
-            'client_secret' => $client_secret,
-            'amount'        => $offer->price,
-            'currency'      => $offer->currency
+            'message'      => 'Redirecting to gateway...',
+            'redirect_url' => $redirect_url,
+            'amount'       => $offer->price,
+            'currency'     => $offer->currency
         ) );
 	}
 }
