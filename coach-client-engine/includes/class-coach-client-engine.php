@@ -22,23 +22,26 @@ class Coach_Client_Engine {
 	 * Load the required dependencies for this plugin.
 	 */
 	private function load_dependencies() {
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-rest-controller.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-webhooks-controller.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-mailer.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-activity-logger.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-cce-public.php';
+        $path = plugin_dir_path( dirname( __FILE__, 1 ) );
+		require_once $path . 'includes/class-cce-rest-controller.php';
+        require_once $path . 'includes/class-cce-webhooks-controller.php';
+        require_once $path . 'includes/class-cce-mailer.php';
+        require_once $path . 'includes/class-cce-activity-logger.php';
+        require_once $path . 'public/class-cce-public.php';
 
         // Modules
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/leads/class-leads-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/crm/class-crm-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/bookings/class-bookings-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/clients/class-offer-model.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/clients/class-checkout-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/funnels/class-funnels-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/analytics/class-analytics-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/portal/class-portal-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/proof/class-proof-manager.php';
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'modules/automation/class-automation-manager.php';
+        require_once $path . 'modules/leads/class-leads-manager.php';
+        require_once $path . 'modules/crm/class-crm-manager.php';
+        require_once $path . 'modules/bookings/class-bookings-manager.php';
+        require_once $path . 'modules/clients/class-offer-model.php';
+        require_once $path . 'modules/clients/class-checkout-manager.php';
+        require_once $path . 'modules/clients/class-stripe-wrapper.php';
+        require_once $path . 'modules/clients/class-paypal-wrapper.php';
+        require_once $path . 'modules/funnels/class-funnels-manager.php';
+        require_once $path . 'modules/analytics/class-analytics-manager.php';
+        require_once $path . 'modules/portal/class-portal-manager.php';
+        require_once $path . 'modules/proof/class-proof-manager.php';
+        require_once $path . 'modules/automation/class-automation-manager.php';
 	}
 
 	/**
@@ -62,7 +65,8 @@ class Coach_Client_Engine {
      * Enqueue public assets.
      */
     public function enqueue_public_assets() {
-        wp_enqueue_style( 'cce-public-css', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/cce-public.css', array(), CCE_VERSION );
+        $url = plugin_dir_url( dirname( __FILE__, 1 ) );
+        wp_enqueue_style( 'cce-public-css', $url . 'public/css/cce-public.css', array(), CCE_VERSION );
     }
 
 	/**
@@ -95,7 +99,10 @@ class Coach_Client_Engine {
             return;
         }
 
-        $asset_path = plugin_dir_path( dirname( __FILE__ ) ) . 'build/index.asset.php';
+        $path = plugin_dir_path( dirname( __FILE__, 1 ) );
+        $url = plugin_dir_url( dirname( __FILE__, 1 ) );
+
+        $asset_path = $path . 'build/index.asset.php';
         if ( ! file_exists( $asset_path ) ) {
             return;
         }
@@ -104,7 +111,7 @@ class Coach_Client_Engine {
 
         wp_enqueue_script(
             'cce-admin-js',
-            plugin_dir_url( dirname( __FILE__ ) ) . 'build/index.js',
+            $url . 'build/index.js',
             $asset_file['dependencies'],
             $asset_file['version'],
             true
@@ -112,7 +119,7 @@ class Coach_Client_Engine {
 
         wp_enqueue_style(
             'cce-admin-css',
-            plugin_dir_url( dirname( __FILE__ ) ) . 'admin/css/cce-admin.css',
+            $url . 'admin/css/cce-admin.css',
             array(),
             CCE_VERSION
         );
