@@ -246,6 +246,11 @@ const CRMView = () => {
                             <div key={lead.id} className="cce-card" style={{marginBottom: '10px', fontSize: '14px', padding: '10px'}}>
                                 <strong>{lead.first_name} {lead.last_name}</strong>
                                 <div style={{fontSize: '12px', color: '#718096'}}>{lead.status?.toUpperCase()}</div>
+                                {lead.activities?.length > 0 && (
+                                    <div style={{fontSize: '11px', marginTop: '5px', color: '#0073aa', fontStyle: 'italic'}}>
+                                        Latest: {lead.activities[0].activity_type}
+                                    </div>
+                                )}
                             </div>
                         ))}
                         <button className="button button-small" style={{width: '100%', borderStyle: 'dashed'}}>+ Add Lead</button>

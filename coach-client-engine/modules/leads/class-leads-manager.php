@@ -70,6 +70,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		$lead_id = $wpdb->insert_id;
 		$data['id'] = $lead_id;
 
+        // Log activity
+        CCE_Activity_Logger::log( $lead_id, 'optin', 'Lead captured from ' . ( $_SERVER['HTTP_REFERER'] ?? 'unknown' ) );
+
         // Trigger action for automation
         do_action( 'cce_lead_created', $lead_id );
 

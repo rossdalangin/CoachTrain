@@ -25,6 +25,7 @@ class Coach_Client_Engine {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-rest-controller.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-webhooks-controller.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-mailer.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-activity-logger.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-cce-public.php';
 
         // Modules

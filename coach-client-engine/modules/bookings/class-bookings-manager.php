@@ -67,7 +67,15 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 			return $this->error( 'Failed to create booking' );
 		}
 
-		$data['id'] = $wpdb->insert_id;
+		$booking_id = $wpdb->insert_id;
+		$data['id'] = $booking_id;
+
+        // Log activity
+        CCE_Activity_Logger::log( $data['lead_id'], 'booking', 'New consultation booked for ' . $data['start_time'] );
+
+        // Trigger action
+        do_action( 'cce_booking_confirmed', $booking_id );
+
 		return $this->success( $data );
 	}
 }

@@ -51,6 +51,12 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
                 "SELECT * FROM $leads_table WHERE crm_stage_id = %d",
                 $stage->id
             ) );
+
+            // Fetch activities for each lead
+            foreach ( $leads as &$lead ) {
+                $lead->activities = CCE_Activity_Logger::get_logs( $lead->id );
+            }
+
             $pipeline[] = array(
                 'stage' => $stage,
                 'leads' => $leads
