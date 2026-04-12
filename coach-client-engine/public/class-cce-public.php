@@ -160,13 +160,24 @@ class CCE_Public {
 	 * Render testimonials.
 	 */
 	public function render_testimonials( $atts ) {
+        $atts = shortcode_atts( array(
+			'type' => 'testimonial', // testimonial, case_study
+		), $atts );
+
 		ob_start();
 		?>
 		<div class="cce-testimonials-display">
-			<div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
-				<p>"The Coach Client Engine tripled my bookings in one month!"</p>
-				<strong>- Sarah Jenkins</strong>
-			</div>
+            <?php if ( 'case_study' === $atts['type'] ): ?>
+                <div class="cce-case-study" style="border:1px solid #ddd; padding:20px; margin-bottom:10px; background:#fff;">
+                    <h4>How Sarah Doubled Her Revenue</h4>
+                    <p>Before using the Engine, Sarah was struggling to get 1 client/month. Now she gets 5 consistently.</p>
+                </div>
+            <?php else: ?>
+                <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
+                    <p>"The Coach Client Engine tripled my bookings in one month!"</p>
+                    <strong>- Sarah Jenkins</strong>
+                </div>
+            <?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();

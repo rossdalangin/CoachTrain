@@ -53,8 +53,9 @@ const App = () => {
                 {currentTab === 'Settings' && <SettingsView setIsPro={setIsPro} />}
                 {currentTab === 'Funnels' && <FunnelsView />}
                 {currentTab === 'Clients' && <ClientsView />}
+                {currentTab === 'Analytics' && <AnalyticsView />}
 
-                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings', 'Funnels', 'Clients'].includes(currentTab) &&
+                {!['Dashboard', 'Leads', 'CRM', 'Automation', 'Client Portal', 'Proof', 'Settings', 'Funnels', 'Clients', 'Analytics'].includes(currentTab) &&
                     <div className="cce-card">
                         <p>The <strong>{currentTab}</strong> module is currently in development and will be available in the next update.</p>
                         <button className="button">Join the Beta</button>
@@ -131,7 +132,6 @@ const FunnelsView = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        // Mock loading steps for funnel ID 1
         apiFetch({ path: '/cce/v1/funnels/1/steps' }).then(res => {
             if (res.success) setFunnelSteps(res.data);
         });
@@ -209,33 +209,46 @@ const FunnelsView = () => {
 const ClientsView = () => {
     const [offers, setOffers] = useState([
         { id: 1, title: '90-Day Transformation', price: 2997, type: 'one-time' },
-        { id: 2, title: 'Monthly Mentorship', price: 497, type: 'subscription' }
     ]);
 
     return (
-        <div className="cce-card">
-            <h3>Your Coaching Offers</h3>
-            <table className="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Price</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {offers.map(offer => (
-                        <tr key={offer.id}>
-                            <td><strong>{offer.title}</strong></td>
-                            <td>${offer.price}</td>
-                            <td>{offer.type.toUpperCase()}</td>
-                            <td><button className="button button-small">Edit</button></td>
+        <div>
+            <div className="cce-card" style={{marginBottom: '30px', borderLeft: '4px solid #ff4136'}}>
+                <h3>💎 Alex Hormozi "Grand Slam" Offer Builder</h3>
+                <div className="form-group" style={{marginBottom: '15px'}}>
+                    <label>Dream Outcome</label>
+                    <input type="text" className="large-text" placeholder="What is the ultimate result you deliver?" />
+                </div>
+                <div className="form-group" style={{marginBottom: '15px'}}>
+                    <label>Value Proposition</label>
+                    <textarea rows="3" style={{width: '100%'}} placeholder="How do you increase perceived likelihood of achievement?"></textarea>
+                </div>
+                <button className="button button-primary">Save Grand Slam Offer</button>
+            </div>
+
+            <div className="cce-card">
+                <h3>Your Active Offers</h3>
+                <table className="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Type</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-            <button className="button button-primary" style={{marginTop: '20px'}}>Create New Offer</button>
+                    </thead>
+                    <tbody>
+                        {offers.map(offer => (
+                            <tr key={offer.id}>
+                                <td><strong>{offer.title}</strong></td>
+                                <td>${offer.price}</td>
+                                <td>{offer.type.toUpperCase()}</td>
+                                <td><button className="button button-small">Edit</button></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
@@ -430,6 +443,19 @@ const ProofView = () => (
             </div>
         </div>
         <button className="button button-primary" style={{marginTop: '20px'}}>Request Testimonial</button>
+    </div>
+);
+
+const AnalyticsView = () => (
+    <div className="cce-card">
+        <h3>Strategy Insights</h3>
+        <div style={{background: '#f8f9fa', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #0073aa'}}>
+            <h4>💡 Recommended Actions:</h4>
+            <ul>
+                <li>Your booking rate is higher than average. <strong>Increase your price</strong> to filter for more committed clients.</li>
+                <li>Leads are dropping off at the questionnaire. <strong>Reduce the number of questions</strong> to 3–5.</li>
+            </ul>
+        </div>
     </div>
 );
 

@@ -67,6 +67,7 @@ class Coach_Client_Engine {
     public function enqueue_public_assets() {
         $url = plugin_dir_url( dirname( __FILE__, 1 ) );
         wp_enqueue_style( 'cce-public-css', $url . 'public/css/cce-public.css', array(), CCE_VERSION );
+        wp_enqueue_script( 'cce-public-js', $url . 'public/js/cce-public.js', array(), CCE_VERSION, true );
     }
 
 	/**
