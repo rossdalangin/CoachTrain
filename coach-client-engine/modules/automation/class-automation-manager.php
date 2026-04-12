@@ -8,9 +8,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      * Constructor.
      */
     public function __construct() {
-        add_action( 'cce_lead_created', array( $this, 'trigger_optin_automation' ) );
-        add_action( 'cce_booking_confirmed', array( $this, 'trigger_booking_automation' ) );
-        add_action( 'cce_payment_completed', array( $this, 'trigger_payment_automation' ) );
+        add_action( 'cce_lead_created', array( $this, 'trigger_automation' ) );
+        add_action( 'cce_booking_confirmed', array( $this, 'trigger_automation' ) );
+        add_action( 'cce_payment_completed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
     }
 
@@ -24,6 +24,19 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'get_rules' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_rule' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/rules/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_rule' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 	}
 
@@ -31,52 +44,94 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      * Get automation rules.
      */
     public function get_rules( $request ) {
-        $rules = array(
-            array( 'id' => 1, 'trigger' => 'on_optin', 'action' => 'send_email', 'delay' => 0 ),
-            array( 'id' => 2, 'trigger' => 'on_booking', 'action' => 'add_tag', 'tag' => 'Booked' ),
-        );
+        global $wpdb;
+        $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
         return $this->success( $rules );
     }
 
+    /**
+     * Create automation rule.
+     */
+    public function create_rule( $request ) {
+        global $wpdb;
+        $params = $request->get_params();
+
+        $wpdb->insert( "{$wpdb->prefix}cce_automation_rules", array(
+            'trigger_event' => sanitize_text_field( $params['trigger_event'] ),
+            'action_type'   => sanitize_text_field( $params['action_type'] ),
+            'config'        => json_encode( $params['config'] ?? array() ),
+            'is_active'     => 1,
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Delete automation rule.
+     */
+    public function delete_rule( $request ) {
+        global $wpdb;
+        $wpdb->delete( "{$wpdb->prefix}cce_automation_rules", array( 'id' => absint( $request['id'] ) ) );
+        return $this->success( array( 'message' => 'Rule deleted' ) );
+    }
+
 	/**
-	 * Trigger automation on opt-in.
+	 * Trigger automation.
 	 */
-	public function trigger_optin_automation( $lead_id ) {
-		// logic for email delivery and tagging
-        error_log( "Automation triggered for lead: $lead_id" );
+	public function trigger_automation( $id ) {
+        global $wpdb;
+        $hook = current_action();
 
-        // Send welcome email
-        $mailer = new CCE_Mailer();
-        $mailer->send_welcome_email( $lead_id );
-	}
+        $rules = $wpdb->get_results( $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}cce_automation_rules WHERE trigger_event = %s AND is_active = 1",
+            $hook
+        ) );
 
-	/**
-	 * Trigger automation on booking.
-	 */
-	public function trigger_booking_automation( $booking_id ) {
-		global $wpdb;
-        // logic for reminders
-        error_log( "Automation triggered for booking: $booking_id" );
-
-        // Auto-move to 'Booked' stage (ID 3)
-        $booking = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $booking_id ) );
-        if ( $booking ) {
-            $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => 3 ), array( 'id' => $booking->lead_id ) );
-            CCE_Activity_Logger::log( $booking->lead_id, 'stage_change', 'Lead automatically moved to BOOKED stage.' );
+        foreach ( $rules as $rule ) {
+            $this->execute_rule( $rule, $id, $hook );
         }
 
-        // Schedule a 24h reminder
-        wp_schedule_single_event( time() + DAY_IN_SECONDS, 'cce_delayed_email_event', array( $booking_id, 'booking_reminder' ) );
+        // Keep legacy defaults if no rules found for simple setup
+        if ( empty( $rules ) ) {
+            if ( 'cce_lead_created' === $hook ) {
+                $mailer = new CCE_Mailer();
+                $mailer->send_welcome_email( $id );
+            }
+        }
 	}
 
     /**
-     * Trigger on payment completed.
+     * Execute specific rule.
      */
-    public function trigger_payment_automation( $lead_id ) {
+    private function execute_rule( $rule, $source_id, $hook ) {
         global $wpdb;
-        // Auto-move to 'Closed' stage (ID 4)
-        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => 4 ), array( 'id' => $lead_id ) );
-        CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead automatically moved to CLOSED (Client) stage.' );
+        $config = json_decode( $rule->config, true );
+
+        // Resolve lead_id based on hook
+        $lead_id = 0;
+        if ( 'cce_lead_created' === $hook ) {
+            $lead_id = $source_id;
+        } elseif ( 'cce_booking_confirmed' === $hook ) {
+            $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $source_id ) );
+        } elseif ( 'cce_payment_completed' === $hook ) {
+            $lead_id = $source_id; // Payment completed action already passes lead_id
+        }
+
+        if ( ! $lead_id ) return;
+
+        switch ( $rule->action_type ) {
+            case 'send_email':
+                $mailer = new CCE_Mailer();
+                $mailer->send_welcome_email( $lead_id );
+                break;
+            case 'move_stage':
+                $stage_id = absint( $config['stage_id'] ?? 0 );
+                if ( $stage_id ) {
+                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id ) );
+                    CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead automatically moved by automation rule: ' . $rule->id );
+                }
+                break;
+        }
     }
 
     /**
@@ -84,7 +139,5 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function send_delayed_email( $id, $type ) {
         error_log( "Sending delayed email ($type) for ID: $id" );
-        // $mailer = new CCE_Mailer();
-        // $mailer->send_reminder( $id );
     }
 }

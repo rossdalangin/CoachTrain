@@ -46,8 +46,35 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'delete_lead' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_lead' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 	}
+
+    /**
+     * Update lead.
+     */
+    public function update_lead( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $params = $request->get_params();
+
+        $data = array(
+            'first_name' => sanitize_text_field( $params['first_name'] ),
+            'last_name'  => sanitize_text_field( $params['last_name'] ),
+            'email'       => sanitize_email( $params['email'] ),
+            'phone'       => sanitize_text_field( $params['phone'] ?? '' ),
+            'status'      => sanitize_text_field( $params['status'] ?? 'cold' ),
+        );
+
+        $wpdb->update( "{$wpdb->prefix}cce_leads", $data, array( 'id' => $id ) );
+        CCE_Activity_Logger::log( $id, 'update', 'Lead information updated.' );
+
+        return $this->success( array( 'message' => 'Lead updated' ) );
+    }
 
     /**
      * Delete lead.

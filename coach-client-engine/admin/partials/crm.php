@@ -30,10 +30,13 @@
                                 </select>
                             </div>
 
-                            <div style="margin-top:10px;">
+                            <div style="margin-top:10px; display:flex; gap:5px;">
                                 <a href="#" class="button button-small cce-view-notes"
                                    data-lead-id="<?php echo $lead->id; ?>"
-                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">View Activity</a>
+                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Activity</a>
+                                <a href="#" class="button button-small cce-view-tasks"
+                                   data-lead-id="<?php echo $lead->id; ?>"
+                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Tasks</a>
                             </div>
                         </div>
                     <?php endforeach; else: ?>
@@ -44,20 +47,39 @@
         <?php endforeach; ?>
     </div>
 
-    <!-- Notes Modal -->
-    <div id="cce-notes-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <!-- Leads Modal (Shared for Notes and Tasks) -->
+    <div id="cce-leads-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
         <div style="background:#fff; margin:5% auto; padding:25px; width:50%; border-radius:12px; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
             <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px; color:#888;">&times;</span>
-            <h2 id="cce-modal-title" style="margin-top:0;">Lead Notes</h2>
+            <h2 id="cce-modal-title" style="margin-top:0;">Lead Details</h2>
 
-            <div id="cce-notes-content" style="max-height:350px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+            <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #eee; margin-bottom:20px;">
+                <button class="cce-tab-link active" data-tab="notes" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Activity</button>
+                <button class="cce-tab-link" data-tab="tasks" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Tasks</button>
+            </div>
 
-            <div class="cce-add-note-section">
-                <form id="cce-add-note-form">
-                    <input type="hidden" id="cce-add-note-lead-id">
-                    <textarea id="cce-new-note-text" placeholder="Add a new note or update..." style="width:100%; border-radius:8px; margin-bottom:10px;" rows="3" required></textarea>
-                    <button type="submit" class="button button-primary">Add Note</button>
-                </form>
+            <div id="cce-tab-notes" class="cce-tab-content">
+                <div id="cce-notes-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div class="cce-add-note-section">
+                    <form id="cce-add-note-form">
+                        <input type="hidden" class="cce-lead-id-field">
+                        <textarea id="cce-new-note-text" placeholder="Add a note..." style="width:100%; border-radius:8px; margin-bottom:10px;" rows="2" required></textarea>
+                        <button type="submit" class="button button-primary">Add Note</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="cce-tab-tasks" class="cce-tab-content" style="display:none;">
+                <div id="cce-tasks-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div class="cce-add-task-section">
+                    <form id="cce-add-task-form">
+                        <input type="hidden" class="cce-lead-id-field">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="cce-new-task-title" placeholder="New task title..." style="flex:1; border-radius:8px;" required>
+                            <button type="submit" class="button button-primary">Add Task</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

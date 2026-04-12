@@ -73,6 +73,15 @@ Stores client testimonials and social proof.
 - `status`: VARCHAR(50) DEFAULT 'active'
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
+## Table: `cce_automation_rules`
+Stores customizable automation workflows.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `trigger_event`: VARCHAR(100) (e.g., cce_lead_created, cce_booking_confirmed)
+- `action_type`: VARCHAR(100) (e.g., send_email, add_tag, move_stage)
+- `config`: LONGTEXT (JSON)
+- `is_active`: TINYINT(1) DEFAULT 1
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
 ## Table: `cce_crm_stages`
 Stores CRM pipeline stages.
 - `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY

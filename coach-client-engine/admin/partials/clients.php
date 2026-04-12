@@ -47,11 +47,15 @@
         </thead>
         <tbody>
             <?php if ($offers): foreach ( $offers as $offer ): ?>
-                <tr>
+                <tr id="offer-row-<?php echo $offer->id; ?>"
+                    data-title="<?php echo esc_attr($offer->title); ?>"
+                    data-price="<?php echo esc_attr($offer->price); ?>"
+                    data-type="<?php echo esc_attr($offer->type); ?>">
                     <td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
                     <td>$<?php echo number_format( $offer->price, 2 ); ?></td>
                     <td><?php echo esc_html( strtoupper( $offer->type ) ); ?></td>
                     <td>
+                        <button class="button button-small cce-edit-offer" data-offer-id="<?php echo $offer->id; ?>">Edit</button>
                         <button class="button button-link-delete cce-delete-offer" data-offer-id="<?php echo $offer->id; ?>" style="color:#d63638;">Delete</button>
                     </td>
                 </tr>
@@ -61,18 +65,23 @@
         </tbody>
     </table>
 
-    <script>
-    jQuery(document).ready(function($) {
-        $('.cce-delete-offer').on('click', function() {
-            if(!confirm('Are you sure you want to delete this offer?')) return;
-            const offerId = $(this).data('offer-id');
-            $.ajax({
-                url: cceAdmin.restUrl + 'offers/' + offerId,
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function(res) { if(res.success) location.reload(); }
-            });
-        });
-    });
-    </script>
+    <!-- Edit Offer Modal -->
+    <div id="cce-edit-offer-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Edit Offer</h2>
+            <form id="cce-edit-offer-form">
+                <input type="hidden" name="id" id="edit-offer-id">
+                <p><label>Offer Title</label><br><input type="text" name="title" id="edit-offer-title" class="widefat" required></p>
+                <p><label>Price ($)</label><br><input type="number" name="price" id="edit-offer-price" class="widefat" required></p>
+                <p><label>Type</label><br>
+                    <select name="type" id="edit-offer-type" class="widefat">
+                        <option value="one-time">One-Time</option>
+                        <option value="subscription">Subscription</option>
+                    </select>
+                </p>
+                <button type="submit" class="button button-primary">Update Offer</button>
+            </form>
+        </div>
+    </div>
 </div>

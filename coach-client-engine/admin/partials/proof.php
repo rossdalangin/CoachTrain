@@ -45,29 +45,4 @@
             ?>
         </div>
     </div>
-
-    <script>
-    document.getElementById('cce-add-testimonial-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData.entries());
-
-        fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/proof/testimonials' ) ); ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                location.reload();
-            } else {
-                alert('Failed to save testimonial');
-            }
-        });
-    });
-    </script>
 </div>

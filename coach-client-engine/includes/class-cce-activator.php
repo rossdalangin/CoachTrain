@@ -119,6 +119,16 @@ class CCE_Activator {
 				status varchar(50) DEFAULT 'active',
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_automation_rules (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				trigger_event varchar(100),
+				action_type varchar(100),
+				config longtext,
+				is_active tinyint(1) DEFAULT 1,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

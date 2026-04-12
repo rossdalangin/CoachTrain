@@ -40,12 +40,17 @@
         </thead>
         <tbody>
             <?php if ($leads): foreach ( $leads as $lead ): ?>
-                <tr>
+                <tr id="lead-row-<?php echo $lead->id; ?>"
+                    data-first-name="<?php echo esc_attr($lead->first_name); ?>"
+                    data-last-name="<?php echo esc_attr($lead->last_name); ?>"
+                    data-email="<?php echo esc_attr($lead->email); ?>"
+                    data-status="<?php echo esc_attr($lead->status); ?>">
                     <td><strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong></td>
                     <td><?php echo esc_html( $lead->email ); ?></td>
                     <td><span class="status-tag"><?php echo esc_html( strtoupper( $lead->status ) ); ?></span></td>
                     <td><?php echo esc_html( $lead->created_at ); ?></td>
                     <td>
+                        <button class="button button-small cce-edit-lead" data-lead-id="<?php echo $lead->id; ?>">Edit</button>
                         <button class="button button-link-delete cce-delete-lead" data-lead-id="<?php echo $lead->id; ?>" style="color:#d63638;">Delete</button>
                     </td>
                 </tr>
@@ -55,18 +60,25 @@
         </tbody>
     </table>
 
-    <script>
-    jQuery(document).ready(function($) {
-        $('.cce-delete-lead').on('click', function() {
-            if(!confirm('Are you sure you want to delete this lead?')) return;
-            const leadId = $(this).data('lead-id');
-            $.ajax({
-                url: cceAdmin.restUrl + 'leads/' + leadId,
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function(res) { if(res.success) location.reload(); }
-            });
-        });
-    });
-    </script>
+    <!-- Edit Lead Modal -->
+    <div id="cce-edit-lead-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Edit Lead</h2>
+            <form id="cce-edit-lead-form">
+                <input type="hidden" name="id" id="edit-lead-id">
+                <p><label>First Name</label><br><input type="text" name="first_name" id="edit-lead-first-name" class="widefat" required></p>
+                <p><label>Last Name</label><br><input type="text" name="last_name" id="edit-lead-last-name" class="widefat" required></p>
+                <p><label>Email</label><br><input type="email" name="email" id="edit-lead-email" class="widefat" required></p>
+                <p><label>Status</label><br>
+                    <select name="status" id="edit-lead-status" class="widefat">
+                        <option value="cold">COLD</option>
+                        <option value="warm">WARM</option>
+                        <option value="hot">HOT</option>
+                    </select>
+                </p>
+                <button type="submit" class="button button-primary">Update Lead</button>
+            </form>
+        </div>
+    </div>
 </div>

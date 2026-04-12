@@ -36,8 +36,11 @@
                     </tr>
                     <tr id="funnel-steps-<?php echo $funnel->id; ?>" style="display:none;">
                         <td colspan="5" style="background:#f9f9f9; padding:15px;">
-                            <h4>Steps in this funnel:</h4>
-                            <div class="steps-container-<?php echo $funnel->id; ?>">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h4>Steps in this funnel:</h4>
+                                <button class="button button-small cce-add-step-btn" data-funnel-id="<?php echo $funnel->id; ?>">+ Add Step</button>
+                            </div>
+                            <div class="steps-container-<?php echo $funnel->id; ?>" style="margin-top:10px;">
                                 <em>Loading steps...</em>
                             </div>
                         </td>
@@ -65,72 +68,24 @@
         </div>
     </div>
 
-    <script>
-    jQuery(document).ready(function($) {
-        $('.cce-use-template').on('click', function() {
-            const templateId = $(this).data('template');
-            $.ajax({
-                url: cceAdmin.restUrl + 'funnels/create-from-template',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                data: { template_id: templateId },
-                success: function(res) { if(res.success) location.reload(); }
-            });
-        });
-
-        $('.cce-delete-funnel').on('click', function() {
-            if(!confirm('Are you sure you want to delete this funnel?')) return;
-            const funnelId = $(this).data('funnel-id');
-            $.ajax({
-                url: cceAdmin.restUrl + 'funnels/' + funnelId,
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function(res) { if(res.success) location.reload(); }
-            });
-        });
-
-        $('.cce-copy-shortcode').on('click', function() {
-            const text = $(this).data('shortcode');
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = $(this).text();
-                $(this).text('Copied!');
-                setTimeout(() => $(this).text(originalText), 2000);
-            });
-        });
-
-        $('.cce-view-steps').on('click', function(e) {
-            e.preventDefault();
-            const funnelId = $(this).data('funnel-id');
-            const $row = $('#funnel-steps-' + funnelId);
-            const $container = $('.steps-container-' + funnelId);
-
-            if ($row.is(':visible')) {
-                $row.hide();
-                return;
-            }
-
-            $row.show();
-
-            $.ajax({
-                url: cceAdmin.restUrl + 'funnels/' + funnelId + '/steps',
-                method: 'GET',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce);
-                },
-                success: function(response) {
-                    if (response.success && response.data.length > 0) {
-                        let html = '<ol>';
-                        response.data.forEach(step => {
-                            html += `<li><strong>${step.title}</strong> (${step.step_type})</li>`;
-                        });
-                        html += '</ol>';
-                        $container.html(html);
-                    } else {
-                        $container.html('<p>No steps configured for this funnel yet.</p>');
-                    }
-                }
-            });
-        });
-    });
-    </script>
+    <!-- Add Step Modal -->
+    <div id="cce-add-step-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Add Funnel Step</h2>
+            <form id="cce-add-step-form">
+                <input type="hidden" id="add-step-funnel-id">
+                <p><label>Step Title</label><br><input type="text" id="add-step-title" class="widefat" required></p>
+                <p><label>Step Type</label><br>
+                    <select id="add-step-type" class="widefat">
+                        <option value="optin">Opt-in Form</option>
+                        <option value="booking">Booking/Scheduling</option>
+                        <option value="checkout">Checkout/Payment</option>
+                        <option value="thank_you">Thank You Page</option>
+                    </select>
+                </p>
+                <button type="submit" class="button button-primary">Add Step</button>
+            </form>
+        </div>
+    </div>
 </div>

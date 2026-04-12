@@ -27,8 +27,33 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'delete_offer' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_offer' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 	}
+
+    /**
+     * Update offer.
+     */
+    public function update_offer( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $params = $request->get_params();
+
+        $data = array(
+            'title'       => sanitize_text_field( $params['title'] ),
+            'description' => sanitize_textarea_field( $params['description'] ?? '' ),
+            'price'       => (float) $params['price'],
+            'type'        => sanitize_text_field( $params['type'] ?? 'one-time' ),
+        );
+
+        $wpdb->update( "{$wpdb->prefix}cce_offers", $data, array( 'id' => $id ) );
+
+        return $this->success( array( 'message' => 'Offer updated' ) );
+    }
 
     /**
      * Delete offer.
