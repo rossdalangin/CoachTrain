@@ -87,6 +87,23 @@ Stores customizable automation workflows.
 - `is_active`: TINYINT(1) DEFAULT 1
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
+## Table: `cce_email_templates`
+Stores custom email content for automations.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `name`: VARCHAR(255)
+- `subject`: VARCHAR(255)
+- `content`: LONGTEXT
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
+## Table: `cce_resources`
+Stores coaching resources (PDFs, videos) shared in the portal.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `title`: VARCHAR(255)
+- `type`: VARCHAR(50) (PDF, Video, Link)
+- `url`: VARCHAR(255)
+- `visibility`: VARCHAR(50) (public, clients_only)
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
 ## Table: `cce_crm_stages`
 Stores CRM pipeline stages.
 - `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY

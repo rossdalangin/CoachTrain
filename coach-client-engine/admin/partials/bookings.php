@@ -8,6 +8,10 @@
             <input type="search" name="s" value="<?php echo esc_attr($_GET['s'] ?? ''); ?>" placeholder="Search bookings...">
             <button type="submit" class="button">Search</button>
         </form>
+        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
+            <input type="hidden" name="action" value="cce_export_bookings">
+            <button type="submit" class="button">Export to CSV</button>
+        </form>
     </div>
 
     <div class="cce-card" style="margin-bottom: 20px;">

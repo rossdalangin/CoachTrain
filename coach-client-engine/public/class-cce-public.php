@@ -89,6 +89,14 @@ class CCE_Public {
 
         $current_step_index = absint( $_GET['step_idx'] ?? 0 );
         $current_step = $steps[$current_step_index] ?? $steps[0];
+
+        // Track visit
+        if ( ! is_admin() ) {
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET visits = visits + 1 WHERE id = %d", $current_step->id ) );
+            // Store funnel title in cookie for lead source
+            setcookie('cce_funnel_source', $funnel_id, time() + HOUR_IN_SECONDS, '/');
+        }
+
         $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
 
 		ob_start();
@@ -104,10 +112,18 @@ class CCE_Public {
                         echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url ) );
                         break;
                     case 'checkout':
-                        echo $this->render_checkout( array( 'offer_id' => 1 ) );
+                        $config = json_decode( $current_step->config, true );
+                        $offer_id = absint( $config['offer_id'] ?? 1 );
+                        echo $this->render_checkout( array( 'offer_id' => $offer_id ) );
                         break;
                     case 'thank_you':
-                        echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>Success! You are all set.</p>";
+                        $config = json_decode( $current_step->config, true );
+                        if ( ! empty( $config['redirect_url'] ) ) {
+                            echo "<script>window.location.href='" . esc_url($config['redirect_url']) . "';</script>";
+                        } else {
+                            $msg = $config['success_message'] ?: 'Success! You are all set.';
+                            echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>" . wp_kses_post($msg) . "</p>";
+                        }
                         break;
                 }
                 ?>
@@ -129,6 +145,10 @@ class CCE_Public {
 		}
 
         $completed = json_decode( $lead->onboarding_progress ?: '[]', true );
+
+        $portal_manager = new CCE_Portal_Manager();
+        $resources_res = $portal_manager->get_resources( new WP_REST_Request() );
+        $resources = is_wp_error($resources_res) ? [] : $resources_res->get_data();
 		?>
 		<div class="cce-client-portal">
 			<h3>Welcome, <?php echo esc_html( $lead->first_name ); ?></h3>
@@ -147,6 +167,20 @@ class CCE_Public {
                         </p>
                         <?php endforeach; ?>
                     </div>
+
+                    <h4 style="margin-top:30px;">Resources</h4>
+                    <ul style="list-style:none; padding:0;">
+                        <?php if ($resources): foreach ($resources as $r): ?>
+                            <li style="margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:5px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span><strong>[<?php echo esc_html($r->type); ?>]</strong> <?php echo esc_html($r->title); ?></span>
+                                    <a href="<?php echo esc_url($r->url); ?>" class="button button-small" target="_blank">Access</a>
+                                </div>
+                            </li>
+                        <?php endforeach; else: ?>
+                            <li>No resources available at your current level.</li>
+                        <?php endif; ?>
+                    </ul>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
 					<h4>Your Progress</h4>

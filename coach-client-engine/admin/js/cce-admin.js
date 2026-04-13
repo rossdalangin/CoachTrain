@@ -21,6 +21,22 @@ jQuery(document).ready(function($) {
         $.ajax(ajaxSettings);
     }
 
+    // CRM: Manage Stages
+    $('.cce-manage-stages-btn').on('click', function() {
+        $('#cce-manage-stages-modal').show();
+    });
+
+    $('#cce-add-stage-form').on('submit', function(e) {
+        e.preventDefault();
+        const name = $('#new-stage-name').val();
+        cceApi('crm/stages', 'POST', { name: name }, () => location.reload());
+    });
+
+    $('.cce-delete-stage').on('click', function() {
+        if(!confirm('Delete stage? leads in this stage will be orphaned.')) return;
+        cceApi('crm/stages/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+    });
+
     // CRM: Tabs
     $('.cce-tab-link').on('click', function() {
         $('.cce-tab-link').removeClass('active').css('border-bottom', 'none');
@@ -29,7 +45,7 @@ jQuery(document).ready(function($) {
         $('#cce-tab-' + $(this).data('tab')).show();
     });
 
-    // CRM: View Details (Notes/Tasks/Contact)
+    // CRM: View Details (Notes/Tasks/Contact/Stats)
     $(document).on('click', '.cce-view-notes, .cce-view-tasks, .cce-contact-btn', function(e) {
         e.preventDefault();
         const leadId = $(this).data('lead-id');
@@ -45,8 +61,29 @@ jQuery(document).ready(function($) {
 
         loadNotes(leadId);
         loadTasks(leadId);
+        loadStats(leadId);
         $('#cce-contact-status').html('');
     });
+
+    function loadStats(leadId) {
+        cceApi('crm/leads/' + leadId + '/stats', 'GET', {}, function(res) {
+            if (res.success) {
+                const s = res.data;
+                let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="cce-card" style="border-top:2px solid #0073aa; padding:15px;">
+                        <small>TOTAL PAID</small><div style="font-size:20px; font-weight:bold;">$${s.total_paid.toFixed(2)}</div>
+                    </div>
+                    <div class="cce-card" style="border-top:2px solid #ffb700; padding:15px;">
+                        <small>APPOINTMENTS</small><div style="font-size:20px; font-weight:bold;">${s.appointments}</div>
+                    </div>
+                    <div class="cce-card" style="border-top:2px solid #00a32a; padding:15px;">
+                        <small>TASKS DONE</small><div style="font-size:20px; font-weight:bold;">${s.tasks_done}/${s.tasks_total}</div>
+                    </div>
+                </div>`;
+                $('#cce-lead-stats-content').html(html);
+            }
+        });
+    }
 
     function loadNotes(leadId) {
         cceApi('crm/leads/' + leadId + '/activities', 'GET', {}, function(res) {
@@ -93,7 +130,7 @@ jQuery(document).ready(function($) {
         const taskId = $(this).data('task-id');
         const status = $(this).is(':checked') ? 'completed' : 'pending';
         cceApi('crm/leads/' + leadId + '/tasks/' + taskId, 'POST', { status: status }, function(res) {
-            // Success
+            loadStats(leadId);
         });
     });
 
@@ -106,6 +143,7 @@ jQuery(document).ready(function($) {
             if (res.success) {
                 $('#cce-new-task-title').val('');
                 loadTasks(leadId);
+                loadStats(leadId);
             }
         });
     });
@@ -143,7 +181,7 @@ jQuery(document).ready(function($) {
 
     // Modals: Close
     $(document).on('click', '.cce-modal-close', function() {
-        $('#cce-leads-modal, #cce-edit-lead-modal, #cce-edit-offer-modal, #cce-add-step-modal').hide();
+        $('#cce-leads-modal, #cce-edit-lead-modal, #cce-edit-offer-modal, #cce-add-step-modal, #cce-step-config-modal, #cce-manage-stages-modal, #cce-questionnaire-modal').hide();
     });
 
     // CRM: Stage Update
@@ -178,6 +216,21 @@ jQuery(document).ready(function($) {
     $('.cce-delete-offer').on('click', function() {
         if(!confirm('Delete offer?')) return;
         cceApi('offers/' + $(this).data('offer-id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('.cce-delete-resource').on('click', function() {
+        if(!confirm('Delete resource?')) return;
+        cceApi('portal/resources/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('.cce-delete-testimonial').on('click', function() {
+        if(!confirm('Delete testimonial?')) return;
+        cceApi('proof/testimonials/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('.cce-delete-template').on('click', function() {
+        if(!confirm('Delete template?')) return;
+        cceApi('automation/rules/' + $(this).data('id'), 'DELETE', {}, () => location.reload()); // Assuming logic is similar
     });
 
     $('.cce-edit-lead').on('click', function() {
@@ -247,7 +300,7 @@ jQuery(document).ready(function($) {
         cceApi('bookings/' + $(this).data('booking-id'), 'DELETE', {}, () => location.reload());
     });
 
-    // Funnels: View Steps (enhanced for reordering)
+    // Funnels: View Steps
     $('.cce-view-steps').on('click', function(e) {
         e.preventDefault();
         const funnelId = $(this).data('funnel-id');
@@ -268,9 +321,12 @@ jQuery(document).ready(function($) {
             if (res.success && res.data.length > 0) {
                 let html = '<ul style="list-style:none; padding:0;">';
                 res.data.forEach((step, index) => {
+                    const configStr = JSON.stringify(step.config);
+                    const visits = step.visits || 0;
                     html += `<li style="background:#fff; padding:10px; margin-bottom:5px; border:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
-                        <span><strong>${step.title}</strong> (${step.step_type})</span>
+                        <span><strong>${step.title}</strong> (${step.step_type}) - <small>${visits} visits</small></span>
                         <div>
+                            <button class="button button-small cce-step-config" data-funnel-id="${funnelId}" data-idx="${index}" data-type="${step.step_type}" data-config='${configStr}'>⚙</button>
                             <button class="button button-small cce-step-move" data-funnel-id="${funnelId}" data-idx="${index}" data-dir="up" ${index===0?'disabled':''}>↑</button>
                             <button class="button button-small cce-step-move" data-funnel-id="${funnelId}" data-idx="${index}" data-dir="down" ${index===res.data.length-1?'disabled':''}>↓</button>
                             <button class="button button-small cce-step-remove" data-funnel-id="${funnelId}" data-idx="${index}" style="color:#d63638;">×</button>
@@ -292,7 +348,7 @@ jQuery(document).ready(function($) {
         const isRemove = $(this).hasClass('cce-step-remove');
 
         cceApi('funnels/' + funnelId + '/steps', 'GET', {}, function(res) {
-            let steps = res.data.map(s => ({ title: s.title, type: s.step_type }));
+            let steps = res.data.map(s => ({ title: s.title, type: s.step_type, config: s.config }));
 
             if (isRemove) {
                 steps.splice(idx, 1);
@@ -305,5 +361,58 @@ jQuery(document).ready(function($) {
                 loadFunnelSteps(funnelId, $('.steps-container-' + funnelId));
             });
         });
+    });
+
+    $(document).on('click', '.cce-step-config', function() {
+        const funnelId = $(this).data('funnel-id');
+        const idx = $(this).data('idx');
+        const type = $(this).data('type');
+        const config = $(this).data('config');
+
+        $('#config-funnel-id').val(funnelId);
+        $('#config-step-idx').val(idx);
+        $('#config-offer-selector').toggle(type === 'checkout');
+        $('#config-thankyou-selector').toggle(type === 'thank_you');
+
+        if (type === 'checkout') {
+            $('#config-offer-id').val(config.offer_id || '');
+        }
+        if (type === 'thank_you') {
+            $('#config-success-message').val(config.success_message || '');
+            $('#config-redirect-url').val(config.redirect_url || '');
+        }
+
+        $('#cce-step-config-modal').show();
+    });
+
+    $('#cce-step-config-form').on('submit', function(e) {
+        e.preventDefault();
+        const funnelId = $('#config-funnel-id').val();
+        const idx = parseInt($('#config-step-idx').val());
+        const offerId = $('#config-offer-id').val();
+        const successMessage = $('#config-success-message').val();
+        const redirectUrl = $('#config-redirect-url').val();
+
+        cceApi('funnels/' + funnelId + '/steps', 'GET', {}, function(res) {
+            let steps = res.data.map(s => ({ title: s.title, type: s.step_type, config: s.config }));
+            steps[idx].config = {
+                offer_id: offerId,
+                success_message: successMessage,
+                redirect_url: redirectUrl
+            };
+
+            cceApi('funnels/' + funnelId + '/steps', 'POST', JSON.stringify({ steps: steps }), function() {
+                $('#cce-step-config-modal').hide();
+                loadFunnelSteps(funnelId, $('.steps-container-' + funnelId));
+            });
+        });
+    });
+
+    // Automation UI Tabs logic...
+    $('.cce-automation-tab-link').on('click', function() {
+        $('.cce-automation-tab-link').removeClass('active').css('border-bottom', 'none');
+        $(this).addClass('active').css('border-bottom', '2px solid #0073aa');
+        $('.cce-automation-tab-content').hide();
+        $('#tab-' + $(this).data('tab')).show();
     });
 });

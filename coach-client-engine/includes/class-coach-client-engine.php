@@ -83,6 +83,17 @@ class Coach_Client_Engine {
     public function enqueue_public_assets() {
         $url = plugin_dir_url( dirname( __FILE__ ) );
         wp_enqueue_style( 'cce-public-css', $url . 'public/css/cce-public.css', array(), CCE_VERSION );
+
+        $primary_color = get_option( 'cce_primary_color', '#0073aa' );
+        $custom_css = "
+            :root { --cce-primary: {$primary_color}; }
+            .cce-lead-form-wrapper button, .cce-booking-form-wrapper button, .cce-checkout-wrapper button, .button-primary {
+                background-color: var(--cce-primary) !important;
+            }
+            .cce-testimonial-card::before { color: var(--cce-primary) !important; }
+        ";
+        wp_add_inline_style( 'cce-public-css', $custom_css );
+
         wp_enqueue_script( 'cce-public-js', $url . 'public/js/cce-public.js', array(), CCE_VERSION, true );
     }
 

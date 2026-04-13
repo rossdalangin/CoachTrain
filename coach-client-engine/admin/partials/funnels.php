@@ -5,6 +5,7 @@
     <?php
     global $wpdb;
     $funnels = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_funnels" );
+    $offers = $wpdb->get_results( "SELECT id, title FROM {$wpdb->prefix}cce_offers WHERE is_active = 1" );
     ?>
 
     <div class="cce-card">
@@ -85,6 +86,35 @@
                     </select>
                 </p>
                 <button type="submit" class="button button-primary">Add Step</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Step Config Modal -->
+    <div id="cce-step-config-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Configure Step</h2>
+            <form id="cce-step-config-form">
+                <input type="hidden" id="config-funnel-id">
+                <input type="hidden" id="config-step-idx">
+
+                <div id="config-offer-selector" style="display:none;">
+                    <p><label>Link to Offer</label><br>
+                    <select id="config-offer-id" class="widefat">
+                        <option value="">Select Offer...</option>
+                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                    </select></p>
+                </div>
+
+                <div id="config-thankyou-selector" style="display:none;">
+                    <p><label>Custom Success Message</label><br>
+                    <textarea id="config-success-message" class="widefat" rows="3"></textarea></p>
+                    <p><label>OR Redirect URL</label><br>
+                    <input type="url" id="config-redirect-url" class="widefat" placeholder="https://..."></p>
+                </div>
+
+                <button type="submit" class="button button-primary">Save Config</button>
             </form>
         </div>
     </div>

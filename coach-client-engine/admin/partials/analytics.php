@@ -34,6 +34,22 @@
         </div>
     </div>
 
+    <div class="cce-card" style="margin-bottom:20px;">
+        <h3>Funnel Performance (Leads)</h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr><th>Funnel / Source</th><th>Total Leads</th></tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($summary['funnel_stats'])): foreach($summary['funnel_stats'] as $fs): ?>
+                    <tr><td><strong><?php echo esc_html($fs->funnel_name); ?></strong></td><td><?php echo (int) $fs->lead_count; ?></td></tr>
+                <?php endforeach; else: ?>
+                    <tr><td colspan="2">No funnel data yet.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
     <div class="cce-card" style="border-left:4px solid #0073aa;">
         <h3>💎 Strategy Insights</h3>
         <p>Your path to scaling to $10k/month:</p>

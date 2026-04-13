@@ -20,7 +20,25 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/proof/testimonials/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_testimonial' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Delete testimonial.
+     */
+    public function delete_testimonial( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_testimonials", array( 'id' => $id ) );
+        return $this->success( array( 'message' => 'Testimonial deleted' ) );
+    }
 
 	/**
 	 * Get testimonials.

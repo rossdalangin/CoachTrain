@@ -38,6 +38,19 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/automation/templates', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_templates' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
 
     /**
@@ -73,6 +86,31 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         global $wpdb;
         $wpdb->delete( "{$wpdb->prefix}cce_automation_rules", array( 'id' => absint( $request['id'] ) ) );
         return $this->success( array( 'message' => 'Rule deleted' ) );
+    }
+
+    /**
+     * Get email templates.
+     */
+    public function get_templates( $request ) {
+        global $wpdb;
+        $templates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC" );
+        return $this->success( $templates );
+    }
+
+    /**
+     * Create email template.
+     */
+    public function create_template( $request ) {
+        global $wpdb;
+        $params = $request->get_params();
+
+        $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
+            'name'    => sanitize_text_field( $params['name'] ),
+            'subject' => sanitize_text_field( $params['subject'] ),
+            'content' => wp_kses_post( $params['content'] ),
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
     }
 
 	/**
@@ -114,15 +152,27 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         } elseif ( 'cce_booking_confirmed' === $hook ) {
             $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $source_id ) );
         } elseif ( 'cce_payment_completed' === $hook ) {
-            $lead_id = $source_id; // Payment completed action already passes lead_id
+            $lead_id = $source_id;
         }
 
         if ( ! $lead_id ) return;
 
         switch ( $rule->action_type ) {
             case 'send_email':
-                $mailer = new CCE_Mailer();
-                $mailer->send_welcome_email( $lead_id );
+                $template_id = absint( $config['template_id'] ?? 0 );
+                if ( $template_id ) {
+                    $template = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE id = %d", $template_id ) );
+                    $lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+
+                    if ( $template && $lead ) {
+                        $content = str_replace( '{{first_name}}', $lead->first_name, $template->content );
+                        $mailer = new CCE_Mailer();
+                        $mailer->send( $lead->email, $template->subject, $content );
+                    }
+                } else {
+                    $mailer = new CCE_Mailer();
+                    $mailer->send_welcome_email( $lead_id );
+                }
                 break;
             case 'move_stage':
                 $stage_id = absint( $config['stage_id'] ?? 0 );

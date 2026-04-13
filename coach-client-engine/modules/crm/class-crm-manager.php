@@ -14,6 +14,19 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'get_stages' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_stage' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/crm/stages/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_stage' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 
         register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/tasks/(?P<task_id>\d+)', array(
@@ -76,7 +89,35 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/stats', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_lead_stats' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Get financial and engagement stats for a lead.
+     */
+    public function get_lead_stats( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+
+        $total_paid = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
+        $appointments = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d", $lead_id ) );
+        $tasks_total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d", $lead_id ) );
+        $tasks_done = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
+
+        return $this->success( array(
+            'total_paid'   => (float) ($total_paid ?: 0),
+            'appointments' => (int) $appointments,
+            'tasks_done'   => (int) $tasks_done,
+            'tasks_total'  => (int) $tasks_total,
+        ) );
+    }
 
     /**
      * Get activities for a lead.
@@ -181,6 +222,32 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         CCE_Activity_Logger::log( $lead_id, 'note', $note );
 
         return $this->success( array( 'message' => 'Note added' ) );
+    }
+
+    /**
+     * Create CRM stage.
+     */
+    public function create_stage( $request ) {
+        global $wpdb;
+        $name = sanitize_text_field( $request->get_param( 'name' ) );
+        $order = (int) $wpdb->get_var( "SELECT MAX(stage_order) FROM {$wpdb->prefix}cce_crm_stages" ) + 1;
+
+        $wpdb->insert( "{$wpdb->prefix}cce_crm_stages", array(
+            'name' => $name,
+            'stage_order' => $order
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Delete CRM stage.
+     */
+    public function delete_stage( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_crm_stages", array( 'id' => $id ) );
+        return $this->success( array( 'message' => 'Stage deleted' ) );
     }
 
 	/**

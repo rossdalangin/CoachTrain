@@ -119,6 +119,10 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		$table_name = $wpdb->prefix . 'cce_leads';
 
 		$params = $request->get_params();
+        $source = $_COOKIE['cce_funnel_source'] ?? 'Direct';
+        if ( is_numeric( $source ) ) {
+            $source = $wpdb->get_var( $wpdb->prepare( "SELECT title FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $source ) ) ?: 'Direct';
+        }
 
         $token = bin2hex( random_bytes( 32 ) );
 		$data = array(
@@ -127,6 +131,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 			'email'        => sanitize_email( $params['email'] ),
 			'phone'        => sanitize_text_field( $params['phone'] ),
             'secure_token' => $token,
+            'source'       => $source,
 			'status'       => 'cold',
             'crm_stage_id' => 1, // Default to 'New' stage
 		);

@@ -6,8 +6,12 @@
         $analytics = new CCE_Analytics_Manager();
         $summary_res = $analytics->get_summary( new WP_REST_Request() );
         $summary = is_wp_error($summary_res) ? [] : $summary_res->get_data()['data'];
+
+        $activity_res = $analytics->get_recent_activity( new WP_REST_Request() );
+        $activities = is_wp_error($activity_res) ? [] : $activity_res->get_data()['data'];
     } else {
         $summary = [];
+        $activities = [];
     }
     ?>
 
@@ -27,24 +31,59 @@
         </div>
     </div>
 
-    <div class="cce-card strategy-insights" style="margin-bottom:40px; border-left: 4px solid #0073aa;">
-        <h3>💎 Master Architect Strategy Insights</h3>
-        <p>Based on your current data, here is your path to 3–5 clients this month:</p>
-        <ul style="list-style:disc; padding-left:20px;">
-            <li><strong>Lead Velocity:</strong> Captured <?php echo (int) $summary['leads_today']; ?> leads today. Increase this to 10+ to guarantee scale.</li>
-            <li><strong>Conversion Ratio:</strong> Your lead-to-client conversion is <strong><?php echo $summary['lead_to_client']; ?>%</strong>.</li>
-            <?php if ($summary['lead_to_client'] < 3): ?>
-                <li style="color:#d63638;"><strong>Action Required:</strong> Your conversion is below 3%. Review your Offer Builder and Questionnaire.</li>
-            <?php else: ?>
-                <li style="color:#00a32a;"><strong>Performing Well:</strong> Your funnel is converting efficiently. Scale traffic.</li>
-            <?php endif; ?>
-        </ul>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="cce-card strategy-insights" style="border-left: 4px solid #0073aa;">
+            <h3>💎 Master Architect Strategy Insights</h3>
+            <p>Based on your current data, here is your path to 3–5 clients this month:</p>
+            <ul style="list-style:disc; padding-left:20px;">
+                <li><strong>Lead Velocity:</strong> Captured <?php echo (int) $summary['leads_today']; ?> leads today. Increase this to 10+ to guarantee scale.</li>
+                <li><strong>Conversion Ratio:</strong> Your lead-to-client conversion is <strong><?php echo $summary['lead_to_client']; ?>%</strong>.</li>
+                <?php if ($summary['lead_to_client'] < 3): ?>
+                    <li style="color:#d63638;"><strong>Action Required:</strong> Your conversion is below 3%. Review your Offer Builder.</li>
+                <?php else: ?>
+                    <li style="color:#00a32a;"><strong>Performing Well:</strong> Your funnel is converting efficiently. Scale traffic.</li>
+                <?php endif; ?>
+            </ul>
+        </div>
+
+        <div class="cce-card" style="border-left: 4px solid #ffb700;">
+            <h3>⚡ Recent Activity</h3>
+            <div style="max-height:200px; overflow-y:auto;">
+                <?php if ($activities): ?>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        <?php foreach($activities as $a): ?>
+                            <li style="font-size:12px; padding:8px 0; border-bottom:1px solid #eee;">
+                                <strong><?php echo esc_html($a['lead_name'] ?: 'System'); ?>:</strong> <?php echo esc_html($a['description']); ?>
+                                <br><small style="color:#888;"><?php echo esc_html($a['created_at']); ?></small>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No activity yet.</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
     <?php else: ?>
         <div class="notice notice-warning"><p>No analytics data available. Start capturing leads to see insights!</p></div>
     <?php endif; ?>
 
-    <div class="cce-quick-actions">
+    <div class="cce-card" style="margin-top:20px; border-top: 4px solid #673ab7;">
+        <h3>📊 Conversion Pipeline</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; position:relative; padding:20px 0;">
+            <?php foreach($summary['pipeline'] as $idx => $p): ?>
+                <div style="text-align:center; flex:1; position:relative; z-index:2;">
+                    <div style="font-weight:bold; color:#673ab7; font-size:18px;"><?php echo $p['value']; ?></div>
+                    <div style="font-size:11px; color:#666; text-transform:uppercase;"><?php echo $p['label']; ?></div>
+                </div>
+                <?php if($idx < count($summary['pipeline'])-1): ?>
+                    <div style="flex:0.5; height:2px; background:#e0e0e0; margin-top:-15px;"></div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <div class="cce-quick-actions" style="margin-top:20px;">
         <h2>Quick Actions</h2>
         <a href="?page=cce-funnels" class="button button-primary button-hero">Create Funnel</a>
         <a href="?page=cce-clients" class="button button-hero">Add Offer</a>

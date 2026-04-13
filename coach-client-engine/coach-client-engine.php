@@ -53,4 +53,14 @@ function deactivate_coach_client_engine() {
 register_activation_hook( __FILE__, 'activate_coach_client_engine' );
 register_deactivation_hook( __FILE__, 'deactivate_coach_client_engine' );
 
+/**
+ * Add action links to plugins page.
+ */
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), function( $links ) {
+    $settings_link = '<a href="' . admin_url( 'admin.php?page=cce-settings' ) . '">Settings</a>';
+    $dashboard_link = '<a href="' . admin_url( 'admin.php?page=coach-client-engine' ) . '">Dashboard</a>';
+    array_unshift( $links, $settings_link, $dashboard_link );
+    return $links;
+} );
+
 run_coach_client_engine();

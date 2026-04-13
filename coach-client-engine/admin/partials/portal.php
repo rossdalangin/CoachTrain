@@ -2,9 +2,42 @@
     <h1>Client Portal Management</h1>
     <hr class="wp-header-end">
 
+    <div class="cce-card" style="margin-bottom:20px;">
+        <h3>Add New Resource</h3>
+        <form id="cce-add-resource-form">
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div style="flex:1;">
+                    <label>Title</label><br>
+                    <input type="text" name="title" class="widefat" required>
+                </div>
+                <div style="width:150px;">
+                    <label>Type</label><br>
+                    <select name="type" class="widefat">
+                        <option value="PDF">PDF Document</option>
+                        <option value="Video">Video Link</option>
+                        <option value="Link">External Link</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label>URL</label><br>
+                    <input type="url" name="url" class="widefat" placeholder="https://..." required>
+                </div>
+                <div style="width:150px;">
+                    <label>Visibility</label><br>
+                    <select name="visibility" class="widefat">
+                        <option value="public">Public</option>
+                        <option value="clients_only">Active Clients Only</option>
+                    </select>
+                </div>
+                <div style="align-self:flex-end;">
+                    <button type="submit" class="button button-primary">Save Resource</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="cce-card">
         <h3>Portal Resources</h3>
-        <p>Manage the files and videos shared with your clients.</p>
         <table class="wp-list-table widefat fixed striped">
             <thead>
                 <tr>
@@ -14,21 +47,52 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="cce-resources-list">
+                <?php
+                global $wpdb;
+                $resources = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_resources ORDER BY created_at DESC" );
+                if ($resources): foreach ($resources as $r): ?>
                 <tr>
-                    <td><strong>Client Welcome Pack</strong></td>
-                    <td>PDF</td>
-                    <td>Public</td>
-                    <td><button class="button">Edit</button></td>
+                    <td><strong><?php echo esc_html($r->title); ?></strong></td>
+                    <td><?php echo esc_html($r->type); ?></td>
+                    <td><?php echo $r->visibility === 'public' ? 'Public' : 'Clients Only'; ?></td>
+                    <td>
+                        <button class="button button-link-delete cce-delete-resource" data-id="<?php echo $r->id; ?>" style="color:#d63638;">Delete</button>
+                    </td>
                 </tr>
-                <tr>
-                    <td><strong>High-Ticket Sales Training</strong></td>
-                    <td>Video</td>
-                    <td>Active Clients Only</td>
-                    <td><button class="button">Edit</button></td>
-                </tr>
+                <?php endforeach; else: ?>
+                <tr><td colspan="4">No resources found. Add your first one above!</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
-        <button class="button button-primary" style="margin-top:20px;">Upload New Resource</button>
     </div>
+
+    <script>
+    jQuery(document).ready(function($) {
+        $('#cce-add-resource-form').on('submit', function(e) {
+            e.preventDefault();
+            const data = {};
+            $(this).serializeArray().forEach(item => data[item.name] = item.value);
+
+            $.ajax({
+                url: cceAdmin.restUrl + 'portal/resources',
+                method: 'POST',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function() { location.reload(); }
+            });
+        });
+
+        $(document).on('click', '.cce-delete-resource', function() {
+            if(!confirm('Delete this resource?')) return;
+            $.ajax({
+                url: cceAdmin.restUrl + 'portal/resources/' + $(this).data('id'),
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function() { location.reload(); }
+            });
+        });
+    });
+    </script>
 </div>

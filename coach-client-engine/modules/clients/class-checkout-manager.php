@@ -15,7 +15,38 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 				'permission_callback' => '__return_true', // Public endpoint
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/payments', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_manual_payment' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Create manual payment.
+     */
+    public function create_manual_payment( $request ) {
+        global $wpdb;
+        $params = $request->get_params();
+
+        $wpdb->insert( "{$wpdb->prefix}cce_payments", array(
+            'lead_id'        => absint( $params['lead_id'] ),
+            'offer_id'       => absint( $params['offer_id'] ),
+            'transaction_id' => 'MANUAL_' . time(),
+            'gateway'        => 'manual',
+            'amount'         => (float) $params['amount'],
+            'status'         => 'completed',
+        ) );
+
+        $lead_id = absint( $params['lead_id'] );
+        do_action( 'cce_payment_completed', $lead_id );
+        CCE_Activity_Logger::log( $lead_id, 'payment', 'Manual payment recorded by admin: $' . $params['amount'] );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
 
 	/**
 	 * Process payment (Create Intent).

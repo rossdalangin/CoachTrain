@@ -9,6 +9,8 @@ class CCE_Post_Handler {
         add_action( 'admin_post_cce_save_lead', array( $this, 'save_lead' ) );
         add_action( 'admin_post_cce_save_booking', array( $this, 'save_booking' ) );
         add_action( 'admin_post_cce_export_leads', array( $this, 'export_leads' ) );
+        add_action( 'admin_post_cce_export_bookings', array( $this, 'export_bookings' ) );
+        add_action( 'admin_post_cce_export_payments', array( $this, 'export_payments' ) );
 	}
 
 	/**
@@ -89,19 +91,38 @@ class CCE_Post_Handler {
      */
     public function export_leads() {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
-
         global $wpdb;
-        $leads = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_leads", ARRAY_A );
+        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_leads", ARRAY_A ), 'leads' );
+    }
 
+    /**
+     * Export bookings to CSV.
+     */
+    public function export_bookings() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        global $wpdb;
+        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_bookings", ARRAY_A ), 'bookings' );
+    }
+
+    /**
+     * Export payments to CSV.
+     */
+    public function export_payments() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        global $wpdb;
+        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_payments", ARRAY_A ), 'payments' );
+    }
+
+    /**
+     * Generic CSV exporter.
+     */
+    private function export_csv( $data, $name ) {
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="leads-' . date('Y-m-d') . '.csv"');
-
+        header('Content-Disposition: attachment; filename="' . $name . '-' . date('Y-m-d') . '.csv"');
         $output = fopen('php://output', 'w');
-        if ( ! empty( $leads ) ) {
-            fputcsv($output, array_keys($leads[0]));
-            foreach ($leads as $lead) {
-                fputcsv($output, $lead);
-            }
+        if ( ! empty( $data ) ) {
+            fputcsv($output, array_keys($data[0]));
+            foreach ($data as $row) fputcsv($output, $row);
         }
         fclose($output);
         exit;

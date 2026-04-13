@@ -2,6 +2,10 @@
     <h1>CRM & Pipeline</h1>
     <hr class="wp-header-end">
 
+    <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+        <button class="button cce-manage-stages-btn">Manage Stages</button>
+    </div>
+
     <?php
     global $wpdb;
     $stages = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC" );
@@ -56,7 +60,7 @@
         <?php endforeach; ?>
     </div>
 
-    <!-- Leads Modal (Shared for Notes, Tasks, Contact) -->
+    <!-- Leads Modal (Shared) -->
     <div id="cce-leads-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
         <div style="background:#fff; margin:5% auto; padding:25px; width:500px; border-radius:12px; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
             <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px; color:#888;">&times;</span>
@@ -66,6 +70,7 @@
                 <button class="cce-tab-link active" data-tab="notes" style="background:none; border:none; padding:10px 15px; cursor:pointer; border-bottom:2px solid #0073aa;">Activity</button>
                 <button class="cce-tab-link" data-tab="tasks" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Tasks</button>
                 <button class="cce-tab-link" data-tab="contact" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Contact</button>
+                <button class="cce-tab-link" data-tab="stats" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Stats</button>
             </div>
 
             <div id="cce-tab-notes" class="cce-tab-content">
@@ -101,6 +106,30 @@
                 </form>
                 <div id="cce-contact-status" style="margin-top:10px;"></div>
             </div>
+
+            <div id="cce-tab-stats" class="cce-tab-content" style="display:none;">
+                <div id="cce-lead-stats-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Stages Modal -->
+    <div id="cce-manage-stages-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Manage CRM Stages</h2>
+            <ul style="list-style:none; padding:0;">
+                <?php foreach($stages as $s): ?>
+                    <li style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                        <span><?php echo esc_html($s->name); ?></span>
+                        <button class="button button-small cce-delete-stage" data-id="<?php echo $s->id; ?>" style="color:#d63638;">×</button>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <form id="cce-add-stage-form" style="margin-top:20px;">
+                <input type="text" id="new-stage-name" placeholder="New Stage Name" class="widefat" required>
+                <button type="submit" class="button button-primary" style="margin-top:10px;">Add Stage</button>
+            </form>
         </div>
     </div>
 </div>

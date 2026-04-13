@@ -30,7 +30,8 @@
             if ( $testimonials ):
                 foreach ( $testimonials as $t ):
                 ?>
-                <div class="cce-card" style="border-top:none; background:#f9f9f9;">
+                <div class="cce-card" style="border-top:none; background:#f9f9f9; position:relative;">
+                    <button class="button button-link-delete cce-delete-testimonial" data-id="<?php echo $t->id; ?>" style="position:absolute; right:10px; top:10px; color:#d63638;">×</button>
                     <p>"<?php echo esc_html( $t->content ); ?>"</p>
                     <strong>- <?php echo esc_html( $t->client_name ); ?></strong>
                     <div style="color:#ffb700; margin-top:5px;">

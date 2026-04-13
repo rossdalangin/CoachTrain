@@ -98,6 +98,13 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 ['title' => 'Schedule Call', 'type' => 'booking'],
                 ['title' => 'Confirmation', 'type' => 'thank_you']
             ];
+        } elseif ( 'webinar' === $template_id ) {
+            $steps = [
+                ['title' => 'Registration', 'type' => 'optin'],
+                ['title' => 'Watch Workshop', 'type' => 'thank_you'],
+                ['title' => 'Book Strategy Session', 'type' => 'booking'],
+                ['title' => 'Enroll', 'type' => 'checkout']
+            ];
         }
 
         if ( ! empty( $steps ) ) {

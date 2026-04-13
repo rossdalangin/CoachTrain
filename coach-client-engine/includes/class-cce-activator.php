@@ -73,6 +73,7 @@ class CCE_Activator {
 				step_order int,
 				step_type varchar(50),
 				config longtext,
+				visits bigint(20) DEFAULT 0,
 				PRIMARY KEY  (id)
 			) $charset_collate;",
 
@@ -132,6 +133,25 @@ class CCE_Activator {
 				action_type varchar(100),
 				config longtext,
 				is_active tinyint(1) DEFAULT 1,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_email_templates (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				name varchar(255),
+				subject varchar(255),
+				content longtext,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_resources (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				title varchar(255),
+				type varchar(50),
+				url varchar(255),
+				visibility varchar(50) DEFAULT 'public',
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
 			) $charset_collate;"

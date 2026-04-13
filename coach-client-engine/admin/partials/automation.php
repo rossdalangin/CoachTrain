@@ -2,69 +2,121 @@
     <h1>Automation & Workflows</h1>
     <hr class="wp-header-end">
 
-    <div class="cce-card" style="margin-bottom:20px;">
-        <h3>Create New Automation Rule</h3>
-        <form id="cce-add-automation-form">
-            <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                <div>
-                    <label>When this happens...</label><br>
-                    <select name="trigger_event" required>
-                        <option value="cce_lead_created">New Lead Captured</option>
-                        <option value="cce_booking_confirmed">Consultation Booked</option>
-                        <option value="cce_payment_completed">Payment Received</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Do this...</label><br>
-                    <select name="action_type" required>
-                        <option value="send_email">Send Welcome/Guide Email</option>
-                        <option value="move_stage">Move to CRM Stage</option>
-                    </select>
-                </div>
-                <div id="action-config-stage" style="display:none;">
-                    <label>Target Stage</label><br>
-                    <select name="config[stage_id]">
-                        <?php
-                        global $wpdb;
-                        $stages = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_crm_stages");
-                        foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>";
-                        ?>
-                    </select>
-                </div>
-                <div style="align-self: flex-end;">
-                    <button type="submit" class="button button-primary">Create Rule</button>
-                </div>
-            </div>
-        </form>
+    <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
+        <button class="cce-automation-tab-link active" data-tab="rules" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Automation Rules</button>
+        <button class="cce-automation-tab-link" data-tab="templates" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Email Templates</button>
     </div>
 
-    <div class="cce-card">
-        <h3>Active Automation Rules</h3>
-        <table class="wp-list-table widefat fixed striped">
-            <thead>
-                <tr>
-                    <th>Trigger</th>
-                    <th>Action</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="cce-rules-list">
-                <?php
-                $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
-                if ($rules): foreach ($rules as $rule): ?>
-                <tr>
-                    <td><code><?php echo esc_html($rule->trigger_event); ?></code></td>
-                    <td><strong><?php echo esc_html(strtoupper(str_replace('_', ' ', $rule->action_type))); ?></strong></td>
-                    <td><?php echo $rule->is_active ? 'Active' : 'Inactive'; ?></td>
-                    <td>
-                        <button class="button button-link-delete cce-delete-rule" data-rule-id="<?php echo $rule->id; ?>" style="color:#d63638;">Delete</button>
-                    </td>
-                </tr>
-                <?php endforeach; else: ?>
-                <tr><td colspan="4">No automation rules found. Create your first one above!</td></tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    <div id="tab-rules" class="cce-automation-tab-content">
+        <div class="cce-card" style="margin-bottom:20px;">
+            <h3>Create New Automation Rule</h3>
+            <form id="cce-add-automation-form">
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div>
+                        <label>When this happens...</label><br>
+                        <select name="trigger_event" required>
+                            <option value="cce_lead_created">New Lead Captured</option>
+                            <option value="cce_booking_confirmed">Consultation Booked</option>
+                            <option value="cce_payment_completed">Payment Received</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Do this...</label><br>
+                        <select name="action_type" id="rule-action-type" required>
+                            <option value="send_email">Send Email</option>
+                            <option value="move_stage">Move to CRM Stage</option>
+                        </select>
+                    </div>
+                    <div id="action-config-stage" style="display:none;">
+                        <label>Target Stage</label><br>
+                        <select name="config[stage_id]">
+                            <?php
+                            global $wpdb;
+                            $stages = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_crm_stages");
+                            foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>";
+                            ?>
+                        </select>
+                    </div>
+                    <div id="action-config-email" style="display:block;">
+                        <label>Select Template</label><br>
+                        <select name="config[template_id]">
+                            <option value="">Default Welcome Email</option>
+                            <?php
+                            $templates = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_email_templates");
+                            foreach($templates as $t) echo "<option value='{$t->id}'>{$t->name}</option>";
+                            ?>
+                        </select>
+                    </div>
+                    <div style="align-self: flex-end;">
+                        <button type="submit" class="button button-primary">Create Rule</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="cce-card">
+            <h3>Active Automation Rules</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Trigger</th>
+                        <th>Action</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="cce-rules-list">
+                    <?php
+                    $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
+                    if ($rules): foreach ($rules as $rule): ?>
+                    <tr>
+                        <td><code><?php echo esc_html($rule->trigger_event); ?></code></td>
+                        <td><strong><?php echo esc_html(strtoupper(str_replace('_', ' ', $rule->action_type))); ?></strong></td>
+                        <td><?php echo $rule->is_active ? 'Active' : 'Inactive'; ?></td>
+                        <td>
+                            <button class="button button-link-delete cce-delete-rule" data-rule-id="<?php echo $rule->id; ?>" style="color:#d63638;">Delete</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; else: ?>
+                    <tr><td colspan="4">No automation rules found.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-templates" class="cce-automation-tab-content" style="display:none;">
+        <div class="cce-card" style="margin-bottom:20px;">
+            <h3>Create Email Template</h3>
+            <form id="cce-add-template-form">
+                <p><label>Template Name</label><br><input type="text" name="name" class="regular-text" required></p>
+                <p><label>Email Subject</label><br><input type="text" name="subject" class="large-text" required></p>
+                <p><label>Email Content</label><br>
+                <small>Use <code>{{first_name}}</code> for personalization.</small><br>
+                <textarea name="content" rows="10" style="width:100%; border-radius:8px;" required></textarea></p>
+                <button type="submit" class="button button-primary">Save Template</button>
+            </form>
+        </div>
+
+        <div class="cce-card">
+            <h3>Saved Templates</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr><th>Name</th><th>Subject</th><th>Created At</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $templates = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC");
+                    foreach($templates as $t) echo "<tr>
+                        <td><strong>{$t->name}</strong></td>
+                        <td>{$t->subject}</td>
+                        <td>{$t->created_at}</td>
+                        <td><button class='button button-link-delete cce-delete-template' data-id='{$t->id}' style='color:#d63638;'>Delete</button></td>
+                    </tr>";
+                    if(!$templates) echo "<tr><td colspan='4'>No templates yet.</td></tr>";
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
