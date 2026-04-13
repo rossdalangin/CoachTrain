@@ -42,6 +42,7 @@ class Coach_Client_Engine {
         require_once $path . 'modules/funnels/class-funnels-manager.php';
         require_once $path . 'modules/analytics/class-analytics-manager.php';
         require_once $path . 'modules/portal/class-portal-manager.php';
+        require_once $path . 'modules/portal/class-onboarding-manager.php';
         require_once $path . 'modules/proof/class-proof-manager.php';
         require_once $path . 'modules/automation/class-automation-manager.php';
 	}
@@ -212,6 +213,9 @@ class Coach_Client_Engine {
 
         $portal_manager = new CCE_Portal_Manager();
         $portal_manager->register_routes();
+
+        $onboarding_manager = new CCE_Onboarding_Manager();
+        $onboarding_manager->register_routes();
 
         $proof_manager = new CCE_Proof_Manager();
         $proof_manager->register_routes();

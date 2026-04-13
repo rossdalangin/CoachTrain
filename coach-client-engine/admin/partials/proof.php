@@ -3,14 +3,27 @@
     <hr class="wp-header-end">
 
     <div class="cce-card" style="margin-bottom: 20px;">
-        <h3>Add New Testimonial</h3>
+        <h3>Add New Testimonial / Case Study</h3>
         <form id="cce-add-testimonial-form">
-            <div style="margin-bottom:15px;">
-                <label>Client Name</label><br>
-                <input type="text" name="client_name" class="regular-text" required>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
+                <div>
+                    <label>Type</label><br>
+                    <select name="type" id="new-testimonial-type">
+                        <option value="testimonial">Testimonial</option>
+                        <option value="case_study">Case Study</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Title (for Case Studies)</label><br>
+                    <input type="text" name="title" class="regular-text" placeholder="e.g. Scaling to $10k/mo">
+                </div>
+                <div>
+                    <label>Client Name</label><br>
+                    <input type="text" name="client_name" class="regular-text" required>
+                </div>
             </div>
             <div style="margin-bottom:15px;">
-                <label>Testimonial Content</label><br>
+                <label>Content</label><br>
                 <textarea name="content" rows="4" style="width:100%; max-width:500px;" required></textarea>
             </div>
             <div style="margin-bottom:15px;">
@@ -32,6 +45,8 @@
                 ?>
                 <div class="cce-card" id="testimonial-row-<?php echo $t->id; ?>"
                     style="border-top:none; background:#f9f9f9; position:relative;"
+                    data-type="<?php echo esc_attr($t->type); ?>"
+                    data-title="<?php echo esc_attr($t->title); ?>"
                     data-client-name="<?php echo esc_attr($t->client_name); ?>"
                     data-content="<?php echo esc_attr($t->content); ?>"
                     data-rating="<?php echo $t->rating; ?>">
@@ -58,13 +73,20 @@
     <div id="cce-edit-testimonial-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
         <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
             <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
-            <h2>Edit Testimonial</h2>
+            <h2>Edit Social Proof</h2>
             <form id="cce-edit-testimonial-form">
                 <input type="hidden" id="edit-testimonial-id">
+                <p><label>Type</label><br>
+                    <select id="edit-testimonial-type" class="widefat">
+                        <option value="testimonial">Testimonial</option>
+                        <option value="case_study">Case Study</option>
+                    </select>
+                </p>
+                <p><label>Title</label><br><input type="text" id="edit-testimonial-title" class="widefat"></p>
                 <p><label>Client Name</label><br><input type="text" id="edit-testimonial-name" class="widefat" required></p>
                 <p><label>Content</label><br><textarea id="edit-testimonial-content" class="widefat" rows="4" required></textarea></p>
                 <p><label>Rating (1-5)</label><br><input type="number" id="edit-testimonial-rating" min="1" max="5" required></p>
-                <button type="submit" class="button button-primary">Update Testimonial</button>
+                <button type="submit" class="button button-primary">Update Social Proof</button>
             </form>
         </div>
     </div>

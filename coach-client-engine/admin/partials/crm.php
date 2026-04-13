@@ -46,6 +46,14 @@
                                     </select>
                                 </div>
 
+                                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
+                                    <form class="cce-quick-task-form" style="display:flex; gap:5px;">
+                                        <input type="hidden" name="lead_id" value="<?php echo $lead->id; ?>">
+                                        <input type="text" name="title" placeholder="Quick Task..." style="font-size:10px; height:24px; flex:1;" required>
+                                        <button type="submit" class="button button-small" style="height:24px; padding:0 8px; line-height:22px;">+</button>
+                                    </form>
+                                </div>
+
                                 <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
                                     <a href="#" class="button button-small cce-view-notes"
                                     data-lead-id="<?php echo $lead->id; ?>"

@@ -174,7 +174,8 @@ class CCE_Public {
 					<h4>Your Coaching Roadmap</h4>
                     <div id="cce-onboarding-tasks">
                         <?php
-                        $tasks = ['Welcome Training', 'Community Access'];
+                        $tasks_db = $wpdb->get_results("SELECT task_name FROM {$wpdb->prefix}cce_onboarding_tasks ORDER BY task_order ASC");
+                        $tasks = !empty($tasks_db) ? array_column($tasks_db, 'task_name') : ['Welcome Training', 'Community Access'];
                         foreach ($tasks as $t):
                             $is_done = in_array($t, $completed);
                         ?>

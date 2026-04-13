@@ -57,6 +57,7 @@
                     <thead><tr><th>Component</th><th>Status</th></tr></thead>
                     <tbody>
                         <?php
+                        global $wpdb;
                         $tables = ['leads', 'bookings', 'offers', 'funnels', 'payments', 'crm_stages', 'activity_log', 'tasks', 'testimonials', 'automation_rules', 'resources', 'email_templates'];
                         foreach($tables as $t) {
                             $check = $wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}cce_{$t}'");

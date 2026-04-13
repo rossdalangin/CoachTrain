@@ -166,6 +166,15 @@ class CCE_Activator {
 				question_order int,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_onboarding_tasks (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				task_name varchar(255),
+				description text,
+				task_order int,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

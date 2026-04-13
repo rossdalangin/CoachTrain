@@ -35,6 +35,7 @@
         <h3>🚀 Quick Setup Guide</h3>
         <div style="display:flex; gap:30px; margin-top:10px;">
             <?php
+            global $wpdb;
             $setup_steps = [
                 'License Key' => get_option('cce_license_key'),
                 'Stripe Connected' => get_option('cce_stripe_api_key'),

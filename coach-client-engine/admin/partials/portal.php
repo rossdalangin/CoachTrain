@@ -36,6 +36,32 @@
         </form>
     </div>
 
+    <div class="cce-card" style="margin-bottom:20px;">
+        <h3>Onboarding Task Builder</h3>
+        <form id="cce-add-onboarding-task-form">
+            <div style="display:flex; gap:15px; align-items:center;">
+                <input type="text" id="new-onboarding-task-name" placeholder="Task name (e.g. Join Community)" class="regular-text" required>
+                <button type="submit" class="button button-primary">Add Onboarding Task</button>
+            </div>
+        </form>
+        <table class="wp-list-table widefat fixed striped" style="margin-top:15px;">
+            <thead><tr><th>Task Name</th><th>Action</th></tr></thead>
+            <tbody>
+                <?php
+                global $wpdb;
+                $onboarding_tasks = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_onboarding_tasks ORDER BY task_order ASC");
+                if($onboarding_tasks): foreach($onboarding_tasks as $ot): ?>
+                <tr>
+                    <td><?php echo esc_html($ot->task_name); ?></td>
+                    <td><button class="button button-link-delete cce-delete-onboarding-task" data-id="<?php echo $ot->id; ?>" style="color:#d63638;">×</button></td>
+                </tr>
+                <?php endforeach; else: ?>
+                <tr><td colspan="2">No custom tasks. Default tasks will be used.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
     <div class="cce-card">
         <h3>Portal Resources</h3>
         <table class="wp-list-table widefat fixed striped">
@@ -69,6 +95,29 @@
 
     <script>
     jQuery(document).ready(function($) {
+        $('#cce-add-onboarding-task-form').on('submit', function(e) {
+            e.preventDefault();
+            const data = { task_name: $('#new-onboarding-task-name').val() };
+            $.ajax({
+                url: cceAdmin.restUrl + 'portal/onboarding-tasks',
+                method: 'POST',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function() { location.reload(); }
+            });
+        });
+
+        $(document).on('click', '.cce-delete-onboarding-task', function() {
+            if(!confirm('Delete onboarding task?')) return;
+            $.ajax({
+                url: cceAdmin.restUrl + 'portal/onboarding-tasks/' + $(this).data('id'),
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function() { location.reload(); }
+            });
+        });
+
         $('#cce-add-resource-form').on('submit', function(e) {
             e.preventDefault();
             const data = {};

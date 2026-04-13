@@ -26,6 +26,7 @@
                             <option value="send_email">Send Email</option>
                             <option value="move_stage">Move to CRM Stage</option>
                             <option value="schedule_reminder">Schedule Reminder</option>
+                            <option value="create_task">Create Task</option>
                         </select>
                     </div>
                     <div id="action-config-stage" style="display:none;">
@@ -41,6 +42,10 @@
                     <div id="action-config-reminder" style="display:none;">
                         <label>Delay (Hours)</label><br>
                         <input type="number" name="config[delay_hours]" value="24" class="small-text">
+                    </div>
+                    <div id="action-config-task" style="display:none;">
+                        <label>Task Title</label><br>
+                        <input type="text" name="config[task_title]" placeholder="e.g. Call lead back" class="regular-text">
                     </div>
                     <div id="action-config-email" style="display:block;">
                         <label>Select Template</label><br>
@@ -188,6 +193,7 @@
                             <option value="send_email">Send Email</option>
                             <option value="move_stage">Move to CRM Stage</option>
                             <option value="schedule_reminder">Schedule Reminder</option>
+                            <option value="create_task">Create Task</option>
                         </select>
                     </div>
                     <div id="edit-action-config-stage">
@@ -199,6 +205,10 @@
                     <div id="edit-action-config-reminder">
                         <label>Delay (Hours)</label><br>
                         <input type="number" id="edit-config-delay" class="widefat">
+                    </div>
+                    <div id="edit-action-config-task">
+                        <label>Task Title</label><br>
+                        <input type="text" id="edit-config-task-title" class="widefat">
                     </div>
                     <div id="edit-action-config-email">
                         <label>Select Template</label><br>

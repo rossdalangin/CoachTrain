@@ -267,6 +267,15 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
                 wp_schedule_single_event( time() + $delay, 'cce_delayed_email_event', array( $source_id, 'reminder' ) );
                 CCE_Activity_Logger::log( $lead_id, 'automation', 'Reminder scheduled via rule: ' . $rule->id );
                 break;
+            case 'create_task':
+                $title = sanitize_text_field( $config['task_title'] ?? 'Follow up' );
+                $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
+                    'lead_id' => $lead_id,
+                    'title'   => $title,
+                    'status'  => 'pending',
+                ) );
+                CCE_Activity_Logger::log( $lead_id, 'automation', 'Task created via automation rule: ' . $title );
+                break;
         }
     }
 

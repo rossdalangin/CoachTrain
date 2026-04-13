@@ -64,6 +64,8 @@ jQuery(document).ready(function($) {
             $('#edit-config-delay').val(config.delay_hours);
         } else if ($row.data('action') === 'send_email') {
             $('#edit-config-template-id').val(config.template_id);
+        } else if ($row.data('action') === 'create_task') {
+            $('#edit-config-task-title').val(config.task_title);
         }
 
         $('#cce-edit-rule-modal').show();
@@ -74,6 +76,7 @@ jQuery(document).ready(function($) {
         $('#edit-action-config-email').toggle(val === 'send_email');
         $('#edit-action-config-stage').toggle(val === 'move_stage');
         $('#edit-action-config-reminder').toggle(val === 'schedule_reminder');
+        $('#edit-action-config-task').toggle(val === 'create_task');
     });
 
     $('#cce-edit-rule-form').on('submit', function(e) {
@@ -86,7 +89,8 @@ jQuery(document).ready(function($) {
             config: {
                 template_id: $('#edit-config-template-id').val(),
                 stage_id: $('#edit-config-stage-id').val(),
-                delay_hours: $('#edit-config-delay').val()
+                delay_hours: $('#edit-config-delay').val(),
+                task_title: $('#edit-config-task-title').val()
             }
         };
         // Reuse create rule endpoint if it supports ID or create a new one
@@ -99,21 +103,34 @@ jQuery(document).ready(function($) {
         const id = $(this).data('id');
         const $row = $('#testimonial-row-' + id);
         $('#edit-testimonial-id').val(id);
+        $('#edit-testimonial-type').val($row.data('type'));
+        $('#edit-testimonial-title').val($row.data('title'));
         $('#edit-testimonial-name').val($row.data('client-name'));
         $('#edit-testimonial-content').val($row.data('content'));
         $('#edit-testimonial-rating').val($row.data('rating'));
         $('#cce-edit-testimonial-modal').show();
     });
 
+    $('#cce-add-testimonial-form').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        cceApi('proof/testimonials', 'POST', JSON.stringify(data), function(res) {
+            if(res.success) location.reload();
+        });
+    });
+
     $('#cce-edit-testimonial-form').on('submit', function(e) {
         e.preventDefault();
         const id = $('#edit-testimonial-id').val();
         const data = {
+            type: $('#edit-testimonial-type').val(),
+            title: $('#edit-testimonial-title').val(),
             client_name: $('#edit-testimonial-name').val(),
             content: $('#edit-testimonial-content').val(),
             rating: $('#edit-testimonial-rating').val()
         };
-        cceApi('proof/testimonials/' + id, 'POST', data, function(res) {
+        cceApi('proof/testimonials/' + (id || ''), 'POST', JSON.stringify(data), function(res) {
             if(res.success) location.reload();
         });
     });
@@ -605,7 +622,8 @@ jQuery(document).ready(function($) {
             config: {
                 template_id: formData.get('config[template_id]'),
                 stage_id: formData.get('config[stage_id]'),
-                delay_hours: formData.get('config[delay_hours]')
+                delay_hours: formData.get('config[delay_hours]'),
+                task_title: formData.get('config[task_title]')
             }
         };
         cceApi('automation/rules', 'POST', JSON.stringify(data), function(res) {
@@ -618,6 +636,7 @@ jQuery(document).ready(function($) {
         $('#action-config-email').toggle(val === 'send_email');
         $('#action-config-stage').toggle(val === 'move_stage');
         $('#action-config-reminder').toggle(val === 'schedule_reminder');
+        $('#action-config-task').toggle(val === 'create_task');
     });
 
     $('.cce-delete-rule').on('click', function() {
@@ -678,5 +697,20 @@ jQuery(document).ready(function($) {
             });
         };
         reader.readAsText(file);
+    });
+
+    // CRM: Quick Task
+    $(document).on('submit', '.cce-quick-task-form', function(e) {
+        e.preventDefault();
+        const leadId = $(this).find('[name="lead_id"]').val();
+        const title = $(this).find('[name="title"]').val();
+        const $input = $(this).find('[name="title"]');
+
+        cceApi('crm/leads/' + leadId + '/tasks', 'POST', { title: title }, function(res) {
+            if (res.success) {
+                $input.val('');
+                alert('Task added!');
+            }
+        });
     });
 });

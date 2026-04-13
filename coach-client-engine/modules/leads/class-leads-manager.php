@@ -87,12 +87,14 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             $exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE email = %s", $email ) );
             if ( $exists ) continue;
 
+            $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
+
             $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
                 'first_name'   => sanitize_text_field( $lead['first_name'] ?? '' ),
                 'last_name'    => sanitize_text_field( $lead['last_name'] ?? '' ),
                 'email'        => $email,
                 'status'       => 'cold',
-                'crm_stage_id' => 1,
+                'crm_stage_id' => $default_stage_id,
                 'secure_token' => bin2hex( random_bytes( 32 ) ),
                 'source'       => 'Imported'
             ) );
@@ -195,6 +197,8 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         }
 
         $token = bin2hex( random_bytes( 32 ) );
+        $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
+
 		$data = array(
 			'first_name'   => sanitize_text_field( $params['first_name'] ),
 			'last_name'    => sanitize_text_field( $params['last_name'] ),
@@ -203,7 +207,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             'secure_token' => $token,
             'source'       => $source,
 			'status'       => 'cold',
-            'crm_stage_id' => 1, // Default to 'New' stage
+            'crm_stage_id' => $default_stage_id,
 		);
 
 		$result = $wpdb->insert( $table_name, $data );
