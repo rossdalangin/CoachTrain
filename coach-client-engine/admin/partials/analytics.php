@@ -32,19 +32,28 @@
             <h3>Total Revenue</h3>
             <div class="value">$<?php echo number_format( (float) $summary['revenue_today'], 2 ); // Simplified for this view ?></div>
         </div>
+        <div class="cce-card">
+            <h3>Show Rate</h3>
+            <div class="value"><?php echo $summary['show_rate']; ?>%</div>
+        </div>
     </div>
 
     <div class="cce-card" style="margin-bottom:20px;">
-        <h3>Funnel Performance (Leads)</h3>
+        <h3>Funnel Conversion Analysis</h3>
         <table class="wp-list-table widefat fixed striped">
             <thead>
-                <tr><th>Funnel / Source</th><th>Total Leads</th></tr>
+                <tr><th>Funnel / Source</th><th>Visits</th><th>Leads</th><th>Conversion Rate</th></tr>
             </thead>
             <tbody>
                 <?php if (!empty($summary['funnel_stats'])): foreach($summary['funnel_stats'] as $fs): ?>
-                    <tr><td><strong><?php echo esc_html($fs->funnel_name); ?></strong></td><td><?php echo (int) $fs->lead_count; ?></td></tr>
+                    <tr>
+                        <td><strong><?php echo esc_html($fs->funnel_name); ?></strong></td>
+                        <td><?php echo (int) $fs->visits; ?></td>
+                        <td><?php echo (int) $fs->lead_count; ?></td>
+                        <td><span style="font-weight:bold; color:#0073aa;"><?php echo $fs->rate; ?>%</span></td>
+                    </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="2">No funnel data yet.</td></tr>
+                    <tr><td colspan="4">No funnel data yet.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

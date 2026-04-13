@@ -6,6 +6,7 @@
             <a href="#general" class="nav-tab nav-tab-active">General</a>
             <a href="#payments" class="nav-tab">Payments</a>
             <a href="#branding" class="nav-tab">Branding</a>
+            <a href="#status" class="nav-tab">System Status</a>
         </h2>
     </div>
 
@@ -47,6 +48,26 @@
                     <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_option('cce_primary_color', '#0073aa') ); ?>"></td>
                 </tr>
             </table>
+        </div>
+
+        <div id="section-status" class="cce-settings-section" style="display:none;">
+            <div class="cce-card">
+                <h3>Diagnostic Check</h3>
+                <table class="wp-list-table widefat fixed striped">
+                    <thead><tr><th>Component</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <?php
+                        $tables = ['leads', 'bookings', 'offers', 'funnels', 'payments', 'crm_stages', 'activity_log', 'tasks', 'testimonials', 'automation_rules', 'resources', 'email_templates'];
+                        foreach($tables as $t) {
+                            $check = $wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}cce_{$t}'");
+                            echo "<tr><td>Database Table: <code>cce_{$t}</code></td><td>" . ($check ? '✅ OK' : '❌ Missing') . "</td></tr>";
+                        }
+                        ?>
+                        <tr><td>Plugin Version</td><td><code><?php echo CCE_VERSION; ?></code></td></tr>
+                        <tr><td>PHP Version</td><td><code><?php echo phpversion(); ?></code></td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <p class="submit">

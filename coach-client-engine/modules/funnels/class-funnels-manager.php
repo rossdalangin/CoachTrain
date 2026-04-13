@@ -57,7 +57,46 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/funnels/(?P<id>\d+)/duplicate', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'duplicate_funnel' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Duplicate funnel.
+     */
+    public function duplicate_funnel( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $id ) );
+        if ( ! $funnel ) return $this->error( 'Funnel not found' );
+
+        $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
+            'title'  => $funnel->title . ' (Copy)',
+            'type'   => $funnel->type,
+            'status' => 'draft',
+        ) );
+
+        $new_id = $wpdb->insert_id;
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d", $id ) );
+
+        foreach ( $steps as $step ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                'funnel_id'  => $new_id,
+                'title'      => $step->title,
+                'step_order' => $step->step_order,
+                'step_type'  => $step->step_type,
+                'config'     => $step->config,
+            ) );
+        }
+
+        return $this->success( array( 'id' => $new_id ) );
+    }
 
     /**
      * Delete funnel.

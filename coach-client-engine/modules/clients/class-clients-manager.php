@@ -33,6 +33,14 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/offers/(?P<id>\d+)/duplicate', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'duplicate_offer' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
 
     /**
@@ -57,6 +65,30 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
         $wpdb->update( "{$wpdb->prefix}cce_offers", $data, array( 'id' => $id ) );
 
         return $this->success( array( 'message' => 'Offer updated' ) );
+    }
+
+    /**
+     * Duplicate offer.
+     */
+    public function duplicate_offer( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $id ) );
+        if ( ! $offer ) return $this->error( 'Offer not found' );
+
+        $wpdb->insert( "{$wpdb->prefix}cce_offers", array(
+            'title'                => $offer->title . ' (Copy)',
+            'description'          => $offer->description,
+            'price'                => $offer->price,
+            'type'                 => $offer->type,
+            'dream_outcome'        => $offer->dream_outcome,
+            'perceived_likelihood' => $offer->perceived_likelihood,
+            'time_delay'           => $offer->time_delay,
+            'effort_sacrifice'     => $offer->effort_sacrifice,
+            'is_active'            => 1,
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
     }
 
     /**

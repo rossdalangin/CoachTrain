@@ -10,6 +10,7 @@
         </form>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_export_bookings">
+            <?php wp_nonce_field('cce_export_bookings_nonce'); ?>
             <button type="submit" class="button">Export to CSV</button>
         </form>
     </div>
@@ -75,7 +76,10 @@
                         <?php if ($booking->status === 'pending'): ?>
                             <button class="button button-small cce-booking-action" data-booking-id="<?php echo $booking->id; ?>" data-action="confirmed">Confirm</button>
                         <?php endif; ?>
-                        <?php if ($booking->status !== 'cancelled'): ?>
+                        <?php if ($booking->status === 'confirmed'): ?>
+                            <button class="button button-small cce-booking-action" data-booking-id="<?php echo $booking->id; ?>" data-action="completed" style="background:#00a32a; color:#fff;">Mark Completed</button>
+                        <?php endif; ?>
+                        <?php if ($booking->status !== 'cancelled' && $booking->status !== 'completed'): ?>
                             <button class="button button-small cce-booking-action" data-booking-id="<?php echo $booking->id; ?>" data-action="cancelled">Cancel</button>
                         <?php endif; ?>
                         <button class="button button-link-delete cce-delete-booking" data-booking-id="<?php echo $booking->id; ?>" style="color:#d63638;">Delete</button>
@@ -102,7 +106,9 @@
             const data = $(this).data('data');
             let html = '<ul>';
             for (const key in data) {
-                html += `<li><strong>${key}:</strong> ${data[key]}</li>`;
+                const escapedKey = $('<div>').text(key).html();
+                const escapedVal = $('<div>').text(data[key]).html();
+                html += `<li><strong>${escapedKey}:</strong> ${escapedVal}</li>`;
             }
             html += '</ul>';
             $('#cce-questionnaire-content').html(html);

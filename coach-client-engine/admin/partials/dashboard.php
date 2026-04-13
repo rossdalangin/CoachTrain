@@ -31,6 +31,25 @@
         </div>
     </div>
 
+    <div class="cce-card" style="margin-bottom:20px; border-left: 4px solid #00a32a;">
+        <h3>🚀 Quick Setup Guide</h3>
+        <div style="display:flex; gap:30px; margin-top:10px;">
+            <?php
+            $setup_steps = [
+                'License Key' => get_option('cce_license_key'),
+                'Stripe Connected' => get_option('cce_stripe_api_key'),
+                'Lead Magnet' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels"),
+                'Coaching Offer' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers"),
+            ];
+            foreach($setup_steps as $label => $check): ?>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:18px;"><?php echo $check ? '✅' : '❌'; ?></span>
+                    <span style="font-size:13px; color:#555;"><?php echo $label; ?></span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
         <div class="cce-card strategy-insights" style="border-left: 4px solid #0073aa;">
             <h3>💎 Master Architect Strategy Insights</h3>
@@ -63,6 +82,22 @@
                 <?php endif; ?>
             </div>
         </div>
+
+        <div class="cce-card" style="margin-top:20px; border-left: 4px solid #e91e63;">
+            <h3>📌 Pending Tasks</h3>
+            <?php if (!empty($summary['pending_tasks'])): ?>
+                <ul style="list-style:none; padding:0;">
+                    <?php foreach($summary['pending_tasks'] as $task): ?>
+                        <li style="font-size:12px; padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                            <span><strong><?php echo esc_html($task->lead_name); ?>:</strong> <?php echo esc_html($task->title); ?></span>
+                            <a href="?page=cce-crm" class="button button-small">View CRM</a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p>No pending tasks! You're all caught up.</p>
+            <?php endif; ?>
+        </div>
     </div>
     <?php else: ?>
         <div class="notice notice-warning"><p>No analytics data available. Start capturing leads to see insights!</p></div>
@@ -83,8 +118,9 @@
         </div>
     </div>
 
-    <div class="cce-quick-actions" style="margin-top:20px;">
-        <h2>Quick Actions</h2>
+    <div class="cce-quick-actions" style="margin-top:30px; display:flex; gap:15px; justify-content:center;">
+        <a href="?page=cce-leads" class="button button-hero">Manage Leads</a>
+        <a href="?page=cce-bookings" class="button button-hero">View Schedule</a>
         <a href="?page=cce-funnels" class="button button-primary button-hero">Create Funnel</a>
         <a href="?page=cce-clients" class="button button-hero">Add Offer</a>
     </div>

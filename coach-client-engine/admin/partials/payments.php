@@ -40,6 +40,7 @@
     <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_export_payments">
+            <?php wp_nonce_field('cce_export_payments_nonce'); ?>
             <button type="submit" class="button">Export to CSV</button>
         </form>
     </div>

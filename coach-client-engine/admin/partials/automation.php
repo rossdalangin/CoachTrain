@@ -25,6 +25,7 @@
                         <select name="action_type" id="rule-action-type" required>
                             <option value="send_email">Send Email</option>
                             <option value="move_stage">Move to CRM Stage</option>
+                            <option value="schedule_reminder">Schedule Reminder</option>
                         </select>
                     </div>
                     <div id="action-config-stage" style="display:none;">
@@ -36,6 +37,10 @@
                             foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>";
                             ?>
                         </select>
+                    </div>
+                    <div id="action-config-reminder" style="display:none;">
+                        <label>Delay (Hours)</label><br>
+                        <input type="number" name="config[delay_hours]" value="24" class="small-text">
                     </div>
                     <div id="action-config-email" style="display:block;">
                         <label>Select Template</label><br>
@@ -83,6 +88,37 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="cce-card" style="margin-top:20px;">
+            <h3>Scheduled Workflows (WordPress Cron)</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr><th>Event</th><th>Target ID</th><th>Scheduled Time</th></tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $cron = _get_cron_array();
+                    $found = false;
+                    if ($cron) {
+                        foreach ($cron as $timestamp => $events) {
+                            if (isset($events['cce_delayed_email_event'])) {
+                                foreach ($events['cce_delayed_email_event'] as $key => $event) {
+                                    $found = true;
+                                    $args = $event['args'];
+                                    echo "<tr>
+                                        <td><code>cce_delayed_email_event</code></td>
+                                        <td>ID: " . esc_html($args[0]) . "</td>
+                                        <td>" . date('Y-m-d H:i:s', $timestamp) . "</td>
+                                    </tr>";
+                                }
+                            }
+                        }
+                    }
+                    if (!$found) echo "<tr><td colspan='3'>No pending workflows.</td></tr>";
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="tab-templates" class="cce-automation-tab-content" style="display:none;">
@@ -108,10 +144,10 @@
                     <?php
                     $templates = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC");
                     foreach($templates as $t) echo "<tr>
-                        <td><strong>{$t->name}</strong></td>
-                        <td>{$t->subject}</td>
-                        <td>{$t->created_at}</td>
-                        <td><button class='button button-link-delete cce-delete-template' data-id='{$t->id}' style='color:#d63638;'>Delete</button></td>
+                        <td><strong>" . esc_html($t->name) . "</strong></td>
+                        <td>" . esc_html($t->subject) . "</td>
+                        <td>" . esc_html($t->created_at) . "</td>
+                        <td><button class='button button-link-delete cce-delete-template' data-id='" . esc_attr($t->id) . "' style='color:#d63638;'>Delete</button></td>
                     </tr>";
                     if(!$templates) echo "<tr><td colspan='4'>No templates yet.</td></tr>";
                     ?>

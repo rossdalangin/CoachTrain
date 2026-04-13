@@ -2,16 +2,28 @@
     <h1>Leads Management</h1>
     <hr class="wp-header-end">
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
         <form method="get" action="">
             <input type="hidden" name="page" value="cce-leads">
             <input type="search" name="s" value="<?php echo esc_attr($_GET['s'] ?? ''); ?>" placeholder="Search leads...">
             <button type="submit" class="button">Search</button>
         </form>
-        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-            <input type="hidden" name="action" value="cce_export_leads">
-            <button type="submit" class="button">Export to CSV</button>
-        </form>
+
+        <div style="display:flex; gap:10px;">
+            <select id="cce-bulk-action-selector">
+                <option value="">Bulk Actions</option>
+                <option value="delete">Delete Selected</option>
+                <option value="cold">Mark as COLD</option>
+                <option value="warm">Mark as WARM</option>
+                <option value="hot">Mark as HOT</option>
+            </select>
+            <button class="button" id="cce-apply-bulk-action">Apply</button>
+            <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
+                <input type="hidden" name="action" value="cce_export_leads">
+                <?php wp_nonce_field('cce_export_leads_nonce'); ?>
+                <button type="submit" class="button">Export to CSV</button>
+            </form>
+        </div>
     </div>
 
     <div class="cce-card" style="margin-bottom: 20px;">
@@ -42,6 +54,7 @@
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
+                <th style="width:30px;"><input type="checkbox" id="cce-select-all-leads"></th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Status</th>
@@ -56,6 +69,7 @@
                     data-last-name="<?php echo esc_attr($lead->last_name); ?>"
                     data-email="<?php echo esc_attr($lead->email); ?>"
                     data-status="<?php echo esc_attr($lead->status); ?>">
+                    <td><input type="checkbox" class="cce-lead-checkbox" value="<?php echo $lead->id; ?>"></td>
                     <td><strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong></td>
                     <td><?php echo esc_html( $lead->email ); ?></td>
                     <td><span class="status-tag"><?php echo esc_html( strtoupper( $lead->status ) ); ?></span></td>
@@ -66,7 +80,7 @@
                     </td>
                 </tr>
             <?php endforeach; else: ?>
-                <tr><td colspan="5">No leads found.</td></tr>
+                <tr><td colspan="6">No leads found.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

@@ -77,6 +77,7 @@
                     <td><?php echo esc_html( strtoupper( $offer->type ) ); ?></td>
                     <td>
                         <button class="button button-small cce-edit-offer" data-offer-id="<?php echo $offer->id; ?>">Edit</button>
+                        <button class="button button-small cce-duplicate-offer" data-offer-id="<?php echo $offer->id; ?>">Duplicate</button>
                         <button class="button button-link-delete cce-delete-offer" data-offer-id="<?php echo $offer->id; ?>" style="color:#d63638;">Delete</button>
                     </td>
                 </tr>

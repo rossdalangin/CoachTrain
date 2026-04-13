@@ -67,7 +67,9 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             'total_bookings'  => $total_bookings,
             'total_clients'   => $total_clients,
             'lead_to_client'  => $total_leads > 0 ? round( ($total_clients / $total_leads) * 100, 1 ) : 0,
+            'show_rate'       => $total_bookings > 0 ? round( ( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE status = 'completed'" ) / $total_bookings ) * 100, 1 ) : 0,
             'funnel_stats'    => $this->get_funnel_leads_stats(),
+            'pending_tasks'   => $this->get_pending_tasks(),
             'pipeline'        => array(
                 array( 'label' => 'Total Visitors', 'value' => (int) get_option( 'cce_total_visitors', 0 ) ),
                 array( 'label' => 'Captured Leads', 'value' => $total_leads ),
@@ -78,15 +80,39 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
 	}
 
     /**
-     * Get lead counts per funnel source.
+     * Get pending tasks across all leads.
      */
-    private function get_funnel_leads_stats() {
+    private function get_pending_tasks() {
         global $wpdb;
         return $wpdb->get_results( "
-            SELECT source as funnel_name, COUNT(*) as lead_count
-            FROM {$wpdb->prefix}cce_leads
-            WHERE source IS NOT NULL AND source != ''
-            GROUP BY source
+            SELECT t.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
+            FROM {$wpdb->prefix}cce_tasks t
+            JOIN {$wpdb->prefix}cce_leads l ON t.lead_id = l.id
+            WHERE t.status = 'pending'
+            ORDER BY t.created_at ASC
+            LIMIT 5
         " );
+    }
+
+    private function get_funnel_leads_stats() {
+        global $wpdb;
+        $funnels = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_funnels" );
+        $stats = [];
+
+        foreach ( $funnels as $f ) {
+            $leads = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads WHERE source = %s", $f->title ) );
+
+            // Sum visits from all steps in this funnel
+            $visits = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(visits) FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d", $f->id ) ) ?: 0;
+
+            $stats[] = (object) array(
+                'funnel_name' => $f->title,
+                'lead_count'  => (int) $leads,
+                'visits'      => (int) $visits,
+                'rate'        => $visits > 0 ? round( ($leads / $visits) * 100, 1 ) : 0,
+            );
+        }
+
+        return $stats;
     }
 }

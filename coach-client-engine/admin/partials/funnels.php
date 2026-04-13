@@ -32,6 +32,7 @@
                         </td>
                         <td>
                             <a href="#" class="button cce-view-steps" data-funnel-id="<?php echo $funnel->id; ?>">View Steps</a>
+                            <button class="button cce-duplicate-funnel" data-funnel-id="<?php echo $funnel->id; ?>">Duplicate</button>
                             <button class="button button-link-delete cce-delete-funnel" data-funnel-id="<?php echo $funnel->id; ?>" style="color:#d63638;">Delete</button>
                         </td>
                     </tr>

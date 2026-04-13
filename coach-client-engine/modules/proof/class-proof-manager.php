@@ -27,6 +27,11 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'delete_testimonial' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+            array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_testimonial' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 	}
 
@@ -38,6 +43,25 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
         $id = absint( $request['id'] );
         $wpdb->delete( "{$wpdb->prefix}cce_testimonials", array( 'id' => $id ) );
         return $this->success( array( 'message' => 'Testimonial deleted' ) );
+    }
+
+    /**
+     * Update testimonial.
+     */
+    public function update_testimonial( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $params = $request->get_params();
+
+        $wpdb->update( "{$wpdb->prefix}cce_testimonials", array(
+            'type'        => sanitize_text_field( $params['type'] ?? 'testimonial' ),
+            'title'       => sanitize_text_field( $params['title'] ?? '' ),
+            'client_name' => sanitize_text_field( $params['client_name'] ),
+            'content'     => sanitize_textarea_field( $params['content'] ),
+            'rating'      => absint( $params['rating'] ),
+        ), array( 'id' => $id ) );
+
+        return $this->success( array( 'message' => 'Testimonial updated' ) );
     }
 
 	/**
@@ -57,6 +81,8 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
         $params = $request->get_params();
 
         $data = array(
+            'type'        => sanitize_text_field( $params['type'] ?? 'testimonial' ),
+            'title'       => sanitize_text_field( $params['title'] ?? '' ),
             'client_name' => sanitize_text_field( $params['client_name'] ),
             'content'     => sanitize_textarea_field( $params['content'] ),
             'rating'      => absint( $params['rating'] ?? 5 ),

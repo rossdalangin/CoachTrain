@@ -91,6 +91,7 @@ class CCE_Post_Handler {
      */
     public function export_leads() {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_export_leads_nonce' );
         global $wpdb;
         $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_leads", ARRAY_A ), 'leads' );
     }
@@ -100,6 +101,7 @@ class CCE_Post_Handler {
      */
     public function export_bookings() {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_export_bookings_nonce' );
         global $wpdb;
         $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_bookings", ARRAY_A ), 'bookings' );
     }
@@ -109,6 +111,7 @@ class CCE_Post_Handler {
      */
     public function export_payments() {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_export_payments_nonce' );
         global $wpdb;
         $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_payments", ARRAY_A ), 'payments' );
     }

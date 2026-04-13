@@ -26,6 +26,33 @@ jQuery(document).ready(function($) {
         $('#cce-manage-stages-modal').show();
     });
 
+    $(document).on('click', '.cce-edit-template', function() {
+        // Implementation for editing email templates could go here
+    });
+
+    $(document).on('click', '.cce-edit-testimonial', function() {
+        const id = $(this).data('id');
+        const $row = $('#testimonial-row-' + id);
+        $('#edit-testimonial-id').val(id);
+        $('#edit-testimonial-name').val($row.data('client-name'));
+        $('#edit-testimonial-content').val($row.data('content'));
+        $('#edit-testimonial-rating').val($row.data('rating'));
+        $('#cce-edit-testimonial-modal').show();
+    });
+
+    $('#cce-edit-testimonial-form').on('submit', function(e) {
+        e.preventDefault();
+        const id = $('#edit-testimonial-id').val();
+        const data = {
+            client_name: $('#edit-testimonial-name').val(),
+            content: $('#edit-testimonial-content').val(),
+            rating: $('#edit-testimonial-rating').val()
+        };
+        cceApi('proof/testimonials/' + id, 'POST', data, function(res) {
+            if(res.success) location.reload();
+        });
+    });
+
     $('#cce-add-stage-form').on('submit', function(e) {
         e.preventDefault();
         const name = $('#new-stage-name').val();
@@ -91,10 +118,12 @@ jQuery(document).ready(function($) {
                 let html = '<ul class="cce-activity-list" style="padding-left:0; list-style:none;">';
                 res.data.forEach(activity => {
                     const desc = $('<div>').text(activity.description).html();
+                    const type = $('<div>').text(activity.activity_type.toUpperCase()).html();
+                    const date = $('<div>').text(activity.created_at).html();
                     html += `<li style="border-bottom:1px solid #eee; padding:10px 0;">
                         <div style="display:flex; justify-content:space-between;">
-                            <strong>${activity.activity_type.toUpperCase()}</strong>
-                            <small style="color:#888;">${activity.created_at}</small>
+                            <strong>${type}</strong>
+                            <small style="color:#888;">${date}</small>
                         </div>
                         <div style="margin-top:5px;">${desc}</div>
                     </li>`;
@@ -111,11 +140,13 @@ jQuery(document).ready(function($) {
                 let html = '<ul style="padding-left:0; list-style:none;">';
                 res.data.forEach(task => {
                     const checked = task.status === 'completed' ? 'checked' : '';
-                    html += `<li style="padding:8px 0; border-bottom:1px solid #f9f9f9;">
+                    const title = $('<div>').text(task.title).html();
+                    html += `<li style="padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between; align-items:center;">
                         <label>
                             <input type="checkbox" ${checked} class="cce-toggle-task" data-task-id="${task.id}" data-lead-id="${leadId}">
-                            ${task.title}
+                            ${title}
                         </label>
+                        <button class="button button-small cce-delete-task" data-task-id="${task.id}" data-lead-id="${leadId}" style="color:#d63638;">×</button>
                     </li>`;
                 });
                 html += '</ul>';
@@ -130,6 +161,16 @@ jQuery(document).ready(function($) {
         const taskId = $(this).data('task-id');
         const status = $(this).is(':checked') ? 'completed' : 'pending';
         cceApi('crm/leads/' + leadId + '/tasks/' + taskId, 'POST', { status: status }, function(res) {
+            loadStats(leadId);
+        });
+    });
+
+    $(document).on('click', '.cce-delete-task', function() {
+        if(!confirm('Delete task?')) return;
+        const leadId = $(this).data('lead-id');
+        const taskId = $(this).data('task-id');
+        cceApi('crm/leads/' + leadId + '/tasks/' + taskId, 'DELETE', {}, function() {
+            loadTasks(leadId);
             loadStats(leadId);
         });
     });
@@ -202,10 +243,36 @@ jQuery(document).ready(function($) {
         });
     });
 
+    // Leads: Bulk Actions
+    $('#cce-select-all-leads').on('change', function() {
+        $('.cce-lead-checkbox').prop('checked', $(this).is(':checked'));
+    });
+
+    $('#cce-apply-bulk-action').on('click', function() {
+        const action = $('#cce-bulk-action-selector').val();
+        const ids = $('.cce-lead-checkbox:checked').map(function() { return $(this).val(); }).get();
+
+        if (!action || ids.length === 0) {
+            alert('Please select an action and at least one lead.');
+            return;
+        }
+
+        if (action === 'delete' && !confirm('Are you sure you want to delete ' + ids.length + ' leads?')) return;
+
+        cceApi('leads/bulk', 'POST', { bulk_action: action, ids: ids }, function(res) {
+            if (res.success) location.reload();
+        });
+    });
+
     // Generic Actions
     $('.cce-delete-funnel').on('click', function() {
         if(!confirm('Delete funnel?')) return;
         cceApi('funnels/' + $(this).data('funnel-id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('.cce-duplicate-funnel').on('click', function() {
+        if(!confirm('Duplicate this funnel?')) return;
+        cceApi('funnels/' + $(this).data('funnel-id') + '/duplicate', 'POST', {}, () => location.reload());
     });
 
     $('.cce-delete-lead').on('click', function() {
@@ -216,6 +283,11 @@ jQuery(document).ready(function($) {
     $('.cce-delete-offer').on('click', function() {
         if(!confirm('Delete offer?')) return;
         cceApi('offers/' + $(this).data('offer-id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('.cce-duplicate-offer').on('click', function() {
+        if(!confirm('Duplicate this offer?')) return;
+        cceApi('offers/' + $(this).data('offer-id') + '/duplicate', 'POST', {}, () => location.reload());
     });
 
     $('.cce-delete-resource').on('click', function() {
@@ -230,7 +302,7 @@ jQuery(document).ready(function($) {
 
     $('.cce-delete-template').on('click', function() {
         if(!confirm('Delete template?')) return;
-        cceApi('automation/rules/' + $(this).data('id'), 'DELETE', {}, () => location.reload()); // Assuming logic is similar
+        cceApi('automation/templates/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-edit-lead').on('click', function() {

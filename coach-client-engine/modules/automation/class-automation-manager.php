@@ -51,6 +51,19 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/automation/templates/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+            array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
 
     /**
@@ -77,6 +90,33 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Update email template.
+     */
+    public function update_template( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $params = $request->get_params();
+
+        $wpdb->update( "{$wpdb->prefix}cce_email_templates", array(
+            'name'    => sanitize_text_field( $params['name'] ),
+            'subject' => sanitize_text_field( $params['subject'] ),
+            'content' => wp_kses_post( $params['content'] ),
+        ), array( 'id' => $id ) );
+
+        return $this->success( array( 'message' => 'Template updated' ) );
+    }
+
+    /**
+     * Delete email template.
+     */
+    public function delete_template( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_email_templates", array( 'id' => $id ) );
+        return $this->success( array( 'message' => 'Template deleted' ) );
     }
 
     /**
@@ -135,6 +175,25 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
                 $mailer = new CCE_Mailer();
                 $mailer->send_welcome_email( $id );
             }
+
+            // Default stage movement if no specific rule for booking/payment
+            if ( 'cce_booking_confirmed' === $hook ) {
+                $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $id ) );
+                if ( $lead_id ) {
+                    $booked_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Booked%' LIMIT 1" );
+                    if ( $booked_stage_id ) {
+                        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $booked_stage_id ), array( 'id' => $lead_id ) );
+                    }
+                }
+            }
+
+            if ( 'cce_payment_completed' === $hook ) {
+                $lead_id = $id; // For payment, ID is lead_id
+                $closed_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Closed%' OR name LIKE '%Won%' LIMIT 1" );
+                if ( $closed_stage_id ) {
+                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $closed_stage_id ), array( 'id' => $lead_id ) );
+                }
+            }
         }
 	}
 
@@ -181,6 +240,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
                     CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead automatically moved by automation rule: ' . $rule->id );
                 }
                 break;
+            case 'schedule_reminder':
+                $delay = absint( $config['delay_hours'] ?? 24 ) * HOUR_IN_SECONDS;
+                wp_schedule_single_event( time() + $delay, 'cce_delayed_email_event', array( $source_id, 'reminder' ) );
+                CCE_Activity_Logger::log( $lead_id, 'automation', 'Reminder scheduled via rule: ' . $rule->id );
+                break;
         }
     }
 
@@ -189,5 +253,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function send_delayed_email( $id, $type ) {
         error_log( "Sending delayed email ($type) for ID: $id" );
+        if ( 'reminder' === $type ) {
+            $mailer = new CCE_Mailer();
+            $mailer->send_reminder( $id );
+        }
     }
 }

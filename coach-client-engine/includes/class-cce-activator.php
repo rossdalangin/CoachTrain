@@ -119,6 +119,8 @@ class CCE_Activator {
 
 			"CREATE TABLE {$wpdb->prefix}cce_testimonials (
 				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				type varchar(50) DEFAULT 'testimonial',
+				title varchar(255),
 				client_name varchar(255),
 				content text,
 				rating int DEFAULT 5,

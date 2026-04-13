@@ -2,62 +2,98 @@
     <h1>CRM & Pipeline</h1>
     <hr class="wp-header-end">
 
-    <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
-        <button class="button cce-manage-stages-btn">Manage Stages</button>
+    <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
+        <button class="cce-crm-tab-link active" data-tab="kanban" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Pipeline</button>
+        <button class="cce-crm-tab-link" data-tab="log" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Activity Log</button>
     </div>
 
-    <?php
-    global $wpdb;
-    $stages = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC" );
-    ?>
+    <div id="crm-tab-kanban" class="cce-crm-tab-content">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+            <button class="button cce-manage-stages-btn">Manage Stages</button>
+        </div>
 
-    <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
-        <?php foreach ( $stages as $stage ): ?>
-            <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
-                <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
-                <div class="kanban-cards">
-                    <?php
-                    $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d", $stage->id ) );
-                    if ($leads): foreach ( $leads as $lead ):
-                    ?>
-                        <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px;">
-                            <div style="display:flex; justify-content:space-between; align-items:start;">
-                                <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
-                                <select class="cce-status-toggle" data-lead-id="<?php echo $lead->id; ?>" style="font-size:9px; height:auto; padding:2px;">
-                                    <option value="cold" <?php selected($lead->status, 'cold'); ?>>COLD</option>
-                                    <option value="warm" <?php selected($lead->status, 'warm'); ?>>WARM</option>
-                                    <option value="hot" <?php selected($lead->status, 'hot'); ?>>HOT</option>
-                                </select>
-                            </div>
+        <?php
+        global $wpdb;
+        $stages = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC" );
+        ?>
 
-                            <div style="margin-top:10px;">
-                                <select class="cce-stage-select" data-lead-id="<?php echo $lead->id; ?>" style="font-size:11px; width:100%;">
-                                    <?php foreach ( $stages as $s ): ?>
-                                        <option value="<?php echo $s->id; ?>" <?php selected( $lead->crm_stage_id, $s->id ); ?>>
-                                            Move to: <?php echo esc_html( $s->name ); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+        <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
+            <?php foreach ( $stages as $stage ): ?>
+                <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
+                    <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
+                    <div class="kanban-cards">
+                        <?php
+                        $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d", $stage->id ) );
+                        if ($leads): foreach ( $leads as $lead ):
+                        ?>
+                            <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px;">
+                                <div style="display:flex; justify-content:space-between; align-items:start;">
+                                    <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
+                                    <select class="cce-status-toggle" data-lead-id="<?php echo $lead->id; ?>" style="font-size:9px; height:auto; padding:2px;">
+                                        <option value="cold" <?php selected($lead->status, 'cold'); ?>>COLD</option>
+                                        <option value="warm" <?php selected($lead->status, 'warm'); ?>>WARM</option>
+                                        <option value="hot" <?php selected($lead->status, 'hot'); ?>>HOT</option>
+                                    </select>
+                                </div>
 
-                            <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
-                                <a href="#" class="button button-small cce-view-notes"
-                                   data-lead-id="<?php echo $lead->id; ?>"
-                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Activity</a>
-                                <a href="#" class="button button-small cce-view-tasks"
-                                   data-lead-id="<?php echo $lead->id; ?>"
-                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Tasks</a>
-                                <a href="#" class="button button-small cce-contact-btn"
-                                   data-lead-id="<?php echo $lead->id; ?>"
-                                   data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Contact</a>
+                                <div style="margin-top:10px;">
+                                    <select class="cce-stage-select" data-lead-id="<?php echo $lead->id; ?>" style="font-size:11px; width:100%;">
+                                        <?php foreach ( $stages as $s ): ?>
+                                            <option value="<?php echo $s->id; ?>" <?php selected( $lead->crm_stage_id, $s->id ); ?>>
+                                                Move to: <?php echo esc_html( $s->name ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                                    <a href="#" class="button button-small cce-view-notes"
+                                    data-lead-id="<?php echo $lead->id; ?>"
+                                    data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Activity</a>
+                                    <a href="#" class="button button-small cce-view-tasks"
+                                    data-lead-id="<?php echo $lead->id; ?>"
+                                    data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Tasks</a>
+                                    <a href="#" class="button button-small cce-contact-btn"
+                                    data-lead-id="<?php echo $lead->id; ?>"
+                                    data-lead-name="<?php echo esc_attr( $lead->first_name . ' ' . $lead->last_name ); ?>">Contact</a>
+                                </div>
                             </div>
-                        </div>
-                    <?php endforeach; else: ?>
-                        <div style="font-style:italic; color:#718096; font-size:12px; text-align:center;">Empty</div>
-                    <?php endif; ?>
+                        <?php endforeach; else: ?>
+                            <div style="font-style:italic; color:#718096; font-size:12px; text-align:center;">Empty</div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <div id="crm-tab-log" class="cce-crm-tab-content" style="display:none;">
+        <div class="cce-card">
+            <h3>Global Activity Log</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr><th>Lead</th><th>Activity</th><th>Time</th></tr>
+                </thead>
+                <tbody id="cce-global-activity-body">
+                    <?php
+                    $activities = $wpdb->get_results( "
+                        SELECT a.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
+                        FROM {$wpdb->prefix}cce_activity_log a
+                        LEFT JOIN {$wpdb->prefix}cce_leads l ON a.lead_id = l.id
+                        ORDER BY a.created_at DESC LIMIT 50
+                    " );
+                    if($activities): foreach($activities as $a): ?>
+                    <tr>
+                        <td><strong><?php echo esc_html($a->lead_name ?: 'System'); ?></strong></td>
+                        <td><?php echo esc_html($a->description); ?></td>
+                        <td><?php echo esc_html($a->created_at); ?></td>
+                    </tr>
+                    <?php endforeach; else: ?>
+                    <tr><td colspan="3">No activities logged.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Leads Modal (Shared) -->
@@ -133,3 +169,14 @@
         </div>
     </div>
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+    $('.cce-crm-tab-link').on('click', function() {
+        $('.cce-crm-tab-link').removeClass('active').css('border-bottom', 'none');
+        $(this).addClass('active').css('border-bottom', '2px solid #0073aa');
+        $('.cce-crm-tab-content').hide();
+        $('#crm-tab-' + $(this).data('tab')).show();
+    });
+});
+</script>

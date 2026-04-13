@@ -21,10 +21,23 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/crm/activities', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_all_activities' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
         register_rest_route( $this->namespace, '/crm/stages/(?P<id>\d+)', array(
 			array(
 				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_stage' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+            array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_stage' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
@@ -33,6 +46,11 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_task' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+            array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_task' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
@@ -129,6 +147,21 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     }
 
     /**
+     * Get all global activities.
+     */
+    public function get_all_activities( $request ) {
+        global $wpdb;
+        $activities = $wpdb->get_results( "
+            SELECT a.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
+            FROM {$wpdb->prefix}cce_activity_log a
+            LEFT JOIN {$wpdb->prefix}cce_leads l ON a.lead_id = l.id
+            ORDER BY a.created_at DESC
+            LIMIT 50
+        " );
+        return $this->success( $activities );
+    }
+
+    /**
      * Get tasks for a lead.
      */
     public function get_tasks( $request ) {
@@ -153,6 +186,16 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Delete task.
+     */
+    public function delete_task( $request ) {
+        global $wpdb;
+        $task_id = absint( $request['task_id'] );
+        $wpdb->delete( "{$wpdb->prefix}cce_tasks", array( 'id' => $task_id ) );
+        return $this->success( array( 'message' => 'Task deleted' ) );
     }
 
     /**
@@ -248,6 +291,23 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         $id = absint( $request['id'] );
         $wpdb->delete( "{$wpdb->prefix}cce_crm_stages", array( 'id' => $id ) );
         return $this->success( array( 'message' => 'Stage deleted' ) );
+    }
+
+    /**
+     * Update CRM stage.
+     */
+    public function update_stage( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $name = sanitize_text_field( $request->get_param( 'name' ) );
+        $order = absint( $request->get_param( 'stage_order' ) );
+
+        $wpdb->update( "{$wpdb->prefix}cce_crm_stages",
+            array( 'name' => $name, 'stage_order' => $order ),
+            array( 'id' => $id )
+        );
+
+        return $this->success( array( 'message' => 'Stage updated' ) );
     }
 
 	/**

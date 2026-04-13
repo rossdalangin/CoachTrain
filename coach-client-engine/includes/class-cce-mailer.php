@@ -28,4 +28,24 @@ class CCE_Mailer {
 
 		return $this->send( $lead->email, $subject, $message );
 	}
+
+    /**
+     * Send reminder email for a booking.
+     */
+    public function send_reminder( $booking_id ) {
+        global $wpdb;
+        $booking = $wpdb->get_row( $wpdb->prepare( "
+            SELECT b.*, l.first_name, l.email
+            FROM {$wpdb->prefix}cce_bookings b
+            JOIN {$wpdb->prefix}cce_leads l ON b.lead_id = l.id
+            WHERE b.id = %d
+        ", $booking_id ) );
+
+        if ( ! $booking ) return false;
+
+        $subject = "Reminder: Your coaching session is coming up!";
+        $message = "<h1>Hi " . esc_html( $booking->first_name ) . ",</h1><p>This is a reminder for your upcoming strategy session scheduled for " . esc_html( $booking->start_time ) . ".</p>";
+
+        return $this->send( $booking->email, $subject, $message );
+    }
 }

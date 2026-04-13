@@ -25,12 +25,26 @@ class CCE_Public {
 			'offer_id' => 1,
 		), $atts );
 
+        $offer_id = absint( $atts['offer_id'] );
+        $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $offer_id ) );
+
 		ob_start();
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
 		<div class="cce-checkout-wrapper">
-			<h3>Complete Your Purchase</h3>
+			<?php if ( $offer ): ?>
+                <h3>Enroll in <?php echo esc_html( $offer->title ); ?></h3>
+                <div class="cce-offer-summary" style="margin-bottom:20px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                    <p style="font-size:20px; font-weight:bold; color:#0073aa;">Price: $<?php echo number_format($offer->price, 2); ?></p>
+                    <?php if ($offer->dream_outcome): ?>
+                        <p><strong>Your Outcome:</strong> <?php echo esc_html($offer->dream_outcome); ?></p>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <h3>Complete Your Purchase</h3>
+            <?php endif; ?>
+
 			<form id="cce-public-checkout-form">
 				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
@@ -235,17 +249,25 @@ class CCE_Public {
 			'type' => 'testimonial',
 		), $atts );
 
+        $type = sanitize_text_field( $atts['type'] );
 		ob_start();
-        $testimonials = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' ORDER BY RAND() LIMIT 3" );
+        $testimonials = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND type = %s ORDER BY RAND() LIMIT 3", $type ) );
 		?>
 		<div class="cce-testimonials-display">
             <?php if ( 'case_study' === $atts['type'] ): ?>
                 <div class="cce-case-study-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div class="cce-case-study" style="border:1px solid #eee; padding:20px; border-radius:10px;">
-                        <h4>The $50k Month Strategy</h4>
-                        <p>How we helped a fitness coach scale using the Engine.</p>
-                        <a href="#" class="button button-small">Read More</a>
-                    </div>
+                    <?php if ($testimonials): foreach($testimonials as $cs): ?>
+                        <div class="cce-case-study" style="border:1px solid #eee; padding:20px; border-radius:10px;">
+                            <h4><?php echo esc_html($cs->title ?: 'Success Story'); ?></h4>
+                            <p><?php echo wp_trim_words(esc_html($cs->content), 20); ?></p>
+                            <strong>- <?php echo esc_html($cs->client_name); ?></strong>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div class="cce-case-study" style="border:1px solid #eee; padding:20px; border-radius:10px;">
+                            <h4>The $50k Month Strategy</h4>
+                            <p>How we helped a fitness coach scale using the Engine.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <?php if ( ! empty( $testimonials ) ): ?>
@@ -314,6 +336,11 @@ class CCE_Public {
                 const redirect = this.getAttribute('data-redirect');
                 data.end_time = data.start_time;
 
+                const $btn = this.querySelector('button');
+                const originalText = $btn.innerText;
+                $btn.disabled = true;
+                $btn.innerText = 'Processing...';
+
                 fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
                     method: 'POST',
                     headers: {
@@ -324,6 +351,8 @@ class CCE_Public {
                 })
                 .then(res => res.json())
                 .then(res => {
+                    $btn.disabled = false;
+                    $btn.innerText = originalText;
                     if (res.success) {
                         if(redirect) {
                             window.location.href = redirect;
@@ -369,6 +398,11 @@ class CCE_Public {
                 const data = Object.fromEntries(formData.entries());
                 const redirect = this.getAttribute('data-redirect');
 
+                const $btn = this.querySelector('button');
+                const originalText = $btn.innerText;
+                $btn.disabled = true;
+                $btn.innerText = 'Processing...';
+
                 fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/leads' ) ); ?>', {
                     method: 'POST',
                     headers: {
@@ -379,6 +413,8 @@ class CCE_Public {
                 })
                 .then(res => res.json())
                 .then(res => {
+                    $btn.disabled = false;
+                    $btn.innerText = originalText;
                     if (res.success) {
                         document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
                         if(redirect) {

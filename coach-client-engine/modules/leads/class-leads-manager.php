@@ -32,6 +32,14 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/leads/bulk', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'handle_bulk_action' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
         register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/status', array(
 			array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
@@ -74,6 +82,28 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         CCE_Activity_Logger::log( $id, 'update', 'Lead information updated.' );
 
         return $this->success( array( 'message' => 'Lead updated' ) );
+    }
+
+    /**
+     * Handle bulk actions.
+     */
+    public function handle_bulk_action( $request ) {
+        global $wpdb;
+        $params = $request->get_params();
+        $ids = $params['ids'] ?? [];
+        $action = $params['bulk_action'] ?? '';
+
+        if ( empty( $ids ) ) return $this->error( 'No IDs provided' );
+
+        $ids_string = implode( ',', array_map( 'absint', $ids ) );
+
+        if ( 'delete' === $action ) {
+            $wpdb->query( "DELETE FROM {$wpdb->prefix}cce_leads WHERE id IN ($ids_string)" );
+        } elseif ( in_array( $action, ['cold', 'warm', 'hot'] ) ) {
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_leads SET status = %s WHERE id IN ($ids_string)", $action ) );
+        }
+
+        return $this->success( array( 'message' => 'Bulk action completed' ) );
     }
 
     /**
