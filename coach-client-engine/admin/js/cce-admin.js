@@ -487,4 +487,89 @@ jQuery(document).ready(function($) {
         $('.cce-automation-tab-content').hide();
         $('#tab-' + $(this).data('tab')).show();
     });
+
+    // Funnel Templates
+    $('.cce-use-template').on('click', function() {
+        const templateId = $(this).data('template');
+        if(!confirm('Create new funnel from ' + templateId + ' template?')) return;
+        cceApi('funnels/create-from-template', 'POST', { template_id: templateId }, function(res) {
+            if(res.success) location.reload();
+        });
+    });
+
+    // Funnel Step Management
+    $('.cce-add-step-btn').on('click', function() {
+        $('#add-step-funnel-id').val($(this).data('funnel-id'));
+        $('#cce-add-step-modal').show();
+    });
+
+    $('#cce-add-step-form').on('submit', function(e) {
+        e.preventDefault();
+        const funnelId = $('#add-step-funnel-id').val();
+        const title = $('#add-step-title').val();
+        const type = $('#add-step-type').val();
+
+        cceApi('funnels/' + funnelId + '/steps', 'GET', {}, function(res) {
+            let steps = res.data.map(s => ({ title: s.title, type: s.step_type, config: s.config }));
+            steps.push({ title: title, type: type, config: {} });
+
+            cceApi('funnels/' + funnelId + '/steps', 'POST', JSON.stringify({ steps: steps }), function() {
+                $('#cce-add-step-modal').hide();
+                loadFunnelSteps(funnelId, $('.steps-container-' + funnelId));
+            });
+        });
+    });
+
+    // Copy Shortcode
+    $('.cce-copy-shortcode').on('click', function() {
+        const text = $(this).data('shortcode');
+        navigator.clipboard.writeText(text).then(() => {
+            const original = $(this).text();
+            $(this).text('Copied!');
+            setTimeout(() => $(this).text(original), 2000);
+        });
+    });
+
+    // Automation: Add Rule
+    $('#cce-add-automation-form').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            trigger_event: formData.get('trigger_event'),
+            action_type: formData.get('action_type'),
+            config: {
+                template_id: formData.get('config[template_id]'),
+                stage_id: formData.get('config[stage_id]'),
+                delay_hours: formData.get('config[delay_hours]')
+            }
+        };
+        cceApi('automation/rules', 'POST', JSON.stringify(data), function(res) {
+            if(res.success) location.reload();
+        });
+    });
+
+    $('#rule-action-type').on('change', function() {
+        const val = $(this).val();
+        $('#action-config-email').toggle(val === 'send_email');
+        $('#action-config-stage').toggle(val === 'move_stage');
+        $('#action-config-reminder').toggle(val === 'schedule_reminder');
+    });
+
+    $('.cce-delete-rule').on('click', function() {
+        if(!confirm('Delete rule?')) return;
+        cceApi('automation/rules/' + $(this).data('rule-id'), 'DELETE', {}, () => location.reload());
+    });
+
+    // Automation: Add Template
+    $('#cce-add-template-form').on('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            name: $(this).find('[name="name"]').val(),
+            subject: $(this).find('[name="subject"]').val(),
+            content: $(this).find('[name="content"]').val()
+        };
+        cceApi('automation/templates', 'POST', JSON.stringify(data), function(res) {
+            if(res.success) location.reload();
+        });
+    });
 });

@@ -73,9 +73,12 @@ class CCE_Public {
 			.then(res => res.json())
 			.then(res => {
 				const msg = document.getElementById('cce-checkout-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Payment successful! Welcome aboard.</p>';
-				} else {
+				if (res.success && res.data.redirect_url) {
+					msg.innerHTML = '<p style="color:green">' + res.data.message + '</p>';
+                    window.location.href = res.data.redirect_url;
+				} else if (res.success) {
+                    msg.innerHTML = '<p style="color:green">Payment successful! Welcome aboard.</p>';
+                } else {
 					msg.innerHTML = '<p style="color:red">Payment failed. Please try again.</p>';
 				}
 			});
