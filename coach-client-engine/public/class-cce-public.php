@@ -322,9 +322,27 @@ class CCE_Public {
 					<option value="America/Los_Angeles">PST</option>
 				</select>
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label>What is your #1 goal right now?</label>
-                    <textarea name="questionnaire[goal]" rows="3" required></textarea>
+                <div class="cce-dynamic-questions">
+                    <?php
+                    $questions = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_questions ORDER BY question_order ASC");
+                    if ($questions): foreach ($questions as $q):
+                        $req = $q->is_required ? 'required' : '';
+                        $name = "questionnaire[" . esc_attr($q->question_text) . "]";
+                    ?>
+                        <div style="margin-bottom:15px;">
+                            <label><?php echo esc_html($q->question_text); ?></label>
+                            <?php if ($q->question_type === 'textarea'): ?>
+                                <textarea name="<?php echo $name; ?>" rows="3" <?php echo $req; ?>></textarea>
+                            <?php else: ?>
+                                <input type="text" name="<?php echo $name; ?>" <?php echo $req; ?>>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div style="margin-bottom:15px;">
+                            <label>What is your #1 goal right now?</label>
+                            <textarea name="questionnaire[goal]" rows="3" required></textarea>
+                        </div>
+                    <?php endif; ?>
                 </div>
 				<button type="submit" class="button">Book My Session</button>
 			</form>

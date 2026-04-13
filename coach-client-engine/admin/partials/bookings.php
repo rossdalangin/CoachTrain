@@ -99,8 +99,69 @@
         </div>
     </div>
 
+    <div class="cce-card" style="margin-top:30px;">
+        <h3>Questionnaire Builder</h3>
+        <p>Define the questions clients must answer when booking a consultation.</p>
+        <form id="cce-add-question-form">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="new-question-text" placeholder="Enter question..." class="regular-text" required>
+                <select id="new-question-type">
+                    <option value="text">Short Text</option>
+                    <option value="textarea">Long Text</option>
+                </select>
+                <label><input type="checkbox" id="new-question-required" checked> Required</label>
+                <button type="submit" class="button button-primary">Add Question</button>
+            </div>
+        </form>
+
+        <table class="wp-list-table widefat fixed striped" style="margin-top:15px;">
+            <thead><tr><th>Question</th><th>Type</th><th>Required</th><th>Action</th></tr></thead>
+            <tbody id="cce-questions-body">
+                <?php
+                $questions = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_questions ORDER BY question_order ASC");
+                if($questions): foreach($questions as $q): ?>
+                <tr>
+                    <td><?php echo esc_html($q->question_text); ?></td>
+                    <td><?php echo esc_html($q->question_type); ?></td>
+                    <td><?php echo $q->is_required ? 'Yes' : 'No'; ?></td>
+                    <td><button class="button button-link-delete cce-delete-question" data-id="<?php echo $q->id; ?>" style="color:#d63638;">×</button></td>
+                </tr>
+                <?php endforeach; else: ?>
+                <tr><td colspan="4">No custom questions. Default "Goal" question will be used.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
     <script>
     jQuery(document).ready(function($) {
+        $('#cce-add-question-form').on('submit', function(e) {
+            e.preventDefault();
+            const data = {
+                question_text: $('#new-question-text').val(),
+                question_type: $('#new-question-type').val(),
+                is_required: $('#new-question-required').is(':checked') ? 1 : 0
+            };
+            $.ajax({
+                url: cceAdmin.restUrl + 'bookings/questions',
+                method: 'POST',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function() { location.reload(); }
+            });
+        });
+
+        $(document).on('click', '.cce-delete-question', function() {
+            if(!confirm('Delete question?')) return;
+            $.ajax({
+                url: cceAdmin.restUrl + 'bookings/questions/' + $(this).data('id'),
+                method: 'DELETE',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function() { location.reload(); }
+            });
+        });
+
         $('.cce-view-questionnaire').on('click', function(e) {
             e.preventDefault();
             const data = $(this).data('data');

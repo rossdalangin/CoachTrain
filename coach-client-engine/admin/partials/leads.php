@@ -26,8 +26,9 @@
         </div>
     </div>
 
-    <div class="cce-card" style="margin-bottom: 20px;">
-        <h3>Add New Lead</h3>
+    <div class="cce-card" style="margin-bottom: 20px; display:flex; gap:20px;">
+        <div style="flex:1;">
+            <h3>Add New Lead</h3>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_save_lead">
             <?php wp_nonce_field('cce_save_lead_nonce'); ?>
@@ -38,6 +39,14 @@
                 <button type="submit" class="button button-primary">Add Lead</button>
             </div>
         </form>
+        </div>
+        <div style="flex:1; border-left:1px solid #eee; padding-left:20px;">
+            <h3>Import Leads (CSV)</h3>
+            <p style="font-size:12px; color:#666;">Format: <code>first_name,last_name,email</code></p>
+            <input type="file" id="cce-import-csv" accept=".csv" style="display:block; margin-bottom:10px;">
+            <button class="button" id="cce-start-import">Start Import</button>
+            <div id="import-status" style="margin-top:10px;"></div>
+        </div>
     </div>
 
     <?php

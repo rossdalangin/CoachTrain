@@ -69,6 +69,7 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             'lead_to_client'  => $total_leads > 0 ? round( ($total_clients / $total_leads) * 100, 1 ) : 0,
             'show_rate'       => $total_bookings > 0 ? round( ( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE status = 'completed'" ) / $total_bookings ) * 100, 1 ) : 0,
             'funnel_stats'    => $this->get_funnel_leads_stats(),
+            'projections'     => $this->get_projections(),
             'pending_tasks'   => $this->get_pending_tasks(),
             'pipeline'        => array(
                 array( 'label' => 'Total Visitors', 'value' => (int) get_option( 'cce_total_visitors', 0 ) ),
@@ -114,5 +115,28 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
         }
 
         return $stats;
+    }
+
+    /**
+     * Get revenue projections based on average order value and lead velocity.
+     */
+    public function get_projections() {
+        global $wpdb;
+        $total_leads = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads" );
+        $total_sales = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" );
+        $total_revenue = (float) $wpdb->get_var( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE status = 'completed'" );
+
+        $conv_rate = $total_leads > 0 ? ($total_sales / $total_leads) : 0;
+        $aov = $total_sales > 0 ? ($total_revenue / $total_sales) : 0;
+
+        // Current 30 day velocity
+        $leads_30 = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)" );
+
+        return array(
+            'leads_next_30' => $leads_30,
+            'projected_sales' => round($leads_30 * $conv_rate, 1),
+            'projected_revenue' => round(($leads_30 * $conv_rate) * $aov, 2),
+            'aov' => round($aov, 2)
+        );
     }
 }

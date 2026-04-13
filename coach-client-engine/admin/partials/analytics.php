@@ -59,13 +59,29 @@
         </table>
     </div>
 
-    <div class="cce-card" style="border-left:4px solid #0073aa;">
-        <h3>💎 Strategy Insights</h3>
-        <p>Your path to scaling to $10k/month:</p>
-        <ul style="list-style:disc; padding-left:20px;">
-            <li>Your lead conversion is healthy. Focus on increasing <strong>top-of-funnel traffic</strong>.</li>
-            <li>Optimize your <strong>consultation show-up rate</strong> by sending automated reminders.</li>
-        </ul>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="cce-card" style="border-left:4px solid #0073aa;">
+            <h3>💎 Strategy Insights</h3>
+            <p>Your path to scaling to $10k/month:</p>
+            <ul style="list-style:disc; padding-left:20px;">
+                <li>Your lead conversion is healthy. Focus on increasing <strong>top-of-funnel traffic</strong>.</li>
+                <li>Optimize your <strong>consultation show-up rate</strong> by sending automated reminders.</li>
+            </ul>
+        </div>
+        <div class="cce-card" style="border-left:4px solid #673ab7;">
+            <h3>📈 Next 30 Days Projections</h3>
+            <?php $p = $summary['projections']; ?>
+            <p>Based on current velocity (<?php echo $p['leads_next_30']; ?> leads/mo) and <?php echo $summary['lead_to_client']; ?>% conversion:</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                <div style="background:#f3f0ff; padding:10px; border-radius:8px;">
+                    <small>PROJECTED SALES</small><br><strong><?php echo $p['projected_sales']; ?></strong>
+                </div>
+                <div style="background:#f3f0ff; padding:10px; border-radius:8px;">
+                    <small>PROJECTED REVENUE</small><br><strong>$<?php echo number_format($p['projected_revenue'], 2); ?></strong>
+                </div>
+            </div>
+            <p style="font-size:11px; color:#888; margin-top:10px;">Average Order Value (AOV): $<?php echo $p['aov']; ?></p>
+        </div>
     </div>
     <?php else: ?>
         <div class="notice notice-warning"><p>No analytics data available.</p></div>

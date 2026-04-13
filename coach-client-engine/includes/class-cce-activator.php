@@ -156,6 +156,16 @@ class CCE_Activator {
 				visibility varchar(50) DEFAULT 'public',
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_questions (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				question_text text,
+				question_type varchar(50) DEFAULT 'text',
+				is_required tinyint(1) DEFAULT 1,
+				question_order int,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

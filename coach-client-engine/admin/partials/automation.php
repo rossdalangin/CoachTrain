@@ -74,11 +74,15 @@
                     <?php
                     $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
                     if ($rules): foreach ($rules as $rule): ?>
-                    <tr>
+                    <tr id="rule-row-<?php echo $rule->id; ?>"
+                        data-trigger="<?php echo esc_attr($rule->trigger_event); ?>"
+                        data-action="<?php echo esc_attr($rule->action_type); ?>"
+                        data-config='<?php echo esc_attr($rule->config); ?>'>
                         <td><code><?php echo esc_html($rule->trigger_event); ?></code></td>
                         <td><strong><?php echo esc_html(strtoupper(str_replace('_', ' ', $rule->action_type))); ?></strong></td>
                         <td><?php echo $rule->is_active ? 'Active' : 'Inactive'; ?></td>
                         <td>
+                            <button class="button button-small cce-edit-rule" data-rule-id="<?php echo $rule->id; ?>">Edit</button>
                             <button class="button button-link-delete cce-delete-rule" data-rule-id="<?php echo $rule->id; ?>" style="color:#d63638;">Delete</button>
                         </td>
                     </tr>
@@ -143,16 +147,85 @@
                 <tbody>
                     <?php
                     $templates = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC");
-                    foreach($templates as $t) echo "<tr>
+                    foreach($templates as $t) echo "<tr id='template-row-{$t->id}'
+                        data-name='" . esc_attr($t->name) . "'
+                        data-subject='" . esc_attr($t->subject) . "'
+                        data-content='" . esc_attr($t->content) . "'>
                         <td><strong>" . esc_html($t->name) . "</strong></td>
                         <td>" . esc_html($t->subject) . "</td>
                         <td>" . esc_html($t->created_at) . "</td>
-                        <td><button class='button button-link-delete cce-delete-template' data-id='" . esc_attr($t->id) . "' style='color:#d63638;'>Delete</button></td>
+                        <td>
+                            <button class='button button-small cce-edit-template' data-id='" . esc_attr($t->id) . "'>Edit</button>
+                            <button class='button button-link-delete cce-delete-template' data-id='" . esc_attr($t->id) . "' style='color:#d63638;'>Delete</button>
+                        </td>
                     </tr>";
                     if(!$templates) echo "<tr><td colspan='4'>No templates yet.</td></tr>";
                     ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Edit Rule Modal -->
+    <div id="cce-edit-rule-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:500px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Edit Automation Rule</h2>
+            <form id="cce-edit-rule-form">
+                <input type="hidden" id="edit-rule-id">
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <div>
+                        <label>When this happens...</label><br>
+                        <select id="edit-rule-trigger" class="widefat" required>
+                            <option value="cce_lead_created">New Lead Captured</option>
+                            <option value="cce_booking_confirmed">Consultation Booked</option>
+                            <option value="cce_payment_completed">Payment Received</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Do this...</label><br>
+                        <select id="edit-rule-action" class="widefat" required>
+                            <option value="send_email">Send Email</option>
+                            <option value="move_stage">Move to CRM Stage</option>
+                            <option value="schedule_reminder">Schedule Reminder</option>
+                        </select>
+                    </div>
+                    <div id="edit-action-config-stage">
+                        <label>Target Stage</label><br>
+                        <select id="edit-config-stage-id" class="widefat">
+                            <?php foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>"; ?>
+                        </select>
+                    </div>
+                    <div id="edit-action-config-reminder">
+                        <label>Delay (Hours)</label><br>
+                        <input type="number" id="edit-config-delay" class="widefat">
+                    </div>
+                    <div id="edit-action-config-email">
+                        <label>Select Template</label><br>
+                        <select id="edit-config-template-id" class="widefat">
+                            <option value="">Default Welcome Email</option>
+                            <?php foreach($templates as $t) echo "<option value='{$t->id}'>{$t->name}</option>"; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="button button-primary">Update Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Template Modal -->
+    <div id="cce-edit-template-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:5% auto; padding:25px; width:600px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Edit Email Template</h2>
+            <form id="cce-edit-template-form">
+                <input type="hidden" id="edit-template-id">
+                <p><label>Template Name</label><br><input type="text" id="edit-template-name" class="widefat" required></p>
+                <p><label>Email Subject</label><br><input type="text" id="edit-template-subject" class="widefat" required></p>
+                <p><label>Email Content</label><br>
+                <textarea id="edit-template-content" rows="10" class="widefat" required></textarea></p>
+                <button type="submit" class="button button-primary">Update Template</button>
+            </form>
         </div>
     </div>
 </div>

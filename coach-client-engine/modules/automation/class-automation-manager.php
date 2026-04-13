@@ -37,6 +37,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'delete_rule' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+            array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_rule' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 
         register_rest_route( $this->namespace, '/automation/templates', array(
@@ -117,6 +122,23 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         $id = absint( $request['id'] );
         $wpdb->delete( "{$wpdb->prefix}cce_email_templates", array( 'id' => $id ) );
         return $this->success( array( 'message' => 'Template deleted' ) );
+    }
+
+    /**
+     * Update automation rule.
+     */
+    public function update_rule( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $params = $request->get_params();
+
+        $wpdb->update( "{$wpdb->prefix}cce_automation_rules", array(
+            'trigger_event' => sanitize_text_field( $params['trigger_event'] ),
+            'action_type'   => sanitize_text_field( $params['action_type'] ),
+            'config'        => json_encode( $params['config'] ?? array() ),
+        ), array( 'id' => $id ) );
+
+        return $this->success( array( 'message' => 'Rule updated' ) );
     }
 
     /**

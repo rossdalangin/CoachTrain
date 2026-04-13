@@ -27,7 +27,72 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.cce-edit-template', function() {
-        // Implementation for editing email templates could go here
+        const id = $(this).data('id');
+        const $row = $('#template-row-' + id);
+        $('#edit-template-id').val(id);
+        $('#edit-template-name').val($row.data('name'));
+        $('#edit-template-subject').val($row.data('subject'));
+        $('#edit-template-content').val($row.data('content'));
+        $('#cce-edit-template-modal').show();
+    });
+
+    $('#cce-edit-template-form').on('submit', function(e) {
+        e.preventDefault();
+        const id = $('#edit-template-id').val();
+        const data = {
+            name: $('#edit-template-name').val(),
+            subject: $('#edit-template-subject').val(),
+            content: $('#edit-template-content').val()
+        };
+        cceApi('automation/templates/' + id, 'POST', JSON.stringify(data), function(res) {
+            if(res.success) location.reload();
+        });
+    });
+
+    $(document).on('click', '.cce-edit-rule', function() {
+        const id = $(this).data('rule-id');
+        const $row = $('#rule-row-' + id);
+        const config = $row.data('config');
+
+        $('#edit-rule-id').val(id);
+        $('#edit-rule-trigger').val($row.data('trigger'));
+        $('#edit-rule-action').val($row.data('action')).change();
+
+        if ($row.data('action') === 'move_stage') {
+            $('#edit-config-stage-id').val(config.stage_id);
+        } else if ($row.data('action') === 'schedule_reminder') {
+            $('#edit-config-delay').val(config.delay_hours);
+        } else if ($row.data('action') === 'send_email') {
+            $('#edit-config-template-id').val(config.template_id);
+        }
+
+        $('#cce-edit-rule-modal').show();
+    });
+
+    $('#edit-rule-action').on('change', function() {
+        const val = $(this).val();
+        $('#edit-action-config-email').toggle(val === 'send_email');
+        $('#edit-action-config-stage').toggle(val === 'move_stage');
+        $('#edit-action-config-reminder').toggle(val === 'schedule_reminder');
+    });
+
+    $('#cce-edit-rule-form').on('submit', function(e) {
+        e.preventDefault();
+        const id = $('#edit-rule-id').val();
+        const action = $('#edit-rule-action').val();
+        const data = {
+            trigger_event: $('#edit-rule-trigger').val(),
+            action_type: action,
+            config: {
+                template_id: $('#edit-config-template-id').val(),
+                stage_id: $('#edit-config-stage-id').val(),
+                delay_hours: $('#edit-config-delay').val()
+            }
+        };
+        // Reuse create rule endpoint if it supports ID or create a new one
+        cceApi('automation/rules/' + id, 'POST', JSON.stringify(data), function(res) {
+            if(res.success) location.reload();
+        });
     });
 
     $(document).on('click', '.cce-edit-testimonial', function() {
@@ -222,7 +287,7 @@ jQuery(document).ready(function($) {
 
     // Modals: Close
     $(document).on('click', '.cce-modal-close', function() {
-        $('#cce-leads-modal, #cce-edit-lead-modal, #cce-edit-offer-modal, #cce-add-step-modal, #cce-step-config-modal, #cce-manage-stages-modal, #cce-questionnaire-modal').hide();
+        $('#cce-leads-modal, #cce-edit-lead-modal, #cce-edit-offer-modal, #cce-add-step-modal, #cce-step-config-modal, #cce-manage-stages-modal, #cce-questionnaire-modal, #cce-edit-template-modal, #cce-edit-rule-modal').hide();
     });
 
     // CRM: Stage Update
@@ -571,5 +636,47 @@ jQuery(document).ready(function($) {
         cceApi('automation/templates', 'POST', JSON.stringify(data), function(res) {
             if(res.success) location.reload();
         });
+    });
+
+    // Leads: Import CSV
+    $('#cce-start-import').on('click', function() {
+        const file = $('#cce-import-csv')[0].files[0];
+        if (!file) {
+            alert('Please select a CSV file.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            const leads = [];
+
+            lines.forEach((line, index) => {
+                if (index === 0 && line.toLowerCase().includes('email')) return; // Skip header
+                const parts = line.split(',');
+                if (parts.length >= 3) {
+                    leads.push({
+                        first_name: parts[0].trim(),
+                        last_name: parts[1].trim(),
+                        email: parts[2].trim()
+                    });
+                }
+            });
+
+            if (leads.length === 0) {
+                alert('No valid leads found in CSV.');
+                return;
+            }
+
+            $('#import-status').text('Importing ' + leads.length + ' leads...');
+            cceApi('leads/import', 'POST', JSON.stringify({ leads: leads }), function(res) {
+                if (res.success) {
+                    alert('Successfully imported ' + res.data.count + ' leads!');
+                    location.reload();
+                }
+            });
+        };
+        reader.readAsText(file);
     });
 });

@@ -60,7 +60,47 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/leads/import', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'import_leads' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Import leads from CSV data.
+     */
+    public function import_leads( $request ) {
+        global $wpdb;
+        $leads = $request->get_param( 'leads' );
+        if ( ! is_array( $leads ) ) return $this->error( 'Invalid data' );
+
+        $count = 0;
+        foreach ( $leads as $lead ) {
+            $email = sanitize_email( $lead['email'] ?? '' );
+            if ( ! $email ) continue;
+
+            // Check if exists
+            $exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE email = %s", $email ) );
+            if ( $exists ) continue;
+
+            $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
+                'first_name'   => sanitize_text_field( $lead['first_name'] ?? '' ),
+                'last_name'    => sanitize_text_field( $lead['last_name'] ?? '' ),
+                'email'        => $email,
+                'status'       => 'cold',
+                'crm_stage_id' => 1,
+                'secure_token' => bin2hex( random_bytes( 32 ) ),
+                'source'       => 'Imported'
+            ) );
+            $count++;
+        }
+
+        return $this->success( array( 'count' => $count ) );
+    }
 
     /**
      * Update lead.

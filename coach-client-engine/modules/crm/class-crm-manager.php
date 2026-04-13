@@ -232,8 +232,11 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         $subject = 'Regarding your coaching application';
         $mailer->send( $lead->email, $subject, wpautop( $message ) );
 
-        // Automatically move to 'Contacted' stage (ID 2)
-        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => 2 ), array( 'id' => $lead_id ) );
+        // Automatically move to 'Contacted' stage dynamically
+        $contacted_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Contacted%' LIMIT 1" );
+        if ( $contacted_stage_id ) {
+            $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $contacted_stage_id ), array( 'id' => $lead_id ) );
+        }
 
         CCE_Activity_Logger::log( $lead_id, 'contacted', 'Manual email sent: ' . $message );
 
