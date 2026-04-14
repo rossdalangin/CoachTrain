@@ -35,7 +35,16 @@ class CCE_Questions_Manager extends CCE_REST_Controller {
      */
     public function get_questions( $request ) {
         global $wpdb;
-        $questions = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_questions ORDER BY question_order ASC" );
+        $user_id = 0;
+        $token = $_COOKIE['cce_lead_token'] ?? '';
+        if ( $token ) {
+            $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+        }
+        if ( ! $user_id && current_user_can( 'manage_options' ) ) {
+            $user_id = get_current_user_id();
+        }
+
+        $questions = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_questions WHERE user_id = %d ORDER BY question_order ASC", $user_id ) );
         return $this->success( $questions );
     }
 
@@ -44,10 +53,12 @@ class CCE_Questions_Manager extends CCE_REST_Controller {
      */
     public function create_question( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
-        $order = (int) $wpdb->get_var( "SELECT MAX(question_order) FROM {$wpdb->prefix}cce_questions" ) + 1;
+        $order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(question_order) FROM {$wpdb->prefix}cce_questions WHERE user_id = %d", $user_id ) ) + 1;
 
         $wpdb->insert( "{$wpdb->prefix}cce_questions", array(
+            'user_id'       => $user_id,
             'question_text' => sanitize_text_field( $params['question_text'] ),
             'question_type' => sanitize_text_field( $params['question_type'] ?? 'text' ),
             'is_required'   => (int) ($params['is_required'] ?? 1),
@@ -63,7 +74,8 @@ class CCE_Questions_Manager extends CCE_REST_Controller {
     public function delete_question( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_questions", array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_questions", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Question deleted' ) );
     }
 }

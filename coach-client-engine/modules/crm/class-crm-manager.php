@@ -338,9 +338,34 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 		global $wpdb;
         $user_id = $this->get_current_user_id();
 		$table_name = $wpdb->prefix . 'cce_crm_stages';
-		$stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
+
+        $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
+
+        if ( empty( $stages ) && $user_id > 0 ) {
+            $this->seed_default_stages( $user_id );
+            $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
+        }
+
 		return $this->success( $stages );
 	}
+
+    /**
+     * Seed default stages for a user.
+     */
+    private function seed_default_stages( $user_id ) {
+        global $wpdb;
+        $stages = ['New', 'Contacted', 'Booked', 'Closed'];
+        foreach ( $stages as $index => $stage ) {
+            $wpdb->insert(
+                "{$wpdb->prefix}cce_crm_stages",
+                [
+                    'user_id'     => $user_id,
+                    'name'        => $stage,
+                    'stage_order' => $index + 1
+                ]
+            );
+        }
+    }
 
     /**
      * Get Pipeline (Leads grouped by stages).

@@ -92,6 +92,12 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 			'status'         => 'pending',
 		) );
 
+        // Track Conversion if in funnel
+        $step_id = absint( $_COOKIE['cce_active_funnel_step'] ?? 0 );
+        if ( $step_id ) {
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET conversions = conversions + 1 WHERE id = %d", $step_id ) );
+        }
+
 		return $this->success( array(
             'message'      => 'Redirecting to gateway...',
             'redirect_url' => $redirect_url,

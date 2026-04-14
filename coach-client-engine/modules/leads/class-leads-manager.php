@@ -90,6 +90,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
 
             $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
+                'user_id'      => get_current_user_id(),
                 'first_name'   => sanitize_text_field( $lead['first_name'] ?? '' ),
                 'last_name'    => sanitize_text_field( $lead['last_name'] ?? '' ),
                 'email'        => $email,
@@ -230,6 +231,12 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		}
 
 		$lead_id = $wpdb->insert_id;
+
+        // Track Conversion if in funnel
+        $step_id = absint( $_COOKIE['cce_active_funnel_step'] ?? 0 );
+        if ( $step_id ) {
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET conversions = conversions + 1 WHERE id = %d", $step_id ) );
+        }
 		$data['id'] = $lead_id;
 
         // Log activity

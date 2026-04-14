@@ -28,7 +28,7 @@ class CCE_Public {
 
         $offer_id = absint( $atts['offer_id'] );
         $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $offer_id ) );
-        $user_id = $atts['user_id'] ?: ( $offer ? $offer->user_id : 0 );
+        $user_id = $atts['user_id'] ?: ( $offer ? $offer->user_id : get_the_author_meta( 'ID' ) );
 
         $currency_code = get_option('cce_currency', 'USD');
         $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
@@ -126,6 +126,7 @@ class CCE_Public {
             $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET visits = visits + 1 WHERE id = %d", $current_step->id ) );
             // Store funnel title in cookie for lead source
             setcookie('cce_funnel_source', $funnel_id, time() + HOUR_IN_SECONDS, '/');
+            setcookie('cce_active_funnel_step', $current_step->id, time() + HOUR_IN_SECONDS, '/');
         }
 
         $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
@@ -281,7 +282,7 @@ class CCE_Public {
 		), $atts );
 
         $type = sanitize_text_field( $atts['type'] );
-        $user_id = absint( $atts['user_id'] );
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		ob_start();
 
         $query = "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND type = %s";
@@ -342,7 +343,7 @@ class CCE_Public {
 		), $atts );
 
 		ob_start();
-        $user_id = absint( $atts['user_id'] );
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
@@ -447,12 +448,13 @@ class CCE_Public {
 		), $atts );
 
 		ob_start();
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		$wrapper_class = 'cce-lead-form-wrapper cce-form-' . esc_attr( $atts['type'] );
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form class="cce-public-lead-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
-                <input type="hidden" name="user_id" value="<?php echo esc_attr( $atts['user_id'] ); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 				<input type="text" name="first_name" placeholder="First Name" required>
 				<input type="email" name="email" placeholder="Email Address" required>
 				<button type="submit" class="button">Send Me the Guide</button>

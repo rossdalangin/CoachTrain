@@ -40,11 +40,11 @@ class CCE_Webhooks_Controller extends CCE_REST_Controller {
             $wpdb->update(
                 "{$wpdb->prefix}cce_payments",
                 array( 'status' => 'completed', 'transaction_id' => $intent_id ),
-                array( 'transaction_id' => 'PENDING_' . $intent_id ) // Simplified lookup logic
+                array( 'status' => 'pending' ) // More robust lookup if transaction_id was custom
             );
 
             // Trigger automation
-            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s", $intent_id ) );
+            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id, user_id FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s", $intent_id ) );
             if ( $payment ) {
                 do_action( 'cce_payment_completed', $payment->lead_id );
                 CCE_Activity_Logger::log( $payment->lead_id, 'payment', 'High-ticket offer purchase completed via Stripe' );

@@ -65,7 +65,7 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
 			'bookings_today'  => (int) $bookings_count,
 			'revenue_today'   => (float) ($revenue ?? 0),
             'sales_today'     => (int) $sales_count,
-            'total_visitors'  => (int) get_option( 'cce_total_visitors', 0 ),
+            'total_visitors'  => (int) get_user_meta( $user_id, 'cce_total_visitors', true ),
             'total_leads'     => $total_leads,
             'total_bookings'  => $total_bookings,
             'total_clients'   => $total_clients,
@@ -75,7 +75,7 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             'projections'     => $this->get_projections(),
             'pending_tasks'   => $this->get_pending_tasks(),
             'pipeline'        => array(
-                array( 'label' => 'Total Visitors', 'value' => (int) get_option( 'cce_total_visitors', 0 ) ),
+                array( 'label' => 'Total Visitors', 'value' => (int) get_user_meta( $user_id, 'cce_total_visitors', true ) ),
                 array( 'label' => 'Captured Leads', 'value' => $total_leads ),
                 array( 'label' => 'Bookings', 'value' => $total_bookings ),
                 array( 'label' => 'Closed Clients', 'value' => $total_clients ),

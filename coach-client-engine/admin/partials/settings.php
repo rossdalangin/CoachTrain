@@ -16,11 +16,11 @@
             <table class="form-table">
                 <tr>
                     <th scope="row">License Key</th>
-                    <td><input type="text" name="license_key" value="<?php echo esc_attr( get_option('cce_license_key') ); ?>" class="regular-text"></td>
+                    <td><input type="text" name="license_key" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_license_key', true ) ?: get_option('cce_license_key') ); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
                     <th scope="row">Coach Name</th>
-                    <td><input type="text" name="coach_name" value="<?php echo esc_attr( get_option('cce_coach_name') ); ?>" class="regular-text"></td>
+                    <td><input type="text" name="coach_name" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_coach_name', true ) ?: get_option('cce_coach_name') ); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
                     <th scope="row">Default Currency</th>
@@ -28,7 +28,7 @@
                         <select name="default_currency">
                             <?php
                             $currencies = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
-                            $current = get_option('cce_currency', 'USD');
+                            $current = get_user_meta( get_current_user_id(), 'cce_currency', true ) ?: get_option('cce_currency', 'USD');
                             foreach ($currencies as $code => $symbol) {
                                 printf('<option value="%s" %s>%s (%s)</option>', $code, selected($current, $code, false), $code, $symbol);
                             }
@@ -43,15 +43,15 @@
             <table class="form-table">
                 <tr>
                     <th scope="row">Stripe Secret Key</th>
-                    <td><input type="password" name="stripe_api_key" value="<?php echo esc_attr( get_option('cce_stripe_api_key') ); ?>" class="regular-text"></td>
+                    <td><input type="password" name="stripe_api_key" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_stripe_api_key', true ) ?: get_option('cce_stripe_api_key') ); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
                     <th scope="row">Stripe Webhook Secret</th>
-                    <td><input type="password" name="stripe_webhook_secret" value="<?php echo esc_attr( get_option('cce_stripe_webhook_secret') ); ?>" class="regular-text"></td>
+                    <td><input type="password" name="stripe_webhook_secret" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_stripe_webhook_secret', true ) ?: get_option('cce_stripe_webhook_secret') ); ?>" class="regular-text"></td>
                 </tr>
                 <tr>
                     <th scope="row">PayPal Client ID</th>
-                    <td><input type="text" name="paypal_client_id" value="<?php echo esc_attr( get_option('cce_paypal_client_id') ); ?>" class="regular-text"></td>
+                    <td><input type="text" name="paypal_client_id" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_paypal_client_id', true ) ?: get_option('cce_paypal_client_id') ); ?>" class="regular-text"></td>
                 </tr>
             </table>
         </div>
@@ -60,7 +60,7 @@
             <table class="form-table">
                 <tr>
                     <th scope="row">Primary Color</th>
-                    <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_option('cce_primary_color', '#0073aa') ); ?>"></td>
+                    <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_primary_color', true ) ?: get_option('cce_primary_color', '#0073aa') ); ?>"></td>
                 </tr>
             </table>
         </div>

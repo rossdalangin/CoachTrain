@@ -75,9 +75,12 @@ class Coach_Client_Engine {
      * Track visitor.
      */
     public function track_visitor() {
-        if ( is_admin() ) return;
-        $count = (int) get_option( 'cce_total_visitors', 0 );
-        update_option( 'cce_total_visitors', $count + 1 );
+        if ( is_admin() || ! is_singular() ) return;
+        $post_author = get_the_author_meta( 'ID' );
+        if ( $post_author ) {
+            $count = (int) get_user_meta( $post_author, 'cce_total_visitors', true );
+            update_user_meta( $post_author, 'cce_total_visitors', $count + 1 );
+        }
     }
 
     /**
@@ -135,7 +138,8 @@ class Coach_Client_Engine {
 	 * Check if the plugin has a valid pro license.
 	 */
 	public function is_pro() {
-		$license_key = get_option( 'cce_license_key' );
+        $user_id = get_current_user_id();
+		$license_key = get_user_meta( $user_id, 'cce_license_key', true ) ?: get_option( 'cce_license_key' );
 		// Simple mock check for demonstration
 		return ! empty( $license_key ) && strpos( $license_key, 'PRO-' ) === 0;
 	}
@@ -148,13 +152,18 @@ class Coach_Client_Engine {
             array(
                 'methods'             => 'GET',
                 'callback'            => function() {
+                    $user_id = get_current_user_id();
                     return array(
                         'success' => true,
                         'data'    => array(
-                            'license_key'    => get_option( 'cce_license_key', '' ),
-                            'stripe_api_key' => get_option( 'cce_stripe_api_key', '' ),
-                            'paypal_client_id' => get_option( 'cce_paypal_client_id', '' ),
-                            'onboarding_step' => (int) get_option( 'cce_onboarding_step', 1 ),
+                            'license_key'    => get_user_meta( $user_id, 'cce_license_key', true ) ?: get_option( 'cce_license_key', '' ),
+                            'stripe_api_key' => get_user_meta( $user_id, 'cce_stripe_api_key', true ) ?: get_option( 'cce_stripe_api_key', '' ),
+                            'stripe_webhook_secret' => get_user_meta( $user_id, 'cce_stripe_webhook_secret', true ) ?: get_option( 'cce_stripe_webhook_secret', '' ),
+                            'paypal_client_id' => get_user_meta( $user_id, 'cce_paypal_client_id', true ) ?: get_option( 'cce_paypal_client_id', '' ),
+                            'onboarding_step' => (int) get_user_meta( $user_id, 'cce_onboarding_step', true ) ?: (int) get_option( 'cce_onboarding_step', 1 ),
+                            'primary_color' => get_user_meta( $user_id, 'cce_primary_color', true ) ?: get_option( 'cce_primary_color', '#0073aa' ),
+                            'coach_name' => get_user_meta( $user_id, 'cce_coach_name', true ) ?: get_option( 'cce_coach_name', '' ),
+                            'default_currency' => get_user_meta( $user_id, 'cce_currency', true ) ?: get_option( 'cce_currency', 'USD' ),
                         )
                     );
                 },
@@ -163,27 +172,28 @@ class Coach_Client_Engine {
             array(
                 'methods'             => 'POST',
                 'callback'            => function( $request ) {
+                    $user_id = get_current_user_id();
                     $params = $request->get_params();
                     if ( isset( $params['license_key'] ) ) {
-                        update_option( 'cce_license_key', sanitize_text_field( $params['license_key'] ) );
+                        update_user_meta( $user_id, 'cce_license_key', sanitize_text_field( $params['license_key'] ) );
                     }
                     if ( isset( $params['stripe_api_key'] ) ) {
-                        update_option( 'cce_stripe_api_key', sanitize_text_field( $params['stripe_api_key'] ) );
+                        update_user_meta( $user_id, 'cce_stripe_api_key', sanitize_text_field( $params['stripe_api_key'] ) );
                     }
                     if ( isset( $params['stripe_webhook_secret'] ) ) {
-                        update_option( 'cce_stripe_webhook_secret', sanitize_text_field( $params['stripe_webhook_secret'] ) );
+                        update_user_meta( $user_id, 'cce_stripe_webhook_secret', sanitize_text_field( $params['stripe_webhook_secret'] ) );
                     }
                     if ( isset( $params['onboarding_step'] ) ) {
-                        update_option( 'cce_onboarding_step', absint( $params['onboarding_step'] ) );
+                        update_user_meta( $user_id, 'cce_onboarding_step', absint( $params['onboarding_step'] ) );
                     }
                     if ( isset( $params['primary_color'] ) ) {
-                        update_option( 'cce_primary_color', sanitize_hex_color( $params['primary_color'] ) );
+                        update_user_meta( $user_id, 'cce_primary_color', sanitize_hex_color( $params['primary_color'] ) );
                     }
                     if ( isset( $params['coach_name'] ) ) {
-                        update_option( 'cce_coach_name', sanitize_text_field( $params['coach_name'] ) );
+                        update_user_meta( $user_id, 'cce_coach_name', sanitize_text_field( $params['coach_name'] ) );
                     }
                     if ( isset( $params['default_currency'] ) ) {
-                        update_option( 'cce_currency', sanitize_text_field( $params['default_currency'] ) );
+                        update_user_meta( $user_id, 'cce_currency', sanitize_text_field( $params['default_currency'] ) );
                     }
                     return array( 'success' => true );
                 },
