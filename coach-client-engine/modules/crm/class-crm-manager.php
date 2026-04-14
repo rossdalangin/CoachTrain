@@ -36,7 +36,7 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
             array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_stage' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -44,7 +44,7 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/tasks/(?P<task_id>\d+)', array(
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_task' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -124,12 +124,15 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         global $wpdb;
         $lead_id = absint( $request['id'] );
 
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT source, created_at FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
         $total_paid = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
         $appointments = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d", $lead_id ) );
         $tasks_total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d", $lead_id ) );
         $tasks_done = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
 
         return $this->success( array(
+            'source'       => $lead->source ?? 'Direct',
+            'created_at'   => $lead->created_at,
             'total_paid'   => (float) ($total_paid ?: 0),
             'appointments' => (int) $appointments,
             'tasks_done'   => (int) $tasks_done,
@@ -254,6 +257,9 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id ) );
 
         CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead moved to stage ID: ' . $stage_id );
+
+        // Trigger action for automation
+        do_action( 'cce_lead_stage_changed', $lead_id, $stage_id );
 
         return $this->success( array( 'message' => 'Stage updated' ) );
     }

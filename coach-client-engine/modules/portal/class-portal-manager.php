@@ -55,6 +55,7 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
 
         $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
             'title'      => sanitize_text_field( $params['title'] ),
+            'category'   => sanitize_text_field( $params['category'] ?? 'Uncategorized' ),
             'type'       => sanitize_text_field( $params['type'] ),
             'url'        => esc_url_raw( $params['url'] ),
             'visibility' => sanitize_text_field( $params['visibility'] ?? 'public' ),

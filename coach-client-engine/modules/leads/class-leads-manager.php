@@ -55,7 +55,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_lead' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),

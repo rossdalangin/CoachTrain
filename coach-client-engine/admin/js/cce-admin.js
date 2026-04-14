@@ -55,7 +55,7 @@ jQuery(document).ready(function($) {
         const config = $row.data('config');
 
         $('#edit-rule-id').val(id);
-        $('#edit-rule-trigger').val($row.data('trigger'));
+        $('#edit-rule-trigger').val($row.data('trigger')).change();
         $('#edit-rule-action').val($row.data('action')).change();
 
         if ($row.data('action') === 'move_stage') {
@@ -69,6 +69,14 @@ jQuery(document).ready(function($) {
         }
 
         $('#cce-edit-rule-modal').show();
+    });
+
+    $('#rule-trigger-event').on('change', function() {
+        $('#trigger-config-stage').toggle($(this).val() === 'cce_lead_stage_changed');
+    });
+
+    $('#edit-rule-trigger').on('change', function() {
+        $('#edit-trigger-config-stage').toggle($(this).val() === 'cce_lead_stage_changed');
     });
 
     $('#edit-rule-action').on('change', function() {
@@ -87,6 +95,7 @@ jQuery(document).ready(function($) {
             trigger_event: $('#edit-rule-trigger').val(),
             action_type: action,
             config: {
+                trigger_stage_id: $('#edit-config-trigger-stage-id').val(),
                 template_id: $('#edit-config-template-id').val(),
                 stage_id: $('#edit-config-stage-id').val(),
                 delay_hours: $('#edit-config-delay').val(),
@@ -178,7 +187,11 @@ jQuery(document).ready(function($) {
         cceApi('crm/leads/' + leadId + '/stats', 'GET', {}, function(res) {
             if (res.success) {
                 const s = res.data;
-                let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                let html = `
+                <div style="margin-bottom:15px; font-size:12px; color:#666;">
+                    <strong>Source:</strong> ${s.source} | <strong>Joined:</strong> ${s.created_at}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div class="cce-card" style="border-top:2px solid #0073aa; padding:15px;">
                         <small>TOTAL PAID</small><div style="font-size:20px; font-weight:bold;">$${s.total_paid.toFixed(2)}</div>
                     </div>
@@ -394,6 +407,7 @@ jQuery(document).ready(function($) {
         $('#edit-lead-first-name').val($row.data('first-name'));
         $('#edit-lead-last-name').val($row.data('last-name'));
         $('#edit-lead-email').val($row.data('email'));
+        $('#edit-lead-phone').val($row.data('phone'));
         $('#edit-lead-status').val($row.data('status'));
         $('#cce-edit-lead-modal').show();
     });
@@ -405,6 +419,7 @@ jQuery(document).ready(function($) {
             first_name: $('#edit-lead-first-name').val(),
             last_name: $('#edit-lead-last-name').val(),
             email: $('#edit-lead-email').val(),
+            phone: $('#edit-lead-phone').val(),
             status: $('#edit-lead-status').val()
         };
         cceApi('leads/' + id, 'POST', data, function(res) {
@@ -620,6 +635,7 @@ jQuery(document).ready(function($) {
             trigger_event: formData.get('trigger_event'),
             action_type: formData.get('action_type'),
             config: {
+                trigger_stage_id: formData.get('config[trigger_stage_id]'),
                 template_id: formData.get('config[template_id]'),
                 stage_id: formData.get('config[stage_id]'),
                 delay_hours: formData.get('config[delay_hours]'),

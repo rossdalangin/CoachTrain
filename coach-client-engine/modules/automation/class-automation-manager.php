@@ -11,6 +11,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         add_action( 'cce_lead_created', array( $this, 'trigger_automation' ) );
         add_action( 'cce_booking_confirmed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_payment_completed', array( $this, 'trigger_automation' ) );
+        add_action( 'cce_lead_stage_changed', array( $this, 'trigger_automation' ), 10, 2 );
         add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
     }
 
@@ -38,7 +39,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
             array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_rule' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -64,7 +65,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
             array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_template' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -178,7 +179,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 	/**
 	 * Trigger automation.
 	 */
-	public function trigger_automation( $id ) {
+	public function trigger_automation( $id, $arg2 = null ) {
         global $wpdb;
         $hook = current_action();
 
@@ -188,7 +189,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         ) );
 
         foreach ( $rules as $rule ) {
-            $this->execute_rule( $rule, $id, $hook );
+            $this->execute_rule( $rule, $id, $hook, $arg2 );
         }
 
         // Keep legacy defaults if no rules found for simple setup
@@ -222,18 +223,24 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
     /**
      * Execute specific rule.
      */
-    private function execute_rule( $rule, $source_id, $hook ) {
+    private function execute_rule( $rule, $source_id, $hook, $arg2 = null ) {
         global $wpdb;
         $config = json_decode( $rule->config, true );
 
         // Resolve lead_id based on hook
         $lead_id = 0;
-        if ( 'cce_lead_created' === $hook ) {
+        if ( 'cce_lead_created' === $hook || 'cce_payment_completed' === $hook || 'cce_lead_stage_changed' === $hook ) {
             $lead_id = $source_id;
         } elseif ( 'cce_booking_confirmed' === $hook ) {
             $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $source_id ) );
-        } elseif ( 'cce_payment_completed' === $hook ) {
-            $lead_id = $source_id;
+        }
+
+        // For stage changed, check if target stage matches config
+        if ( 'cce_lead_stage_changed' === $hook ) {
+            $target_stage_id = absint( $config['trigger_stage_id'] ?? 0 );
+            if ( $target_stage_id && absint( $arg2 ) !== $target_stage_id ) {
+                return;
+            }
         }
 
         if ( ! $lead_id ) return;

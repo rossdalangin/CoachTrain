@@ -32,10 +32,11 @@
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_save_lead">
             <?php wp_nonce_field('cce_save_lead_nonce'); ?>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <input type="text" name="first_name" placeholder="First Name" required>
                 <input type="text" name="last_name" placeholder="Last Name" required>
                 <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="phone" placeholder="Phone">
                 <button type="submit" class="button button-primary">Add Lead</button>
             </div>
         </form>
@@ -77,6 +78,7 @@
                     data-first-name="<?php echo esc_attr($lead->first_name); ?>"
                     data-last-name="<?php echo esc_attr($lead->last_name); ?>"
                     data-email="<?php echo esc_attr($lead->email); ?>"
+                    data-phone="<?php echo esc_attr($lead->phone); ?>"
                     data-status="<?php echo esc_attr($lead->status); ?>">
                     <td><input type="checkbox" class="cce-lead-checkbox" value="<?php echo $lead->id; ?>"></td>
                     <td><strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong></td>
@@ -104,6 +106,7 @@
                 <p><label>First Name</label><br><input type="text" name="first_name" id="edit-lead-first-name" class="widefat" required></p>
                 <p><label>Last Name</label><br><input type="text" name="last_name" id="edit-lead-last-name" class="widefat" required></p>
                 <p><label>Email</label><br><input type="email" name="email" id="edit-lead-email" class="widefat" required></p>
+                <p><label>Phone</label><br><input type="text" name="phone" id="edit-lead-phone" class="widefat"></p>
                 <p><label>Status</label><br>
                     <select name="status" id="edit-lead-status" class="widefat">
                         <option value="cold">COLD</option>

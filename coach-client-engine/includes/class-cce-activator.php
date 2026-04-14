@@ -151,6 +151,7 @@ class CCE_Activator {
 			"CREATE TABLE {$wpdb->prefix}cce_resources (
 				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 				title varchar(255),
+				category varchar(100) DEFAULT 'Uncategorized',
 				type varchar(50),
 				url varchar(255),
 				visibility varchar(50) DEFAULT 'public',

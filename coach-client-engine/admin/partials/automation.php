@@ -14,10 +14,11 @@
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
                     <div>
                         <label>When this happens...</label><br>
-                        <select name="trigger_event" required>
+                        <select name="trigger_event" id="rule-trigger-event" required>
                             <option value="cce_lead_created">New Lead Captured</option>
                             <option value="cce_booking_confirmed">Consultation Booked</option>
                             <option value="cce_payment_completed">Payment Received</option>
+                            <option value="cce_lead_stage_changed">CRM Stage Changed</option>
                         </select>
                     </div>
                     <div>
@@ -55,6 +56,13 @@
                             $templates = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_email_templates");
                             foreach($templates as $t) echo "<option value='{$t->id}'>{$t->name}</option>";
                             ?>
+                        </select>
+                    </div>
+                    <div id="trigger-config-stage" style="display:none;">
+                        <label>When moved to...</label><br>
+                        <select name="config[trigger_stage_id]">
+                            <option value="">Any Stage</option>
+                            <?php foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>"; ?>
                         </select>
                     </div>
                     <div style="align-self: flex-end;">
@@ -185,6 +193,14 @@
                             <option value="cce_lead_created">New Lead Captured</option>
                             <option value="cce_booking_confirmed">Consultation Booked</option>
                             <option value="cce_payment_completed">Payment Received</option>
+                            <option value="cce_lead_stage_changed">CRM Stage Changed</option>
+                        </select>
+                    </div>
+                    <div id="edit-trigger-config-stage">
+                        <label>When moved to...</label><br>
+                        <select id="edit-config-trigger-stage-id" class="widefat">
+                            <option value="">Any Stage</option>
+                            <?php foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>"; ?>
                         </select>
                     </div>
                     <div>

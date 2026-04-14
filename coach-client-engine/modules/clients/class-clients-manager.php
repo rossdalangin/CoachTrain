@@ -28,7 +28,7 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_offer' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),

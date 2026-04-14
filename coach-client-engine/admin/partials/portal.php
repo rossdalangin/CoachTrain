@@ -10,6 +10,10 @@
                     <label>Title</label><br>
                     <input type="text" name="title" class="widefat" required>
                 </div>
+                <div style="flex:1;">
+                    <label>Category</label><br>
+                    <input type="text" name="category" placeholder="e.g. Training" class="widefat">
+                </div>
                 <div style="width:150px;">
                     <label>Type</label><br>
                     <select name="type" class="widefat">
@@ -68,6 +72,7 @@
             <thead>
                 <tr>
                     <th>Title</th>
+                    <th>Category</th>
                     <th>Type</th>
                     <th>Visibility</th>
                     <th>Actions</th>
@@ -80,6 +85,7 @@
                 if ($resources): foreach ($resources as $r): ?>
                 <tr>
                     <td><strong><?php echo esc_html($r->title); ?></strong></td>
+                    <td><?php echo esc_html($r->category); ?></td>
                     <td><?php echo esc_html($r->type); ?></td>
                     <td><?php echo $r->visibility === 'public' ? 'Public' : 'Clients Only'; ?></td>
                     <td>
@@ -98,24 +104,32 @@
         $('#cce-add-onboarding-task-form').on('submit', function(e) {
             e.preventDefault();
             const data = { task_name: $('#new-onboarding-task-name').val() };
-            $.ajax({
-                url: cceAdmin.restUrl + 'portal/onboarding-tasks',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function() { location.reload(); }
-            });
+            if (typeof cceApi === 'function') {
+                cceApi('portal/onboarding-tasks', 'POST', JSON.stringify(data), () => location.reload());
+            } else {
+                $.ajax({
+                    url: cceAdmin.restUrl + 'portal/onboarding-tasks',
+                    method: 'POST',
+                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function() { location.reload(); }
+                });
+            }
         });
 
         $(document).on('click', '.cce-delete-onboarding-task', function() {
             if(!confirm('Delete onboarding task?')) return;
-            $.ajax({
-                url: cceAdmin.restUrl + 'portal/onboarding-tasks/' + $(this).data('id'),
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function() { location.reload(); }
-            });
+            if (typeof cceApi === 'function') {
+                cceApi('portal/onboarding-tasks/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+            } else {
+                $.ajax({
+                    url: cceAdmin.restUrl + 'portal/onboarding-tasks/' + $(this).data('id'),
+                    method: 'DELETE',
+                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                    success: function() { location.reload(); }
+                });
+            }
         });
 
         $('#cce-add-resource-form').on('submit', function(e) {
@@ -123,24 +137,32 @@
             const data = {};
             $(this).serializeArray().forEach(item => data[item.name] = item.value);
 
-            $.ajax({
-                url: cceAdmin.restUrl + 'portal/resources',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function() { location.reload(); }
-            });
+            if (typeof cceApi === 'function') {
+                cceApi('portal/resources', 'POST', JSON.stringify(data), () => location.reload());
+            } else {
+                $.ajax({
+                    url: cceAdmin.restUrl + 'portal/resources',
+                    method: 'POST',
+                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function() { location.reload(); }
+                });
+            }
         });
 
         $(document).on('click', '.cce-delete-resource', function() {
             if(!confirm('Delete this resource?')) return;
-            $.ajax({
-                url: cceAdmin.restUrl + 'portal/resources/' + $(this).data('id'),
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function() { location.reload(); }
-            });
+            if (typeof cceApi === 'function') {
+                cceApi('portal/resources/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+            } else {
+                $.ajax({
+                    url: cceAdmin.restUrl + 'portal/resources/' + $(this).data('id'),
+                    method: 'DELETE',
+                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                    success: function() { location.reload(); }
+                });
+            }
         });
     });
     </script>

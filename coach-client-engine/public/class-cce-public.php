@@ -187,18 +187,30 @@ class CCE_Public {
                     </div>
 
                     <h4 style="margin-top:30px;">Resources</h4>
-                    <ul style="list-style:none; padding:0;">
-                        <?php if ($resources): foreach ($resources as $r): ?>
-                            <li style="margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:5px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span><strong>[<?php echo esc_html($r->type); ?>]</strong> <?php echo esc_html($r->title); ?></span>
-                                    <a href="<?php echo esc_url($r->url); ?>" class="button button-small" target="_blank">Access</a>
-                                </div>
-                            </li>
-                        <?php endforeach; else: ?>
-                            <li>No resources available at your current level.</li>
-                        <?php endif; ?>
-                    </ul>
+                    <?php
+                    if ($resources):
+                        $categorized = [];
+                        foreach ($resources as $r) {
+                            $cat = $r->category ?: 'General';
+                            $categorized[$cat][] = $r;
+                        }
+                        foreach ($categorized as $cat => $items):
+                        ?>
+                            <h5 style="margin:15px 0 5px; color:#666; text-transform:uppercase; font-size:11px;"><?php echo esc_html($cat); ?></h5>
+                            <ul style="list-style:none; padding:0;">
+                                <?php foreach ($items as $r): ?>
+                                    <li style="margin-bottom:8px; padding:10px; background:#f9f9f9; border-radius:5px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                                            <span><strong>[<?php echo esc_html($r->type); ?>]</strong> <?php echo esc_html($r->title); ?></span>
+                                            <a href="<?php echo esc_url($r->url); ?>" class="button button-small" target="_blank">Access</a>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No resources available at your current level.</p>
+                    <?php endif; ?>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
 					<h4>Your Progress</h4>
