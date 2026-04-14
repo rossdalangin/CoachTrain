@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Funnel Engine</h1>
+    <p class="description">Your Funnel is the bridge between a complete stranger and a happy client. Use the pre-built templates below to launch your acquisition sequence in minutes.</p>
     <hr class="wp-header-end">
 
     <?php
@@ -56,16 +57,22 @@
 
     <div class="cce-card" style="margin-top:20px;">
         <h3>Pre-built Templates</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-            <div class="cce-card" style="border:1px solid #ddd;">
-                <h4>Lead Magnet Funnel</h4>
-                <p>Visitor -> Opt-in -> Thank You</p>
+        <p style="font-size:12px; color:#666;">Each template is designed based on Russell Brunson's DotCom Secrets frameworks for maximum conversion.</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-top:15px;">
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #0073aa;">
+                <h4>🧲 Lead Magnet Funnel</h4>
+                <p style="font-size:11px;">Best for building your email list. Exchange a free PDF or video for their contact info.</p>
                 <button class="button button-primary cce-use-template" data-template="lead_magnet">Use Template</button>
             </div>
-            <div class="cce-card" style="border:1px solid #ddd;">
-                <h4>Consultation Funnel</h4>
-                <p>Visitor -> Opt-in -> Booking -> Thank You</p>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #ffb700;">
+                <h4>📅 Consultation Funnel</h4>
+                <p style="font-size:11px;">The gold standard for high-ticket coaches. Application -> Booking -> Sales Call.</p>
                 <button class="button button-primary cce-use-template" data-template="consultation">Use Template</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #673ab7;">
+                <h4>🎥 Webinar Funnel</h4>
+                <p style="font-size:11px;">Automated selling at scale. Teach for 45 mins then pitch your program.</p>
+                <button class="button button-primary cce-use-template" data-template="webinar">Use Template</button>
             </div>
         </div>
     </div>

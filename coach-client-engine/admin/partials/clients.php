@@ -4,13 +4,17 @@
 
     <div class="cce-card" style="margin-bottom:30px; border-left: 4px solid #ff4136;">
         <h3>💎 Hormozi "Grand Slam" Offer Builder</h3>
+        <p style="font-size:12px; color:#666;">Craft an offer so good people feel stupid saying no. Use the Value Equation below to maximize the perceived value of your coaching.</p>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_save_offer">
             <?php wp_nonce_field('cce_save_offer_nonce'); ?>
             <table class="form-table">
                 <tr>
                     <th scope="row">Offer Title</th>
-                    <td><input type="text" name="title" placeholder="e.g. 90-Day High-Ticket Program" class="regular-text" required></td>
+                    <td>
+                        <input type="text" name="title" placeholder="e.g. 90-Day High-Ticket Program" class="regular-text" required>
+                        <p class="description">Recommended: Use a results-oriented name (e.g., "The Client Acquisition Machine").</p>
+                    </td>
                 </tr>
                 <?php
                 $currency_code = get_option('cce_currency', 'USD');
@@ -33,19 +37,31 @@
                 <tr><th colspan="2" style="padding-bottom:0;"><strong>The Value Equation</strong></th></tr>
                 <tr>
                     <th scope="row">Dream Outcome</th>
-                    <td><textarea name="dream_outcome" placeholder="What will they achieve?" class="large-text" rows="2"></textarea></td>
+                    <td>
+                        <textarea name="dream_outcome" placeholder="e.g. Add $10k/mo to your coaching business in 90 days." class="large-text" rows="2"></textarea>
+                        <p class="description">What is the #1 goal your client wants to achieve? Be specific.</p>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Perceived Likelihood</th>
-                    <td><textarea name="perceived_likelihood" placeholder="Why will it work for them?" class="large-text" rows="2"></textarea></td>
+                    <td>
+                        <textarea name="perceived_likelihood" placeholder="e.g. Step-by-step scripts and weekly 1-on-1 accountability." class="large-text" rows="2"></textarea>
+                        <p class="description">Why will they believe they can actually achieve the outcome with you?</p>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Time Delay</th>
-                    <td><textarea name="time_delay" placeholder="How fast will they see results?" class="large-text" rows="2"></textarea></td>
+                    <td>
+                        <textarea name="time_delay" placeholder="e.g. Your first lead in 48 hours, first client in 14 days." class="large-text" rows="2"></textarea>
+                        <p class="description">How fast will they see a "Small Win"? Shorter is better.</p>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Effort & Sacrifice</th>
-                    <td><textarea name="effort_sacrifice" placeholder="What is removed from their plate?" class="large-text" rows="2"></textarea></td>
+                    <td>
+                        <textarea name="effort_sacrifice" placeholder="e.g. No tech skills required, no cold calling, no complex ads." class="large-text" rows="2"></textarea>
+                        <p class="description">What "pain" are you removing? What do they NOT have to do anymore?</p>
+                    </td>
                 </tr>
             </table>
             <?php submit_button('Create Grand Slam Offer'); ?>

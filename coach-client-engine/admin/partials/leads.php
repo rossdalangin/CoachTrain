@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Leads Management</h1>
+    <p class="description">Your leads are your greatest asset. Manage, tag, and import your contacts here. Use the "Status" tags to prioritize your daily outreach.</p>
     <hr class="wp-header-end">
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
@@ -43,7 +44,7 @@
         </div>
         <div style="flex:1; border-left:1px solid #eee; padding-left:20px;">
             <h3>Import Leads (CSV)</h3>
-            <p style="font-size:12px; color:#666;">Format: <code>first_name,last_name,email</code></p>
+            <p style="font-size:12px; color:#666;">Moving from another CRM? Upload your list here. <br>Format: <code>first_name,last_name,email</code></p>
             <input type="file" id="cce-import-csv" accept=".csv" style="display:block; margin-bottom:10px;">
             <button class="button" id="cce-start-import">Start Import</button>
             <div id="import-status" style="margin-top:10px;"></div>

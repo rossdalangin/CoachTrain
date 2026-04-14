@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Coach Client Engine - Dashboard</h1>
+    <p class="description">Welcome back, fellow consultant. This dashboard is your "Mission Control" for acquiring high-ticket clients. Use these metrics to identify bottlenecks in your funnel and scale your impact.</p>
 
     <?php
     if ( class_exists( 'CCE_Analytics_Manager' ) ) {
@@ -33,19 +34,35 @@
 
     <div class="cce-card" style="margin-bottom:20px; border-left: 4px solid #00a32a;">
         <h3>🚀 Quick Setup Guide</h3>
+        <p style="font-size:12px; color:#666;">Complete these steps to activate your client acquisition machine.</p>
         <div style="display:flex; gap:30px; margin-top:10px;">
             <?php
             global $wpdb;
             $setup_steps = [
-                'License Key' => get_option('cce_license_key'),
-                'Stripe Connected' => get_option('cce_stripe_api_key'),
-                'Lead Magnet' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels"),
-                'Coaching Offer' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers"),
+                'License Key' => [
+                    'check' => get_option('cce_license_key'),
+                    'desc'  => 'Unlock Pro features'
+                ],
+                'Stripe Connected' => [
+                    'check' => get_option('cce_stripe_api_key'),
+                    'desc'  => 'Accept high-ticket payments'
+                ],
+                'Lead Magnet' => [
+                    'check' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels"),
+                    'desc'  => 'Create your first opt-in page'
+                ],
+                'Coaching Offer' => [
+                    'check' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers"),
+                    'desc'  => 'Define your Grand Slam Offer'
+                ],
             ];
-            foreach($setup_steps as $label => $check): ?>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:18px;"><?php echo $check ? '✅' : '❌'; ?></span>
-                    <span style="font-size:13px; color:#555;"><?php echo $label; ?></span>
+            foreach($setup_steps as $label => $data): ?>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:18px;"><?php echo $data['check'] ? '✅' : '❌'; ?></span>
+                        <span style="font-size:13px; font-weight:bold; color:#333;"><?php echo $label; ?></span>
+                    </div>
+                    <small style="font-size:10px; color:#888; padding-left:26px;"><?php echo $data['desc']; ?></small>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -106,6 +123,7 @@
 
     <div class="cce-card" style="margin-top:20px; border-top: 4px solid #673ab7;">
         <h3>📊 Conversion Pipeline</h3>
+        <p style="font-size:12px; color:#666;">This visualization shows the "leakage" in your sales process. Aim for a 20%+ conversion between each stage for maximum profitability.</p>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; position:relative; padding:20px 0;">
             <?php foreach($summary['pipeline'] as $idx => $p): ?>
                 <div style="text-align:center; flex:1; position:relative; z-index:2;">

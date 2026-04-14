@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>CRM & Pipeline</h1>
+    <p class="description">Move leads across your sales pipeline. High engagement scores indicate "Hot" leads that should be contacted immediately.</p>
     <hr class="wp-header-end">
 
     <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
@@ -8,7 +9,10 @@
     </div>
 
     <div id="crm-tab-kanban" class="cce-crm-tab-content">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="background:#fff9e6; border-left:4px solid #ffb700; padding:10px; font-size:12px; color:#856404;">
+                <strong>Pro Tip:</strong> Leads are most likely to convert within the first 5 minutes of opting in. Check your "New" column frequently!
+            </div>
             <button class="button cce-manage-stages-btn">Manage Stages</button>
         </div>
 

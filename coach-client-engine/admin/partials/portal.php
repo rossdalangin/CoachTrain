@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Client Portal Management</h1>
+    <p class="description">The Client Portal is where your clients access their coaching materials. Organize your resources by category and define a clear roadmap for their success.</p>
     <hr class="wp-header-end">
 
     <div class="cce-card" style="margin-bottom:20px;">
@@ -8,11 +9,11 @@
             <div style="display:flex; gap:15px; flex-wrap:wrap;">
                 <div style="flex:1;">
                     <label>Title</label><br>
-                    <input type="text" name="title" class="widefat" required>
+                    <input type="text" name="title" placeholder="e.g. Week 1: Mindset Shift" class="widefat" required>
                 </div>
                 <div style="flex:1;">
                     <label>Category</label><br>
-                    <input type="text" name="category" placeholder="e.g. Training" class="widefat">
+                    <input type="text" name="category" placeholder="e.g. Core Training" class="widefat">
                 </div>
                 <div style="width:150px;">
                     <label>Type</label><br>
@@ -40,8 +41,9 @@
         </form>
     </div>
 
-    <div class="cce-card" style="margin-bottom:20px;">
+    <div class="cce-card" style="margin-bottom:20px; border-left: 4px solid #00a32a;">
         <h3>Onboarding Task Builder</h3>
+        <p style="font-size:12px; color:#666;">These tasks appear as a checklist for new clients. <strong>Recommended:</strong> 'Watch Welcome Video', 'Join Facebook Group', 'Complete Onboarding Survey'.</p>
         <form id="cce-add-onboarding-task-form">
             <div style="display:flex; gap:15px; align-items:center;">
                 <input type="text" id="new-onboarding-task-name" placeholder="Task name (e.g. Join Community)" class="regular-text" required>

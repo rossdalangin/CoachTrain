@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Social Proof & Testimonials</h1>
+    <p class="description">Social proof is the "Logos" of your offer. Use Case Studies for deep-dives into results, and Testimonials for quick emotional wins.</p>
     <hr class="wp-header-end">
 
     <div class="cce-card" style="margin-bottom: 20px;">
@@ -24,7 +25,7 @@
             </div>
             <div style="margin-bottom:15px;">
                 <label>Content</label><br>
-                <textarea name="content" rows="4" style="width:100%; max-width:500px;" required></textarea>
+                <textarea name="content" rows="4" style="width:100%; max-width:500px;" placeholder="e.g. 'I was struggling to find clients, but after working with [Coach Name], I added 3 high-ticket clients in just 2 weeks!'" required></textarea>
             </div>
             <div style="margin-bottom:15px;">
                 <label>Rating (1-5)</label><br>

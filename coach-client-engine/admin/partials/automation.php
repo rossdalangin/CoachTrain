@@ -1,5 +1,6 @@
 <div class="wrap cce-admin-wrap">
     <h1>Automation & Workflows</h1>
+    <p class="description">Automate your business so you can focus on coaching. Link events like "Lead Captured" to actions like "Send Email" or "Move CRM Stage".</p>
     <hr class="wp-header-end">
 
     <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
@@ -142,11 +143,11 @@
         <div class="cce-card" style="margin-bottom:20px;">
             <h3>Create Email Template</h3>
             <form id="cce-add-template-form">
-                <p><label>Template Name</label><br><input type="text" name="name" class="regular-text" required></p>
-                <p><label>Email Subject</label><br><input type="text" name="subject" class="large-text" required></p>
+                <p><label>Template Name</label><br><input type="text" name="name" placeholder="e.g. Welcome & Guide" class="regular-text" required></p>
+                <p><label>Email Subject</label><br><input type="text" name="subject" placeholder="e.g. Your Free Coaching Guide is Here!" class="large-text" required></p>
                 <p><label>Email Content</label><br>
-                <small>Use <code>{{first_name}}</code> for personalization.</small><br>
-                <textarea name="content" rows="10" style="width:100%; border-radius:8px;" required></textarea></p>
+                <small>Use <code>{{first_name}}</code>, <code>{{last_name}}</code>, or <code>{{email}}</code> for personalization.</small><br>
+                <textarea name="content" rows="10" style="width:100%; border-radius:8px;" placeholder="Hi {{first_name}},&#10;&#10;Welcome to the program! Here is your access link: [Link]&#10;&#10;Best,&#10;[Your Name]" required></textarea></p>
                 <button type="submit" class="button button-primary">Save Template</button>
             </form>
         </div>
