@@ -10,14 +10,15 @@
                     <option value="">Select Customer...</option>
                     <?php
                     global $wpdb;
-                    $leads = $wpdb->get_results("SELECT id, first_name, last_name FROM {$wpdb->prefix}cce_leads");
+                    $user_id = get_current_user_id();
+                    $leads = $wpdb->get_results($wpdb->prepare("SELECT id, first_name, last_name FROM {$wpdb->prefix}cce_leads WHERE user_id = %d", $user_id));
                     foreach($leads as $l) echo "<option value='{$l->id}'>{$l->first_name} {$l->last_name}</option>";
                     ?>
                 </select>
                 <select name="offer_id" required>
                     <option value="">Select Offer...</option>
                     <?php
-                    $offers = $wpdb->get_results("SELECT id, title, price FROM {$wpdb->prefix}cce_offers WHERE is_active = 1");
+                    $offers = $wpdb->get_results($wpdb->prepare("SELECT id, title, price FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id));
                     foreach($offers as $o) echo "<option value='{$o->id}' data-price='{$o->price}'>{$o->title}</option>";
                     ?>
                 </select>
@@ -28,13 +29,14 @@
     </div>
 
     <?php
-    $payments = $wpdb->get_results( "
+    $payments = $wpdb->get_results( $wpdb->prepare( "
         SELECT p.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name, o.title as offer_title
         FROM {$wpdb->prefix}cce_payments p
         LEFT JOIN {$wpdb->prefix}cce_leads l ON p.lead_id = l.id
         LEFT JOIN {$wpdb->prefix}cce_offers o ON p.offer_id = o.id
+        WHERE p.user_id = %d
         ORDER BY p.created_at DESC
-    " );
+    ", $user_id ) );
     ?>
 
     <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">

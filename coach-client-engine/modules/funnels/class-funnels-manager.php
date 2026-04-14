@@ -73,13 +73,15 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function duplicate_funnel( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $id ) );
+        $user_id = $this->get_current_user_id();
+        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d AND user_id = %d", $id, $user_id ) );
         if ( ! $funnel ) return $this->error( 'Funnel not found' );
 
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
-            'title'  => $funnel->title . ' (Copy)',
-            'type'   => $funnel->type,
-            'status' => 'draft',
+            'user_id' => $user_id,
+            'title'   => $funnel->title . ' (Copy)',
+            'type'    => $funnel->type,
+            'status'  => 'draft',
         ) );
 
         $new_id = $wpdb->insert_id;
@@ -87,6 +89,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 
         foreach ( $steps as $step ) {
             $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                'user_id'    => $user_id,
                 'funnel_id'  => $new_id,
                 'title'      => $step->title,
                 'step_order' => $step->step_order,
@@ -114,13 +117,15 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
      */
     public function create_from_template( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $template_id = sanitize_text_field( $request->get_param( 'template_id' ) );
 
         $title = 'New ' . ucwords( str_replace( '_', ' ', $template_id ) );
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
-            'title' => $title,
-            'type'  => $template_id,
-            'status' => 'active'
+            'user_id' => $user_id,
+            'title'   => $title,
+            'type'    => $template_id,
+            'status'  => 'active'
         ) );
 
         $funnel_id = $wpdb->insert_id;
@@ -149,6 +154,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         if ( ! empty( $steps ) ) {
             foreach ( $steps as $index => $step ) {
                 $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                    'user_id'    => $user_id,
                     'funnel_id'  => $funnel_id,
                     'title'      => $step['title'],
                     'step_order' => $index + 1,
@@ -167,8 +173,9 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function get_funnel_steps( $request ) {
         global $wpdb;
         $funnel_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $table_name = $wpdb->prefix . 'cce_funnel_steps';
-        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE funnel_id = %d AND user_id = %d ORDER BY step_order ASC", $funnel_id, $user_id ) );
         return $this->success( $steps );
     }
 
@@ -178,14 +185,16 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function save_funnel_steps( $request ) {
         global $wpdb;
         $funnel_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $steps = $request->get_param( 'steps' );
         $table_name = $wpdb->prefix . 'cce_funnel_steps';
 
         // Simplified: Delete and re-insert for this version
-        $wpdb->delete( $table_name, array( 'funnel_id' => $funnel_id ) );
+        $wpdb->delete( $table_name, array( 'funnel_id' => $funnel_id, 'user_id' => $user_id ) );
 
         foreach ( $steps as $index => $step ) {
             $wpdb->insert( $table_name, array(
+                'user_id'    => $user_id,
                 'funnel_id'  => $funnel_id,
                 'title'      => sanitize_text_field( $step['title'] ),
                 'step_order' => $index + 1,
@@ -214,8 +223,9 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 	 */
 	public function get_funnels( $request ) {
 		global $wpdb;
+        $user_id = $this->get_current_user_id();
 		$table_name = $wpdb->prefix . 'cce_funnels';
-		$funnels = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC" );
+		$funnels = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
 		return $this->success( $funnels );
 	}
 
@@ -229,9 +239,10 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 		$params = $request->get_params();
 
 		$data = array(
-			'title'  => sanitize_text_field( $params['title'] ),
-			'type'   => sanitize_text_field( $params['type'] ),
-			'status' => 'draft',
+            'user_id' => $this->get_current_user_id(),
+			'title'   => sanitize_text_field( $params['title'] ),
+			'type'    => sanitize_text_field( $params['type'] ),
+			'status'  => 'draft',
 		);
 
 		$result = $wpdb->insert( $table_name, $data );

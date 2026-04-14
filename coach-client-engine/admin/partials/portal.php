@@ -55,7 +55,8 @@
             <tbody>
                 <?php
                 global $wpdb;
-                $onboarding_tasks = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_onboarding_tasks ORDER BY task_order ASC");
+                $user_id = get_current_user_id();
+                $onboarding_tasks = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_onboarding_tasks WHERE user_id = %d ORDER BY task_order ASC", $user_id));
                 if($onboarding_tasks): foreach($onboarding_tasks as $ot): ?>
                 <tr>
                     <td><?php echo esc_html($ot->task_name); ?></td>
@@ -83,7 +84,7 @@
             <tbody id="cce-resources-list">
                 <?php
                 global $wpdb;
-                $resources = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_resources ORDER BY created_at DESC" );
+                $resources = $wpdb->get_results( $wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_resources WHERE user_id = %d ORDER BY created_at DESC", $user_id) );
                 if ($resources): foreach ($resources as $r): ?>
                 <tr>
                     <td><strong><?php echo esc_html($r->title); ?></strong></td>

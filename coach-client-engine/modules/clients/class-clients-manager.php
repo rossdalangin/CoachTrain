@@ -60,9 +60,13 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
             'perceived_likelihood' => sanitize_textarea_field( $params['perceived_likelihood'] ?? '' ),
             'time_delay'           => sanitize_textarea_field( $params['time_delay'] ?? '' ),
             'effort_sacrifice'     => sanitize_textarea_field( $params['effort_sacrifice'] ?? '' ),
+            'upsell_offer_id'      => absint( $params['upsell_offer_id'] ?? 0 ),
+            'downsell_offer_id'    => absint( $params['downsell_offer_id'] ?? 0 ),
+            'order_bump_offer_id'  => absint( $params['order_bump_offer_id'] ?? 0 ),
         );
 
-        $wpdb->update( "{$wpdb->prefix}cce_offers", $data, array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->update( "{$wpdb->prefix}cce_offers", $data, array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Offer updated' ) );
     }
@@ -73,10 +77,12 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
     public function duplicate_offer( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $id ) );
+        $user_id = $this->get_current_user_id();
+        $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d AND user_id = %d", $id, $user_id ) );
         if ( ! $offer ) return $this->error( 'Offer not found' );
 
         $wpdb->insert( "{$wpdb->prefix}cce_offers", array(
+            'user_id'              => $user_id,
             'title'                => $offer->title . ' (Copy)',
             'description'          => $offer->description,
             'price'                => $offer->price,
@@ -97,7 +103,8 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
     public function delete_offer( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->update( "{$wpdb->prefix}cce_offers", array( 'is_active' => 0 ), array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->update( "{$wpdb->prefix}cce_offers", array( 'is_active' => 0 ), array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Offer deleted' ) );
     }
 

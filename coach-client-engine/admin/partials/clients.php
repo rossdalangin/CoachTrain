@@ -70,7 +70,8 @@
 
     <?php
     global $wpdb;
-    $offers = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE is_active = 1" );
+    $user_id = get_current_user_id();
+    $offers = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id ) );
     ?>
 
     <h3>Active Coaching Offers</h3>

@@ -41,7 +41,8 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
     public function delete_testimonial( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_testimonials", array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_testimonials", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Testimonial deleted' ) );
     }
 
@@ -51,6 +52,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
     public function update_testimonial( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->update( "{$wpdb->prefix}cce_testimonials", array(
@@ -59,7 +61,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
             'client_name' => sanitize_text_field( $params['client_name'] ),
             'content'     => sanitize_textarea_field( $params['content'] ),
             'rating'      => absint( $params['rating'] ),
-        ), array( 'id' => $id ) );
+        ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Testimonial updated' ) );
     }
@@ -69,7 +71,8 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
 	 */
 	public function get_testimonials( $request ) {
         global $wpdb;
-        $testimonials = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' ORDER BY created_at DESC" );
+        $user_id = $this->get_current_user_id();
+        $testimonials = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND user_id = %d ORDER BY created_at DESC", $user_id ) );
 		return $this->success( $testimonials );
 	}
 
@@ -78,9 +81,11 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
      */
     public function create_testimonial( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $data = array(
+            'user_id'     => $user_id,
             'type'        => sanitize_text_field( $params['type'] ?? 'testimonial' ),
             'title'       => sanitize_text_field( $params['title'] ?? '' ),
             'client_name' => sanitize_text_field( $params['client_name'] ),

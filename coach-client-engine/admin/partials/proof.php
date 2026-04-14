@@ -40,7 +40,8 @@
         <div id="cce-testimonials-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
             <?php
             global $wpdb;
-            $testimonials = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' ORDER BY created_at DESC" );
+            $user_id = get_current_user_id();
+            $testimonials = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND user_id = %d ORDER BY created_at DESC", $user_id ) );
             if ( $testimonials ):
                 foreach ( $testimonials as $t ):
                 ?>

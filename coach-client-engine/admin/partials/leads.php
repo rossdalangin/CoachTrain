@@ -53,13 +53,21 @@
 
     <?php
     global $wpdb;
+    $user_id = get_current_user_id();
     $search = $_GET['s'] ?? '';
-    $query = "SELECT * FROM {$wpdb->prefix}cce_leads";
+
+    $query = "SELECT * FROM {$wpdb->prefix}cce_leads WHERE user_id = %d";
+    $params = array( $user_id );
+
     if ( ! empty( $search ) ) {
-        $query .= $wpdb->prepare( " WHERE first_name LIKE %s OR last_name LIKE %s OR email LIKE %s", "%$search%", "%$search%", "%$search%" );
+        $query .= " AND (first_name LIKE %s OR last_name LIKE %s OR email LIKE %s)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
     }
+
     $query .= " ORDER BY created_at DESC";
-    $leads = $wpdb->get_results( $query );
+    $leads = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
     ?>
 
     <table class="wp-list-table widefat fixed striped">

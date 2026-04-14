@@ -25,6 +25,7 @@ class CCE_Post_Handler {
 
 		global $wpdb;
 		$data = array(
+            'user_id'              => get_current_user_id(),
 			'title'                => sanitize_text_field( $_POST['title'] ),
 			'price'                => (float) $_POST['price'],
 			'type'                 => sanitize_text_field( $_POST['type'] ),
@@ -49,6 +50,7 @@ class CCE_Post_Handler {
 
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
+            'user_id'      => get_current_user_id(),
             'first_name'   => sanitize_text_field( $_POST['first_name'] ),
             'last_name'    => sanitize_text_field( $_POST['last_name'] ),
             'email'        => sanitize_email( $_POST['email'] ),
@@ -73,6 +75,7 @@ class CCE_Post_Handler {
 
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}cce_bookings", array(
+            'user_id'    => get_current_user_id(),
             'lead_id'    => absint( $_POST['lead_id'] ),
             'start_time' => sanitize_text_field( $_POST['start_time'] ),
             'timezone'   => sanitize_text_field( $_POST['timezone'] ),
@@ -93,7 +96,8 @@ class CCE_Post_Handler {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
         check_admin_referer( 'cce_export_leads_nonce' );
         global $wpdb;
-        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_leads", ARRAY_A ), 'leads' );
+        $user_id = get_current_user_id();
+        $this->export_csv( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE user_id = %d", $user_id ), ARRAY_A ), 'leads' );
     }
 
     /**
@@ -103,7 +107,8 @@ class CCE_Post_Handler {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
         check_admin_referer( 'cce_export_bookings_nonce' );
         global $wpdb;
-        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_bookings", ARRAY_A ), 'bookings' );
+        $user_id = get_current_user_id();
+        $this->export_csv( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_bookings WHERE user_id = %d", $user_id ), ARRAY_A ), 'bookings' );
     }
 
     /**
@@ -113,7 +118,8 @@ class CCE_Post_Handler {
         if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
         check_admin_referer( 'cce_export_payments_nonce' );
         global $wpdb;
-        $this->export_csv( $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_payments", ARRAY_A ), 'payments' );
+        $user_id = get_current_user_id();
+        $this->export_csv( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_payments WHERE user_id = %d", $user_id ), ARRAY_A ), 'payments' );
     }
 
     /**

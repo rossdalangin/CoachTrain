@@ -25,7 +25,8 @@
                     <option value="">Select Lead...</option>
                     <?php
                     global $wpdb;
-                    $leads_list = $wpdb->get_results("SELECT id, first_name, last_name FROM {$wpdb->prefix}cce_leads");
+                    $user_id = get_current_user_id();
+                    $leads_list = $wpdb->get_results($wpdb->prepare("SELECT id, first_name, last_name FROM {$wpdb->prefix}cce_leads WHERE user_id = %d", $user_id));
                     foreach($leads_list as $l) echo "<option value='{$l->id}'>{$l->first_name} {$l->last_name}</option>";
                     ?>
                 </select>
@@ -42,12 +43,18 @@
         SELECT b.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
         FROM {$wpdb->prefix}cce_bookings b
         LEFT JOIN {$wpdb->prefix}cce_leads l ON b.lead_id = l.id
+        WHERE b.user_id = %d
     ";
+    $params = array( $user_id );
+
     if ( ! empty( $search ) ) {
-        $query .= $wpdb->prepare( " WHERE l.first_name LIKE %s OR l.last_name LIKE %s OR l.email LIKE %s", "%$search%", "%$search%", "%$search%" );
+        $query .= " AND (l.first_name LIKE %s OR l.last_name LIKE %s OR l.email LIKE %s)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
     }
     $query .= " ORDER BY b.start_time ASC";
-    $bookings = $wpdb->get_results( $query );
+    $bookings = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
     ?>
 
     <table class="wp-list-table widefat fixed striped">
@@ -118,7 +125,7 @@
             <thead><tr><th>Question</th><th>Type</th><th>Required</th><th>Action</th></tr></thead>
             <tbody id="cce-questions-body">
                 <?php
-                $questions = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_questions ORDER BY question_order ASC");
+                $questions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_questions WHERE user_id = %d ORDER BY question_order ASC", $user_id));
                 if($questions): foreach($questions as $q): ?>
                 <tr>
                     <td><?php echo esc_html($q->question_text); ?></td>

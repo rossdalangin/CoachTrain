@@ -18,7 +18,8 @@
 
         <?php
         global $wpdb;
-        $stages = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC" );
+        $user_id = get_current_user_id();
+        $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
         ?>
 
         <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
@@ -30,7 +31,7 @@
                     <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
                     <div class="kanban-cards">
                         <?php
-                        $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d", $stage->id ) );
+                        $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
                         if ($leads): foreach ( $leads as $lead ):
                             $engagement_score = $analytics->calculate_engagement_score( $lead->id );
                         ?>
@@ -95,12 +96,13 @@
                 </thead>
                 <tbody id="cce-global-activity-body">
                     <?php
-                    $activities = $wpdb->get_results( "
+                    $activities = $wpdb->get_results( $wpdb->prepare( "
                         SELECT a.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
                         FROM {$wpdb->prefix}cce_activity_log a
                         LEFT JOIN {$wpdb->prefix}cce_leads l ON a.lead_id = l.id
+                        WHERE a.user_id = %d
                         ORDER BY a.created_at DESC LIMIT 50
-                    " );
+                    ", $user_id ) );
                     if($activities): foreach($activities as $a): ?>
                     <tr>
                         <td><strong><?php echo esc_html($a->lead_name ?: 'System'); ?></strong></td>

@@ -48,11 +48,11 @@
                     'desc'  => 'Accept high-ticket payments'
                 ],
                 'Lead Magnet' => [
-                    'check' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels"),
+                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels WHERE user_id = %d", get_current_user_id())),
                     'desc'  => 'Create your first opt-in page'
                 ],
                 'Coaching Offer' => [
-                    'check' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers"),
+                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers WHERE user_id = %d", get_current_user_id())),
                     'desc'  => 'Define your Grand Slam Offer'
                 ],
             ];

@@ -30,9 +30,11 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
      */
     public function create_manual_payment( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->insert( "{$wpdb->prefix}cce_payments", array(
+            'user_id'        => $user_id,
             'lead_id'        => absint( $params['lead_id'] ),
             'offer_id'       => absint( $params['offer_id'] ),
             'transaction_id' => 'MANUAL_' . time(),
@@ -57,6 +59,7 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 
 		$offer_id = absint( $params['offer_id'] );
 		$lead_id = absint( $params['lead_id'] );
+        $user_id = absint( $params['user_id'] ?? 0 );
 		$gateway = sanitize_text_field( $params['gateway'] );
 
         // Get offer details
@@ -65,6 +68,8 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
         if ( ! $offer ) {
             return $this->error( 'Offer not found' );
         }
+
+        if ( ! $user_id ) $user_id = $offer->user_id;
 
 		// Process payment based on gateway
         $redirect_url = '';
@@ -78,6 +83,7 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
         }
 
 		$wpdb->insert( "{$wpdb->prefix}cce_payments", array(
+            'user_id'        => $user_id,
 			'lead_id'        => $lead_id,
 			'offer_id'       => $offer_id,
 			'transaction_id' => 'PENDING_' . time(),

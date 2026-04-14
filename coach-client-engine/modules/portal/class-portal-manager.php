@@ -51,9 +51,11 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
      */
     public function create_resource( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
+            'user_id'    => $user_id,
             'title'      => sanitize_text_field( $params['title'] ),
             'category'   => sanitize_text_field( $params['category'] ?? 'Uncategorized' ),
             'type'       => sanitize_text_field( $params['type'] ),
@@ -69,7 +71,9 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
      */
     public function delete_resource( $request ) {
         global $wpdb;
-        $wpdb->delete( "{$wpdb->prefix}cce_resources", array( 'id' => absint( $request['id'] ) ) );
+        $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_resources", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Resource deleted' ) );
     }
 
@@ -130,19 +134,29 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
 		global $wpdb;
         $token = $_COOKIE['cce_lead_token'] ?? '';
         $is_client = false;
+        $owner_id = 0;
 
         if ( ! empty( $token ) ) {
-            $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
-            if ( $lead_id ) {
-                $is_client = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
+            $lead = $wpdb->get_row( $wpdb->prepare( "SELECT id, user_id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+            if ( $lead ) {
+                $owner_id = $lead->user_id;
+                $is_client = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead->id ) );
             }
         }
 
-        $query = "SELECT * FROM {$wpdb->prefix}cce_resources";
-        if ( ! $is_client ) {
-            $query .= " WHERE visibility = 'public'";
+        // If no token, maybe it's an admin request
+        if ( ! $owner_id && current_user_can( 'manage_options' ) ) {
+            $owner_id = get_current_user_id();
+            $is_client = true; // Admins see everything
         }
-        $resources = $wpdb->get_results( $query );
+
+        $query = "SELECT * FROM {$wpdb->prefix}cce_resources WHERE user_id = %d";
+        $params = array( $owner_id );
+
+        if ( ! $is_client ) {
+            $query .= " AND visibility = 'public'";
+        }
+        $resources = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 
 		return $this->success( $resources );
 	}

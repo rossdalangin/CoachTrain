@@ -36,7 +36,8 @@
                         <select name="config[stage_id]">
                             <?php
                             global $wpdb;
-                            $stages = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_crm_stages");
+                            $user_id = get_current_user_id();
+                            $stages = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d", $user_id));
                             foreach($stages as $s) echo "<option value='{$s->id}'>{$s->name}</option>";
                             ?>
                         </select>
@@ -54,7 +55,7 @@
                         <select name="config[template_id]">
                             <option value="">Default Welcome Email</option>
                             <?php
-                            $templates = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}cce_email_templates");
+                            $templates = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM {$wpdb->prefix}cce_email_templates WHERE user_id = %d", $user_id));
                             foreach($templates as $t) echo "<option value='{$t->id}'>{$t->name}</option>";
                             ?>
                         </select>
@@ -86,7 +87,7 @@
                 </thead>
                 <tbody id="cce-rules-list">
                     <?php
-                    $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
+                    $rules = $wpdb->get_results( $wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_automation_rules WHERE user_id = %d ORDER BY created_at DESC", $user_id) );
                     if ($rules): foreach ($rules as $rule): ?>
                     <tr id="rule-row-<?php echo $rule->id; ?>"
                         data-trigger="<?php echo esc_attr($rule->trigger_event); ?>"
@@ -160,7 +161,7 @@
                 </thead>
                 <tbody>
                     <?php
-                    $templates = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC");
+                    $templates = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE user_id = %d ORDER BY created_at DESC", $user_id));
                     foreach($templates as $t) echo "<tr id='template-row-{$t->id}'
                         data-name='" . esc_attr($t->name) . "'
                         data-subject='" . esc_attr($t->subject) . "'

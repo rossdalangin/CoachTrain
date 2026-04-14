@@ -154,13 +154,15 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
      */
     public function get_all_activities( $request ) {
         global $wpdb;
-        $activities = $wpdb->get_results( "
+        $user_id = $this->get_current_user_id();
+        $activities = $wpdb->get_results( $wpdb->prepare( "
             SELECT a.*, CONCAT(l.first_name, ' ', l.last_name) as lead_name
             FROM {$wpdb->prefix}cce_activity_log a
             LEFT JOIN {$wpdb->prefix}cce_leads l ON a.lead_id = l.id
+            WHERE a.user_id = %d
             ORDER BY a.created_at DESC
             LIMIT 50
-        " );
+        ", $user_id ) );
         return $this->success( $activities );
     }
 
@@ -170,7 +172,8 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function get_tasks( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
-        $tasks = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d", $lead_id ) );
+        $user_id = $this->get_current_user_id();
+        $tasks = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND user_id = %d", $lead_id, $user_id ) );
         return $this->success( $tasks );
     }
 
@@ -180,9 +183,11 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function add_task( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $title = sanitize_text_field( $request->get_param( 'title' ) );
 
         $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
+            'user_id' => $user_id,
             'lead_id' => $lead_id,
             'title'   => $title,
             'status'  => 'pending',
@@ -197,7 +202,8 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function delete_task( $request ) {
         global $wpdb;
         $task_id = absint( $request['task_id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_tasks", array( 'id' => $task_id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_tasks", array( 'id' => $task_id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Task deleted' ) );
     }
 
@@ -207,12 +213,13 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function update_task( $request ) {
         global $wpdb;
         $task_id = absint( $request['task_id'] );
+        $user_id = $this->get_current_user_id();
         $status = sanitize_text_field( $request->get_param( 'status' ) );
 
         $wpdb->update(
             "{$wpdb->prefix}cce_tasks",
             array( 'status' => $status ),
-            array( 'id' => $task_id )
+            array( 'id' => $task_id, 'user_id' => $user_id )
         );
 
         return $this->success( array( 'message' => 'Task updated' ) );
@@ -252,9 +259,10 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function update_lead_stage( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $stage_id = absint( $request['stage_id'] );
 
-        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id ) );
+        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
 
         CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead moved to stage ID: ' . $stage_id );
 
@@ -281,11 +289,13 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
      */
     public function create_stage( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $name = sanitize_text_field( $request->get_param( 'name' ) );
-        $order = (int) $wpdb->get_var( "SELECT MAX(stage_order) FROM {$wpdb->prefix}cce_crm_stages" ) + 1;
+        $order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(stage_order) FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d", $user_id ) ) + 1;
 
         $wpdb->insert( "{$wpdb->prefix}cce_crm_stages", array(
-            'name' => $name,
+            'user_id'     => $user_id,
+            'name'        => $name,
             'stage_order' => $order
         ) );
 
@@ -298,7 +308,8 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function delete_stage( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_crm_stages", array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_crm_stages", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Stage deleted' ) );
     }
 
@@ -308,12 +319,13 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function update_stage( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $name = sanitize_text_field( $request->get_param( 'name' ) );
         $order = absint( $request->get_param( 'stage_order' ) );
 
         $wpdb->update( "{$wpdb->prefix}cce_crm_stages",
             array( 'name' => $name, 'stage_order' => $order ),
-            array( 'id' => $id )
+            array( 'id' => $id, 'user_id' => $user_id )
         );
 
         return $this->success( array( 'message' => 'Stage updated' ) );
@@ -324,8 +336,9 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 	 */
 	public function get_stages( $request ) {
 		global $wpdb;
+        $user_id = $this->get_current_user_id();
 		$table_name = $wpdb->prefix . 'cce_crm_stages';
-		$stages = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY stage_order ASC" );
+		$stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
 		return $this->success( $stages );
 	}
 
@@ -334,16 +347,18 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
      */
     public function get_pipeline( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $stages_table = $wpdb->prefix . 'cce_crm_stages';
         $leads_table = $wpdb->prefix . 'cce_leads';
 
-        $stages = $wpdb->get_results( "SELECT * FROM $stages_table ORDER BY stage_order ASC" );
+        $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $stages_table WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
         $pipeline = array();
 
         foreach ( $stages as $stage ) {
             $leads = $wpdb->get_results( $wpdb->prepare(
-                "SELECT * FROM $leads_table WHERE crm_stage_id = %d",
-                $stage->id
+                "SELECT * FROM $leads_table WHERE crm_stage_id = %d AND user_id = %d",
+                $stage->id,
+                $user_id
             ) );
 
             // Fetch activities for each lead

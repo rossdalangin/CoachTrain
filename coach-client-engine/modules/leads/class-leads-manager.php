@@ -110,6 +110,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
     public function update_lead( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $data = array(
@@ -120,7 +121,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             'status'      => sanitize_text_field( $params['status'] ?? 'cold' ),
         );
 
-        $wpdb->update( "{$wpdb->prefix}cce_leads", $data, array( 'id' => $id ) );
+        $wpdb->update( "{$wpdb->prefix}cce_leads", $data, array( 'id' => $id, 'user_id' => $user_id ) );
         CCE_Activity_Logger::log( $id, 'update', 'Lead information updated.' );
 
         return $this->success( array( 'message' => 'Lead updated' ) );
@@ -154,7 +155,8 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
     public function delete_lead( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_leads", array( 'id' => $lead_id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_leads", array( 'id' => $lead_id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Lead deleted' ) );
     }
 
@@ -164,9 +166,10 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
     public function update_lead_status( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $status = sanitize_text_field( $request->get_param( 'status' ) );
 
-        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'status' => $status ), array( 'id' => $lead_id ) );
+        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'status' => $status ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
 
         CCE_Activity_Logger::log( $lead_id, 'status_change', 'Lead tag updated to: ' . $status );
 
@@ -178,8 +181,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 	 */
 	public function get_leads( $request ) {
 		global $wpdb;
+        $user_id = $this->get_current_user_id();
 		$table_name = $wpdb->prefix . 'cce_leads';
-		$leads = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC" );
+		$leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
 		return $this->success( $leads );
 	}
 
@@ -191,19 +195,28 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		$table_name = $wpdb->prefix . 'cce_leads';
 
 		$params = $request->get_params();
+        $user_id = absint( $params['user_id'] ?? 0 );
+
         $source = $_COOKIE['cce_funnel_source'] ?? 'Direct';
         if ( is_numeric( $source ) ) {
-            $source = $wpdb->get_var( $wpdb->prepare( "SELECT title FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $source ) ) ?: 'Direct';
+            $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT title, user_id FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $source ) );
+            if ( $funnel ) {
+                $source = $funnel->title;
+                if ( ! $user_id ) $user_id = $funnel->user_id;
+            } else {
+                $source = 'Direct';
+            }
         }
 
         $token = bin2hex( random_bytes( 32 ) );
-        $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
+        $default_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC LIMIT 1", $user_id ) ) ?: 1;
 
 		$data = array(
+            'user_id'      => $user_id,
 			'first_name'   => sanitize_text_field( $params['first_name'] ),
 			'last_name'    => sanitize_text_field( $params['last_name'] ),
 			'email'        => sanitize_email( $params['email'] ),
-			'phone'        => sanitize_text_field( $params['phone'] ),
+			'phone'        => sanitize_text_field( $params['phone'] ?? '' ),
             'secure_token' => $token,
             'source'       => $source,
 			'status'       => 'cold',

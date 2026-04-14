@@ -27,6 +27,7 @@ class Coach_Client_Engine {
         require_once $path . 'includes/class-cce-webhooks-controller.php';
         require_once $path . 'includes/class-cce-mailer.php';
         require_once $path . 'includes/class-cce-activity-logger.php';
+        require_once $path . 'includes/class-cce-license-manager.php';
         require_once $path . 'public/class-cce-public.php';
 
         // Modules
@@ -225,6 +226,9 @@ class Coach_Client_Engine {
 
         $automation_manager = new CCE_Automation_Manager();
         $automation_manager->register_routes();
+
+        $license_manager = new CCE_License_Manager();
+        $license_manager->register_routes();
 
         $webhooks_controller = new CCE_Webhooks_Controller();
         $webhooks_controller->register_routes();

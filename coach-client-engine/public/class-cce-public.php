@@ -23,10 +23,12 @@ class CCE_Public {
 		global $wpdb;
 		$atts = shortcode_atts( array(
 			'offer_id' => 1,
+            'user_id'  => 0,
 		), $atts );
 
         $offer_id = absint( $atts['offer_id'] );
         $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $offer_id ) );
+        $user_id = $atts['user_id'] ?: ( $offer ? $offer->user_id : 0 );
 
         $currency_code = get_option('cce_currency', 'USD');
         $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
@@ -50,8 +52,9 @@ class CCE_Public {
             <?php endif; ?>
 
 			<form id="cce-public-checkout-form">
-				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
+				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer_id ); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 				<select name="gateway" required>
 					<option value="stripe">Stripe</option>
 					<option value="paypal">PayPal</option>
@@ -102,10 +105,17 @@ class CCE_Public {
 		), $atts );
 
         $funnel_id = absint( $atts['id'] );
+        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $funnel_id ) );
+
+        if ( ! $funnel ) {
+            return '<p>Funnel not found.</p>';
+        }
+
+        $owner_id = $funnel->user_id;
         $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
 
         if ( ! $steps ) {
-            return '<p>Funnel not found or has no steps.</p>';
+            return '<p>Funnel has no steps.</p>';
         }
 
         $current_step_index = absint( $_GET['step_idx'] ?? 0 );
@@ -127,10 +137,10 @@ class CCE_Public {
                 <?php
                 switch ( $current_step->step_type ) {
                     case 'optin':
-                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url ) );
+                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id ) );
                         break;
                     case 'booking':
-                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url ) );
+                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id ) );
                         break;
                     case 'checkout':
                         $config = json_decode( $current_step->config, true );
@@ -267,11 +277,22 @@ class CCE_Public {
         global $wpdb;
         $atts = shortcode_atts( array(
 			'type' => 'testimonial',
+            'user_id' => 0,
 		), $atts );
 
         $type = sanitize_text_field( $atts['type'] );
+        $user_id = absint( $atts['user_id'] );
 		ob_start();
-        $testimonials = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND type = %s ORDER BY RAND() LIMIT 3", $type ) );
+
+        $query = "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND type = %s";
+        $params = array( $type );
+        if ( $user_id ) {
+            $query .= " AND user_id = %d";
+            $params[] = $user_id;
+        }
+        $query .= " ORDER BY RAND() LIMIT 3";
+
+        $testimonials = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 		?>
 		<div class="cce-testimonials-display">
             <?php if ( 'case_study' === $atts['type'] ): ?>
@@ -316,10 +337,12 @@ class CCE_Public {
 		global $wpdb;
 		$atts = shortcode_atts( array(
 			'title' => 'Schedule Your Free Consultation',
-            'redirect' => ''
+            'redirect' => '',
+            'user_id'  => 0,
 		), $atts );
 
 		ob_start();
+        $user_id = absint( $atts['user_id'] );
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
@@ -327,6 +350,7 @@ class CCE_Public {
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form class="cce-public-booking-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
                 <div style="margin-bottom:15px;">
                     <label>Preferred Date & Time</label>
 				    <input type="datetime-local" name="start_time" required>
@@ -341,7 +365,12 @@ class CCE_Public {
                 </div>
                 <div class="cce-dynamic-questions">
                     <?php
-                    $questions = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}cce_questions ORDER BY question_order ASC");
+                    $q_query = "SELECT * FROM {$wpdb->prefix}cce_questions";
+                    if ( $user_id ) {
+                        $questions = $wpdb->get_results($wpdb->prepare($q_query . " WHERE user_id = %d ORDER BY question_order ASC", $user_id));
+                    } else {
+                        $questions = $wpdb->get_results($q_query . " ORDER BY question_order ASC");
+                    }
                     if ($questions): foreach ($questions as $q):
                         $req = $q->is_required ? 'required' : '';
                         $name = "questionnaire[" . esc_attr($q->question_text) . "]";
@@ -413,7 +442,8 @@ class CCE_Public {
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
 			'type'  => 'inline',
-            'redirect' => ''
+            'redirect' => '',
+            'user_id'  => 0,
 		), $atts );
 
 		ob_start();
@@ -422,6 +452,7 @@ class CCE_Public {
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form class="cce-public-lead-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $atts['user_id'] ); ?>">
 				<input type="text" name="first_name" placeholder="First Name" required>
 				<input type="email" name="email" placeholder="Email Address" required>
 				<button type="submit" class="button">Send Me the Guide</button>

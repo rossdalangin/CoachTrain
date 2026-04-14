@@ -77,7 +77,8 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function get_rules( $request ) {
         global $wpdb;
-        $rules = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_automation_rules ORDER BY created_at DESC" );
+        $user_id = $this->get_current_user_id();
+        $rules = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_automation_rules WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
         return $this->success( $rules );
     }
 
@@ -86,9 +87,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function create_rule( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->insert( "{$wpdb->prefix}cce_automation_rules", array(
+            'user_id'       => $user_id,
             'trigger_event' => sanitize_text_field( $params['trigger_event'] ),
             'action_type'   => sanitize_text_field( $params['action_type'] ),
             'config'        => json_encode( $params['config'] ?? array() ),
@@ -104,13 +107,14 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
     public function update_template( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->update( "{$wpdb->prefix}cce_email_templates", array(
             'name'    => sanitize_text_field( $params['name'] ),
             'subject' => sanitize_text_field( $params['subject'] ),
             'content' => wp_kses_post( $params['content'] ),
-        ), array( 'id' => $id ) );
+        ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Template updated' ) );
     }
@@ -121,7 +125,8 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
     public function delete_template( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_email_templates", array( 'id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_email_templates", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Template deleted' ) );
     }
 
@@ -131,13 +136,14 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
     public function update_rule( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->update( "{$wpdb->prefix}cce_automation_rules", array(
             'trigger_event' => sanitize_text_field( $params['trigger_event'] ),
             'action_type'   => sanitize_text_field( $params['action_type'] ),
             'config'        => json_encode( $params['config'] ?? array() ),
-        ), array( 'id' => $id ) );
+        ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Rule updated' ) );
     }
@@ -147,7 +153,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function delete_rule( $request ) {
         global $wpdb;
-        $wpdb->delete( "{$wpdb->prefix}cce_automation_rules", array( 'id' => absint( $request['id'] ) ) );
+        $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_automation_rules", array( 'id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Rule deleted' ) );
     }
 
@@ -156,7 +164,8 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function get_templates( $request ) {
         global $wpdb;
-        $templates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_email_templates ORDER BY created_at DESC" );
+        $user_id = $this->get_current_user_id();
+        $templates = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
         return $this->success( $templates );
     }
 
@@ -165,9 +174,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      */
     public function create_template( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
         $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
+            'user_id' => $user_id,
             'name'    => sanitize_text_field( $params['name'] ),
             'subject' => sanitize_text_field( $params['subject'] ),
             'content' => wp_kses_post( $params['content'] ),
