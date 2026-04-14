@@ -6,6 +6,7 @@
             <a href="#general" class="nav-tab nav-tab-active">General</a>
             <a href="#payments" class="nav-tab">Payments</a>
             <a href="#branding" class="nav-tab">Branding</a>
+            <a href="#shortcodes" class="nav-tab">Shortcodes</a>
             <a href="#status" class="nav-tab">System Status</a>
         </h2>
     </div>
@@ -62,6 +63,62 @@
                     <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_option('cce_primary_color', '#0073aa') ); ?>"></td>
                 </tr>
             </table>
+        </div>
+
+        <div id="section-shortcodes" class="cce-settings-section" style="display:none;">
+            <div class="cce-card">
+                <h3>Shortcode Reference</h3>
+                <p class="description">Copy and paste these shortcodes onto any WordPress page or post to display the Engine's features.</p>
+
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Shortcode</th>
+                            <th>Description</th>
+                            <th>Example / Attributes</th>
+                            <th style="width: 100px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>[cce_lead_capture]</code></td>
+                            <td>Displays a lead magnet opt-in form.</td>
+                            <td><code>type="inline|popup|sticky"</code>, <code>title="My Title"</code>, <code>redirect="url"</code></td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_lead_capture title="Get My Guide" type="inline"]'>Copy</button></td>
+                        </tr>
+                        <tr>
+                            <td><code>[cce_booking]</code></td>
+                            <td>Displays the consultation booking calendar.</td>
+                            <td><code>title="Book Your Call"</code>, <code>redirect="url"</code></td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_booking title="Schedule Your Session"]'>Copy</button></td>
+                        </tr>
+                        <tr>
+                            <td><code>[cce_funnel]</code></td>
+                            <td>Renders a multi-step conversion funnel.</td>
+                            <td><code>id="FUNNEL_ID"</code> (Find IDs in the Funnel Engine tab)</td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_funnel id="1"]'>Copy</button></td>
+                        </tr>
+                        <tr>
+                            <td><code>[cce_client_portal]</code></td>
+                            <td>Displays the secure private client dashboard.</td>
+                            <td>No attributes required. Requires lead token cookie to view content.</td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_client_portal]'>Copy</button></td>
+                        </tr>
+                        <tr>
+                            <td><code>[cce_testimonials]</code></td>
+                            <td>Displays active social proof elements.</td>
+                            <td><code>type="testimonial|case_study"</code></td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_testimonials type="testimonial"]'>Copy</button></td>
+                        </tr>
+                        <tr>
+                            <td><code>[cce_checkout]</code></td>
+                            <td>Displays a payment form for a specific offer.</td>
+                            <td><code>offer_id="OFFER_ID"</code> (Find IDs in the Clients & Offers tab)</td>
+                            <td><button type="button" class="button button-small cce-copy-shortcode" data-shortcode='[cce_checkout offer_id="1"]'>Copy</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="section-status" class="cce-settings-section" style="display:none;">
