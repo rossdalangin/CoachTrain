@@ -29,6 +29,30 @@ class CCE_Mailer {
 		return $this->send( $lead->email, $subject, $message );
 	}
 
+	/**
+	 * Send email using a template.
+	 */
+	public function send_template( $template_id, $lead_id ) {
+		global $wpdb;
+		$template = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE id = %d", $template_id ) );
+		$lead     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+
+		if ( ! $template || ! $lead ) {
+			return false;
+		}
+
+		$content = $template->content;
+		$placeholders = array(
+			'{{first_name}}' => $lead->first_name,
+			'{{last_name}}'  => $lead->last_name,
+			'{{email}}'      => $lead->email,
+		);
+
+		$content = str_replace( array_keys( $placeholders ), array_values( $placeholders ), $content );
+
+		return $this->send( $lead->email, $template->subject, $content );
+	}
+
     /**
      * Send reminder email for a booking.
      */

@@ -28,6 +28,10 @@ class CCE_Public {
         $offer_id = absint( $atts['offer_id'] );
         $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $offer_id ) );
 
+        $currency_code = get_option('cce_currency', 'USD');
+        $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+        $currency_symbol = $currency_symbols[$currency_code] ?? '$';
+
 		ob_start();
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
@@ -36,7 +40,7 @@ class CCE_Public {
 			<?php if ( $offer ): ?>
                 <h3>Enroll in <?php echo esc_html( $offer->title ); ?></h3>
                 <div class="cce-offer-summary" style="margin-bottom:20px; padding:15px; background:#f9f9f9; border-radius:8px;">
-                    <p style="font-size:20px; font-weight:bold; color:#0073aa;">Price: $<?php echo number_format($offer->price, 2); ?></p>
+                    <p style="font-size:20px; font-weight:bold; color:#0073aa;">Price: <?php echo $currency_symbol . number_format($offer->price, 2); ?></p>
                     <?php if ($offer->dream_outcome): ?>
                         <p><strong>Your Outcome:</strong> <?php echo esc_html($offer->dream_outcome); ?></p>
                     <?php endif; ?>

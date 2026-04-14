@@ -58,11 +58,15 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if ($payments): foreach ($payments as $p): ?>
+                <?php if ($payments):
+                $currency_code = get_option('cce_currency', 'USD');
+                $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                $currency_symbol = $currency_symbols[$currency_code] ?? '$';
+                foreach ($payments as $p): ?>
                 <tr>
                     <td><strong><?php echo esc_html($p->lead_name ?: 'Unknown'); ?></strong></td>
                     <td><?php echo esc_html($p->offer_title ?: 'N/A'); ?></td>
-                    <td><?php echo number_format($p->amount, 2) . ' ' . strtoupper($p->currency ?? 'USD'); ?></td>
+                    <td><?php echo $currency_symbol . number_format($p->amount, 2); ?></td>
                     <td><?php echo esc_html(strtoupper($p->gateway)); ?></td>
                     <td><span class="status-tag status-<?php echo esc_attr($p->status); ?>"><?php echo esc_html(strtoupper($p->status)); ?></span></td>
                     <td><?php echo esc_html($p->created_at); ?></td>

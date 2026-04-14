@@ -181,6 +181,9 @@ class Coach_Client_Engine {
                     if ( isset( $params['coach_name'] ) ) {
                         update_option( 'cce_coach_name', sanitize_text_field( $params['coach_name'] ) );
                     }
+                    if ( isset( $params['default_currency'] ) ) {
+                        update_option( 'cce_currency', sanitize_text_field( $params['default_currency'] ) );
+                    }
                     return array( 'success' => true );
                 },
                 'permission_callback' => array( $this, 'check_rest_permission' ),

@@ -29,8 +29,13 @@
             </div>
         </div>
         <div class="cce-card">
+            <?php
+            $currency_code = get_option('cce_currency', 'USD');
+            $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+            $currency_symbol = $currency_symbols[$currency_code] ?? '$';
+            ?>
             <h3>Total Revenue</h3>
-            <div class="value">$<?php echo number_format( (float) $summary['revenue_today'], 2 ); // Simplified for this view ?></div>
+            <div class="value"><?php echo $currency_symbol . number_format( (float) $summary['revenue_today'], 2 ); // Simplified for this view ?></div>
         </div>
         <div class="cce-card">
             <h3>Show Rate</h3>
@@ -77,10 +82,10 @@
                     <small>PROJECTED SALES</small><br><strong><?php echo $p['projected_sales']; ?></strong>
                 </div>
                 <div style="background:#f3f0ff; padding:10px; border-radius:8px;">
-                    <small>PROJECTED REVENUE</small><br><strong>$<?php echo number_format($p['projected_revenue'], 2); ?></strong>
+                    <small>PROJECTED REVENUE</small><br><strong><?php echo $currency_symbol . number_format($p['projected_revenue'], 2); ?></strong>
                 </div>
             </div>
-            <p style="font-size:11px; color:#888; margin-top:10px;">Average Order Value (AOV): $<?php echo $p['aov']; ?></p>
+            <p style="font-size:11px; color:#888; margin-top:10px;">Average Order Value (AOV): <?php echo $currency_symbol . $p['aov']; ?></p>
         </div>
     </div>
     <?php else: ?>

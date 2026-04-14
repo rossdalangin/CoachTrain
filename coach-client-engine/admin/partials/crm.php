@@ -18,17 +18,24 @@
         ?>
 
         <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
-            <?php foreach ( $stages as $stage ): ?>
+            <?php
+            $analytics = new CCE_Analytics_Manager();
+            foreach ( $stages as $stage ):
+            ?>
                 <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
                     <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
                     <div class="kanban-cards">
                         <?php
                         $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d", $stage->id ) );
                         if ($leads): foreach ( $leads as $lead ):
+                            $engagement_score = $analytics->calculate_engagement_score( $lead->id );
                         ?>
                             <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px;">
                                 <div style="display:flex; justify-content:space-between; align-items:start;">
-                                    <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
+                                    <div>
+                                        <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
+                                        <div style="font-size:10px; color:#666;">Engagement: <span style="color:#00a32a; font-weight:bold;"><?php echo $engagement_score; ?></span></div>
+                                    </div>
                                     <select class="cce-status-toggle" data-lead-id="<?php echo $lead->id; ?>" style="font-size:9px; height:auto; padding:2px;">
                                         <option value="cold" <?php selected($lead->status, 'cold'); ?>>COLD</option>
                                         <option value="warm" <?php selected($lead->status, 'warm'); ?>>WARM</option>

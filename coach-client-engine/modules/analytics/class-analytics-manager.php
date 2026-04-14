@@ -118,6 +118,31 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
     }
 
     /**
+     * Calculate engagement score for a lead.
+     */
+    public function calculate_engagement_score( $lead_id ) {
+        global $wpdb;
+        $score = 0;
+
+        // Opt-in: +10
+        $score += 10;
+
+        // Bookings: +20 each
+        $bookings = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d", $lead_id ) );
+        $score += ($bookings * 20);
+
+        // Payments: +50 each
+        $payments = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
+        $score += ($payments * 50);
+
+        // Notes/Activities: +5 each
+        $activities = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_activity_log WHERE lead_id = %d", $lead_id ) );
+        $score += ($activities * 5);
+
+        return $score;
+    }
+
+    /**
      * Get revenue projections based on average order value and lead velocity.
      */
     public function get_projections() {

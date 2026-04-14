@@ -21,6 +21,20 @@
                     <th scope="row">Coach Name</th>
                     <td><input type="text" name="coach_name" value="<?php echo esc_attr( get_option('cce_coach_name') ); ?>" class="regular-text"></td>
                 </tr>
+                <tr>
+                    <th scope="row">Default Currency</th>
+                    <td>
+                        <select name="default_currency">
+                            <?php
+                            $currencies = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                            $current = get_option('cce_currency', 'USD');
+                            foreach ($currencies as $code => $symbol) {
+                                printf('<option value="%s" %s>%s (%s)</option>', $code, selected($current, $code, false), $code, $symbol);
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
             </table>
         </div>
 

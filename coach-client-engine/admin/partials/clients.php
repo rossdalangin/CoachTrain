@@ -12,8 +12,13 @@
                     <th scope="row">Offer Title</th>
                     <td><input type="text" name="title" placeholder="e.g. 90-Day High-Ticket Program" class="regular-text" required></td>
                 </tr>
+                <?php
+                $currency_code = get_option('cce_currency', 'USD');
+                $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                $currency_symbol = $currency_symbols[$currency_code] ?? '$';
+                ?>
                 <tr>
-                    <th scope="row">Price ($)</th>
+                    <th scope="row">Price (<?php echo $currency_symbol; ?>)</th>
                     <td><input type="number" name="price" placeholder="5000" class="regular-text" required></td>
                 </tr>
                 <tr>
@@ -72,8 +77,13 @@
                     data-perceived-likelihood="<?php echo esc_attr($offer->perceived_likelihood); ?>"
                     data-time-delay="<?php echo esc_attr($offer->time_delay); ?>"
                     data-effort-sacrifice="<?php echo esc_attr($offer->effort_sacrifice); ?>">
+                    <?php
+                    $currency_code = get_option('cce_currency', 'USD');
+                    $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                    $currency_symbol = $currency_symbols[$currency_code] ?? '$';
+                    ?>
                     <td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
-                    <td>$<?php echo number_format( $offer->price, 2 ); ?></td>
+                    <td><?php echo $currency_symbol . number_format( $offer->price, 2 ); ?></td>
                     <td><?php echo esc_html( strtoupper( $offer->type ) ); ?></td>
                     <td>
                         <button class="button button-small cce-edit-offer" data-offer-id="<?php echo $offer->id; ?>">Edit</button>
@@ -95,7 +105,7 @@
             <form id="cce-edit-offer-form">
                 <input type="hidden" name="id" id="edit-offer-id">
                 <p><label>Offer Title</label><br><input type="text" id="edit-offer-title" class="widefat" required></p>
-                <p><label>Price ($)</label><br><input type="number" id="edit-offer-price" class="widefat" required></p>
+                <p><label>Price (<?php echo $currency_symbol; ?>)</label><br><input type="number" id="edit-offer-price" class="widefat" required></p>
                 <p><label>Type</label><br>
                     <select id="edit-offer-type" class="widefat">
                         <option value="one-time">One-Time</option>

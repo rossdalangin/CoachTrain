@@ -248,17 +248,10 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         switch ( $rule->action_type ) {
             case 'send_email':
                 $template_id = absint( $config['template_id'] ?? 0 );
+                $mailer = new CCE_Mailer();
                 if ( $template_id ) {
-                    $template = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE id = %d", $template_id ) );
-                    $lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
-
-                    if ( $template && $lead ) {
-                        $content = str_replace( '{{first_name}}', $lead->first_name, $template->content );
-                        $mailer = new CCE_Mailer();
-                        $mailer->send( $lead->email, $template->subject, $content );
-                    }
+                    $mailer->send_template( $template_id, $lead_id );
                 } else {
-                    $mailer = new CCE_Mailer();
                     $mailer->send_welcome_email( $lead_id );
                 }
                 break;
