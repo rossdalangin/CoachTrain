@@ -72,7 +72,22 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
 	public function get_testimonials( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $testimonials = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND user_id = %d ORDER BY created_at DESC", $user_id ) );
+
+        // If it's a public request, user_id might be 0, we should use a default or filtered by current page owner in class-cce-public.php
+        if ( ! $user_id && current_user_can( 'manage_options' ) ) {
+            $user_id = get_current_user_id();
+        }
+
+        $query = "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active'";
+        $params = array();
+
+        if ( $user_id ) {
+            $query .= " AND user_id = %d";
+            $params[] = $user_id;
+        }
+
+        $query .= " ORDER BY created_at DESC";
+        $testimonials = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 		return $this->success( $testimonials );
 	}
 

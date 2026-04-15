@@ -78,10 +78,11 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         if ( ! $funnel ) return $this->error( 'Funnel not found' );
 
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
-            'user_id' => $user_id,
-            'title'   => $funnel->title . ' (Copy)',
-            'type'    => $funnel->type,
-            'status'  => 'draft',
+            'user_id'    => $user_id,
+            'title'      => $funnel->title . ' (Copy)',
+            'type'       => $funnel->type,
+            'status'     => 'draft',
+            'created_at' => current_time( 'mysql' ),
         ) );
 
         $new_id = $wpdb->insert_id;
@@ -107,8 +108,9 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function delete_funnel( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $wpdb->delete( "{$wpdb->prefix}cce_funnels", array( 'id' => $id ) );
-        $wpdb->delete( "{$wpdb->prefix}cce_funnel_steps", array( 'funnel_id' => $id ) );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_funnels", array( 'id' => $id, 'user_id' => $user_id ) );
+        $wpdb->delete( "{$wpdb->prefix}cce_funnel_steps", array( 'funnel_id' => $id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Funnel deleted' ) );
     }
 
@@ -237,12 +239,14 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 		$table_name = $wpdb->prefix . 'cce_funnels';
 
 		$params = $request->get_params();
+        $user_id = $this->get_current_user_id();
 
 		$data = array(
-            'user_id' => $this->get_current_user_id(),
-			'title'   => sanitize_text_field( $params['title'] ),
-			'type'    => sanitize_text_field( $params['type'] ),
-			'status'  => 'draft',
+            'user_id'    => $user_id,
+			'title'      => sanitize_text_field( $params['title'] ),
+			'type'       => sanitize_text_field( $params['type'] ),
+			'status'     => 'draft',
+            'created_at' => current_time( 'mysql' ),
 		);
 
 		$result = $wpdb->insert( $table_name, $data );

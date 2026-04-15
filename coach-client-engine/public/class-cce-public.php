@@ -179,7 +179,9 @@ class CCE_Public {
         $completed = json_decode( $lead->onboarding_progress ?: '[]', true );
 
         $portal_manager = new CCE_Portal_Manager();
-        $resources_res = $portal_manager->get_resources( new WP_REST_Request() );
+        $resources_req = new WP_REST_Request();
+        // Since get_resources uses cookies to find the lead and its owner, we don't need to pass owner_id explicitly in the request params if the cookie is present.
+        $resources_res = $portal_manager->get_resources( $resources_req );
         $resources = is_wp_error($resources_res) ? [] : $resources_res->get_data();
 		?>
 		<div class="cce-client-portal">
@@ -189,7 +191,7 @@ class CCE_Public {
 					<h4>Your Coaching Roadmap</h4>
                     <div id="cce-onboarding-tasks">
                         <?php
-                        $tasks_db = $wpdb->get_results("SELECT task_name FROM {$wpdb->prefix}cce_onboarding_tasks ORDER BY task_order ASC");
+                        $tasks_db = $wpdb->get_results($wpdb->prepare("SELECT task_name FROM {$wpdb->prefix}cce_onboarding_tasks WHERE user_id = %d ORDER BY task_order ASC", $lead->user_id));
                         $tasks = !empty($tasks_db) ? array_column($tasks_db, 'task_name') : ['Welcome Training', 'Community Access'];
                         foreach ($tasks as $t):
                             $is_done = in_array($t, $completed);

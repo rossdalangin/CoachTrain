@@ -7,9 +7,9 @@
 ## Week 1: The "Technical Overwhelm" Phase
 **Goal:** Agitate the pain of using messy systems and show empathy as a fellow consultant.
 
-- **Day 1 (FB/LI):** The Story of my "Messy Middle". How I almost quit coaching because I was spending 10 hours a week on spreadsheets.
-- **Day 2 (TikTok/Reels):** Quick video showing a desk covered in sticky notes. "If your CRM looks like this, we need to talk."
-- **Day 3 (Group Post):** Question: "What's the one part of your sales process you wish you could automate? For me, it was the 'Did you see my email?' follow-up."
+- **Day 1 (FB/LI):** Hook: "I almost quit my coaching business 6 months ago. Not because I lacked clients, but because the 'Tech Tax' was killing me." (Story of the Messy Middle).
+- **Day 2 (TikTok/Reels):** Visual: A desk covered in sticky notes and 15 open browser tabs. Text: "If your CRM looks like this, you don't have a business, you have a headache."
+- **Day 3 (Group Post):** Hook: "Controversial opinion: You don't need a $300/mo funnel builder to hit $10k/mo. You just need an Engine that actually works."
 - **Day 4 (FB/LI):** Introducing the "Value Equation" for high-ticket offers. (Education post).
 - **Day 5 (TikTok/Reels):** "3 Tools every coach needs (and why you can have them all in one place)."
 - **Day 6 (LI):** Why "Tech Debt" is killing your coaching profit margins.

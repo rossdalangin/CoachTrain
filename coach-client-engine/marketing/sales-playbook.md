@@ -4,8 +4,8 @@
 
 ---
 
-## 1. The "Consultant-to-Consultant" Sales Letter
-**Subject: Why I built this (and how it can help you)**
+## 1. The "Consultant-to-Consultant" Core Letter
+**Subject: [Name], let's talk about the "Tech Tax" on your time.**
 
 Hi [Name],
 
@@ -31,7 +31,25 @@ Best,
 
 ---
 
-## 2. High-Converting Outreach Scripts (Social Media / DM)
+## 2. The "Cold Outreach" Framework (LinkedIn / Email)
+
+### Pattern Interrupt Script
+"Hi [Name], quick question—how are you currently tracking your leads from opt-in to paid client?
+
+I noticed a lot of coaches are still using manual sheets or paying $300/mo for software that's too complex. I actually built a simplified 'Engine' that sits right inside WordPress and handles CRM + Funnels + Automation in one place.
+
+I’m giving away a 'Consultant Strategy Guide' and a trial of the system this week. Interested in the link?"
+
+### The "Competitor Shift" Script
+"Hey [Name], saw your post about [Topic]. I'm curious—are you using Kajabi/ClickFunnels for your backend?
+
+I recently moved my whole coaching business back to WordPress because I was tired of the 'all-in-one' platforms being jack-of-all-trades and masters of none.
+
+I developed a plugin called Coach Client Engine that specifically integrates the Alex Hormozi Value Equation into the offer builder. Would love to send you a 2-minute video of how it works if you're open to it?"
+
+---
+
+## 3. Direct Outreach Scripts (Social Media / DM)
 
 ### The "Permission" Outreach (Low Friction)
 "Hey [Name], I’ve been following your content on [Topic]—really love your perspective on [Specific Post]. I’m actually a consultant too and just finished building a tool that automates the lead-to-booking flow for coaches. I’m looking for a few more people to test it out and give feedback. Would you be open to taking a look? No pressure at all."

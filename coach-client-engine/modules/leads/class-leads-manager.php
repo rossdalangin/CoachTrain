@@ -222,6 +222,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             'source'       => $source,
 			'status'       => 'cold',
             'crm_stage_id' => $default_stage_id,
+            'created_at'   => current_time( 'mysql' ),
 		);
 
 		$result = $wpdb->insert( $table_name, $data );

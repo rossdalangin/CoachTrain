@@ -122,12 +122,15 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 	public function create_offer( $request ) {
 		$params = $request->get_params();
 		$offer_model = new CCE_Offer_Model();
+        $user_id = $this->get_current_user_id();
 
 		$data = array(
+            'user_id'     => $user_id,
 			'title'       => sanitize_text_field( $params['title'] ),
 			'description' => sanitize_textarea_field( $params['description'] ?? '' ),
 			'price'       => (float) $params['price'],
 			'type'        => sanitize_text_field( $params['type'] ?? 'one-time' ),
+            'created_at'  => current_time( 'mysql' ),
 		);
 
 		$result = $offer_model->create( $data );

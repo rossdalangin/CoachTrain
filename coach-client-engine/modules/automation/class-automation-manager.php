@@ -96,6 +96,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             'action_type'   => sanitize_text_field( $params['action_type'] ),
             'config'        => json_encode( $params['config'] ?? array() ),
             'is_active'     => 1,
+            'created_at'    => current_time( 'mysql' ),
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
@@ -178,10 +179,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         $params = $request->get_params();
 
         $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
-            'user_id' => $user_id,
-            'name'    => sanitize_text_field( $params['name'] ),
-            'subject' => sanitize_text_field( $params['subject'] ),
-            'content' => wp_kses_post( $params['content'] ),
+            'user_id'    => $user_id,
+            'name'       => sanitize_text_field( $params['name'] ),
+            'subject'    => sanitize_text_field( $params['subject'] ),
+            'content'    => wp_kses_post( $params['content'] ),
+            'created_at' => current_time( 'mysql' ),
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
@@ -194,9 +196,20 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         global $wpdb;
         $hook = current_action();
 
+        // Resolve user_id from the object
+        $user_id = 0;
+        if ( 'cce_lead_created' === $hook || 'cce_payment_completed' === $hook || 'cce_lead_stage_changed' === $hook ) {
+            $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $id ) );
+        } elseif ( 'cce_booking_confirmed' === $hook ) {
+            $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $id ) );
+        }
+
+        if ( ! $user_id ) return;
+
         $rules = $wpdb->get_results( $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}cce_automation_rules WHERE trigger_event = %s AND is_active = 1",
-            $hook
+            "SELECT * FROM {$wpdb->prefix}cce_automation_rules WHERE trigger_event = %s AND is_active = 1 AND user_id = %d",
+            $hook,
+            $user_id
         ) );
 
         foreach ( $rules as $rule ) {
@@ -214,18 +227,18 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             if ( 'cce_booking_confirmed' === $hook ) {
                 $lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_bookings WHERE id = %d", $id ) );
                 if ( $lead_id ) {
-                    $booked_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Booked%' LIMIT 1" );
+                    $booked_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Booked%' AND user_id = %d LIMIT 1", $user_id ) );
                     if ( $booked_stage_id ) {
-                        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $booked_stage_id ), array( 'id' => $lead_id ) );
+                        $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $booked_stage_id ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
                     }
                 }
             }
 
             if ( 'cce_payment_completed' === $hook ) {
                 $lead_id = $id; // For payment, ID is lead_id
-                $closed_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE name LIKE '%Closed%' OR name LIKE '%Won%' LIMIT 1" );
+                $closed_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE (name LIKE '%Closed%' OR name LIKE '%Won%') AND user_id = %d LIMIT 1", $user_id ) );
                 if ( $closed_stage_id ) {
-                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $closed_stage_id ), array( 'id' => $lead_id ) );
+                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $closed_stage_id ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
                 }
             }
         }
@@ -269,7 +282,8 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             case 'move_stage':
                 $stage_id = absint( $config['stage_id'] ?? 0 );
                 if ( $stage_id ) {
-                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id ) );
+                    $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+                    $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
                     CCE_Activity_Logger::log( $lead_id, 'stage_change', 'Lead automatically moved by automation rule: ' . $rule->id );
                 }
                 break;
@@ -280,7 +294,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
                 break;
             case 'create_task':
                 $title = sanitize_text_field( $config['task_title'] ?? 'Follow up' );
+                $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
                 $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
+                    'user_id' => $user_id,
                     'lead_id' => $lead_id,
                     'title'   => $title,
                     'status'  => 'pending',

@@ -1,11 +1,14 @@
 # Coach Client Engine: Installation & Scaling Guide
 
-## 1. Quick Installation
-1. Upload the `coach-client-engine` folder to your `/wp-content/plugins/` directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. You will see a new **"Coach Engine"** menu in your sidebar.
+# Coach Client Engine: Installation & Scaling Guide
 
-## 2. Setting Up Your First Funnel
+## 🛠 1. Quick Installation & Multi-Tenant Setup
+1. **Upload:** Upload the `coach-client-engine` folder to your `/wp-content/plugins/` directory.
+2. **Activate:** Activate through the 'Plugins' menu in WordPress.
+3. **Identity:** Go to **Coach Engine > Settings** and set your **Coach Name** and **Default Currency**. In a multi-tenant environment, these settings are unique to your user account.
+4. **License:** Enter your license key (starts with `PRO-` for full automation features).
+
+## 🚀 2. Setting Up Your First Funnel
 1. Go to **Coach Engine > Funnels**.
 2. Click **"Create from Template"**.
 3. Select **"Consultation Funnel"**. This is the best for high-ticket coaching.
@@ -20,10 +23,17 @@
     - **Time Delay:** How fast can they see a win?
     - **Effort & Sacrifice:** How much "work" can you remove for them?
 
-## 4. Automation Power-Ups
-1. Go to **Coach Engine > Automation**.
-2. Set up a rule: `Trigger: Booking Confirmed` -> `Action: Send Template Email`.
-3. Use this to send a "Homework" email or a pre-call questionnaire.
+## ⚙️ 4. Automation Power-Ups
+Automation is where you win back your time.
+1. **The Sequence:** Go to **Coach Engine > Automation**.
+2. **Create Rule:** Link `Trigger: New Lead Captured` to `Action: Send Email (Welcome Template)`.
+3. **CRM Integration:** Link `Trigger: Booking Confirmed` to `Action: Move Stage (Booked)`.
+4. **Task Delegation:** Link `Trigger: Payment Received` to `Action: Create Task (Onboard Client)`.
+
+### 🛡 Webhook Hardening
+For high-ticket payments via Stripe/PayPal:
+- The Engine automatically handles `payment_intent.succeeded` events.
+- Ensure your Webhook Secret in **Settings > Payments** matches your Stripe Dashboard for secure processing.
 
 ## 5. Shortcodes Reference
 - `[cce_lead_capture]` - Lead magnet form.
