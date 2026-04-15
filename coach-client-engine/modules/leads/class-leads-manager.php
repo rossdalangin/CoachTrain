@@ -97,7 +97,8 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
                 'status'       => 'cold',
                 'crm_stage_id' => $default_stage_id,
                 'secure_token' => bin2hex( random_bytes( 32 ) ),
-                'source'       => 'Imported'
+                'source'       => 'Imported',
+                'created_at'   => current_time( 'mysql' ),
             ) );
             $count++;
         }
@@ -133,6 +134,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
      */
     public function handle_bulk_action( $request ) {
         global $wpdb;
+        $user_id = $this->get_current_user_id();
         $params = $request->get_params();
         $ids = $params['ids'] ?? [];
         $action = $params['bulk_action'] ?? '';
@@ -142,9 +144,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         $ids_string = implode( ',', array_map( 'absint', $ids ) );
 
         if ( 'delete' === $action ) {
-            $wpdb->query( "DELETE FROM {$wpdb->prefix}cce_leads WHERE id IN ($ids_string)" );
+            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}cce_leads WHERE id IN ($ids_string) AND user_id = %d", $user_id ) );
         } elseif ( in_array( $action, ['cold', 'warm', 'hot'] ) ) {
-            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_leads SET status = %s WHERE id IN ($ids_string)", $action ) );
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_leads SET status = %s WHERE id IN ($ids_string) AND user_id = %d", $action, $user_id ) );
         }
 
         return $this->success( array( 'message' => 'Bulk action completed' ) );
@@ -234,7 +236,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		$lead_id = $wpdb->insert_id;
 
         // Track Conversion if in funnel
-        $step_id = absint( $_COOKIE['cce_active_funnel_step'] ?? 0 );
+        $step_id = absint( $params['step_id'] ?? $_COOKIE['cce_active_funnel_step'] ?? 0 );
         if ( $step_id ) {
             $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET conversions = conversions + 1 WHERE id = %d", $step_id ) );
         }

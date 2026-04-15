@@ -57,12 +57,15 @@ class CCE_Onboarding_Manager extends CCE_REST_Controller {
         $params = $request->get_params();
         $order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(task_order) FROM {$wpdb->prefix}cce_onboarding_tasks WHERE user_id = %d", $user_id ) ) + 1;
 
-        $wpdb->insert( "{$wpdb->prefix}cce_onboarding_tasks", array(
+        $result = $wpdb->insert( "{$wpdb->prefix}cce_onboarding_tasks", array(
             'user_id'     => $user_id,
             'task_name'   => sanitize_text_field( $params['task_name'] ),
             'description' => sanitize_textarea_field( $params['description'] ?? '' ),
-            'task_order'  => $order
+            'task_order'  => $order,
+            'created_at'  => current_time( 'mysql' ),
         ) );
+
+        if ( false === $result ) return $this->error( 'Failed to create task' );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
     }

@@ -12,29 +12,54 @@
             --dark: #0f172a;
             --light: #f8fafc;
             --gray: #64748b;
+            --success: #10b981;
         }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; color: var(--dark); background: var(--light); line-height: 1.6; scroll-behavior: smooth; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        header { background: #fff; padding: 20px 0; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
-        .hero { padding: 100px 0; text-align: center; background: radial-gradient(circle at top right, #eff6ff, #fff); border-bottom: 1px solid #e2e8f0; }
-        h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 24px; color: var(--dark); font-weight: 800; letter-spacing: -0.025em; }
-        .hero p { font-size: 1.4rem; max-width: 800px; margin: 0 auto 40px; color: var(--gray); font-weight: 400; }
-        .cta-button { display: inline-block; background: var(--primary); color: #fff; padding: 15px 35px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(0,115,170,0.3); transition: transform 0.2s; }
-        .cta-button:hover { transform: translateY(-2px); }
-        .features { padding: 80px 0; }
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
-        .feature-card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .feature-card h3 { margin-top: 0; color: var(--primary); }
-        .equation-box { background: var(--dark); color: #fff; padding: 40px; border-radius: 20px; margin: 60px 0; text-align: center; }
-        .equation-box h2 { color: var(--secondary); }
-        .footer { background: var(--dark); color: #fff; padding: 40px 0; text-align: center; }
+        header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); padding: 15px 0; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .hero { padding: 120px 0 80px; text-align: center; background: radial-gradient(circle at top right, #eff6ff, #fff); position: relative; overflow: hidden; }
+        .hero::before { content: ""; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: var(--primary); opacity: 0.05; border-radius: 50%; filter: blur(80px); }
+        h1 { font-size: 4rem; line-height: 1.05; margin-bottom: 24px; color: var(--dark); font-weight: 800; letter-spacing: -0.03em; }
+        .hero p { font-size: 1.5rem; max-width: 800px; margin: 0 auto 40px; color: var(--gray); font-weight: 400; }
+        .cta-button { display: inline-block; background: var(--primary); color: #fff; padding: 18px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); transition: all 0.2s; }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4); background: var(--primary-dark); }
+        .features { padding: 100px 0; background: #fff; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 60px; }
+        .feature-card { background: var(--light); padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--primary); background: #fff; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .feature-card h3 { margin-top: 0; color: var(--dark); font-size: 1.5rem; margin-bottom: 15px; }
+        .feature-card p { color: var(--gray); margin-bottom: 0; }
+        .equation-box { background: var(--dark); color: #fff; padding: 60px 40px; border-radius: 24px; margin: 80px 0; text-align: center; position: relative; overflow: hidden; }
+        .equation-box h2 { font-size: 2.5rem; color: #fff; margin-bottom: 30px; }
+        .equation-box .math { font-family: 'Courier New', Courier, monospace; font-size: 2rem; color: var(--secondary); background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; display: inline-block; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1); }
+        .pricing { padding: 100px 0; background: var(--light); }
+        .pricing-card { background: #fff; max-width: 400px; margin: 0 auto; padding: 50px; border-radius: 24px; border: 2px solid var(--primary); position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); }
+        .pricing-card .badge { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 5px 20px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; }
+        .pricing-card h3 { font-size: 2rem; margin-bottom: 10px; }
+        .pricing-card .price { font-size: 3.5rem; font-weight: 800; margin-bottom: 30px; }
+        .pricing-card ul { list-style: none; padding: 0; margin-bottom: 40px; }
+        .pricing-card li { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--gray); }
+        .pricing-card li::before { content: "✓"; color: var(--success); font-weight: 900; }
+        .faq { padding: 100px 0; background: #fff; }
+        .faq-grid { max-width: 800px; margin: 50px auto 0; }
+        .faq-item { margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 30px; }
+        .faq-item h4 { font-size: 1.25rem; margin-bottom: 10px; }
+        .faq-item p { color: var(--gray); }
+        .footer { background: var(--dark); color: #94a3b8; padding: 60px 0; text-align: center; border-top: 1px solid #1e293b; }
+        .footer strong { color: #fff; }
     </style>
 </head>
 <body>
     <header>
         <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">CoachClientEngine</div>
-            <a href="#pricing" class="cta-button" style="padding: 10px 25px; font-size: 0.9rem;">Get Started</a>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px;">
+                <span style="background: var(--primary); color: #fff; padding: 4px 10px; border-radius: 6px;">C</span>
+                CoachClientEngine
+            </div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <a href="#features" style="color: var(--gray); text-decoration: none; font-size: 0.95rem; font-weight: 500;">Features</a>
+                <a href="#pricing" class="cta-button" style="padding: 10px 25px; font-size: 0.9rem;">Get Started</a>
+            </div>
         </div>
     </header>
 
@@ -99,19 +124,67 @@
     </section>
 
     <div class="container" id="equation">
-        <section class="equation-box" style="box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
-            <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 20px;">The "Grand Slam" Math</h2>
-            <p style="font-size: 1.2rem; opacity: 0.9;">"The goal is to move the top of the equation UP and the bottom of the equation DOWN."</p>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 20px; color: var(--secondary);">
-                (Dream Outcome × Perceived Likelihood) / (Time Delay × Effort & Sacrifice)
+        <section class="equation-box">
+            <h2>The "Grand Slam" Equation</h2>
+            <p style="font-size: 1.2rem; opacity: 0.8; max-width: 600px; margin: 0 auto;">"Value is the only thing that matters. Move the top variables UP and the bottom variables DOWN."</p>
+            <div class="math">
+                Value = (Dream Outcome &times; Perceived Likelihood) &divide; (Time Delay &times; Effort & Sacrifice)
             </div>
-            <p style="margin-top: 20px;">The Coach Client Engine is the first tool that allows you to bake this math directly into your sales process.</p>
+            <p style="margin-top: 30px; opacity: 0.9;">The Coach Client Engine is the first tool that lets you build your offers directly on this framework.</p>
         </section>
     </div>
 
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 60px;">
+                <h2 style="font-size: 2.5rem; font-weight: 800;">Simple, Transparent Pricing</h2>
+                <p style="color: var(--gray);">No monthly subscriptions. Just results.</p>
+            </div>
+            <div class="pricing-card">
+                <div class="badge">Early Adopter Offer</div>
+                <h3>Standard Edition</h3>
+                <div class="price">$0<span style="font-size: 1rem; color: var(--gray); font-weight: 400;">/forever</span></div>
+                <ul>
+                    <li>Grand Slam Offer Builder</li>
+                    <li>Visual Kanban CRM</li>
+                    <li>Lead Capture & Questionnaires</li>
+                    <li>Secure Client Portal</li>
+                    <li>Basic Email Notifications</li>
+                </ul>
+                <a href="#" class="cta-button" style="width: 100%; text-align: center; box-sizing: border-box;">Download Now</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; font-weight: 800;">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4>Why is it built on WordPress?</h4>
+                    <p>Because you already own your website. We don't want you to pay $297/mo for "All-in-one" platforms that keep your data hostage. WordPress is flexible, SEO-friendly, and now, with the Engine, extremely powerful.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Do I need technical skills?</h4>
+                    <p>If you can install a plugin, you can use the Engine. We've simplified the complex tech of funnels and automation into a simple, visual interface designed for coaches.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Is it multi-user capable?</h4>
+                    <p>Yes. The Engine supports multi-tenancy. You can have multiple coaches on the same site, each managing their own leads, offers, and analytics without data overlap.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2023 Coach Client Engine. Built by Consultants, for Consultants.</p>
+            <p style="margin-bottom: 20px;"><strong>CoachClientEngine</strong> - The Operating System for High-Ticket Consultants.</p>
+            <p>&copy; 2023 Coach Client Engine. All rights reserved.</p>
+            <div style="margin-top: 30px; display: flex; justify-content: center; gap: 30px;">
+                <a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+                <a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a>
+                <a href="#" style="color: inherit; text-decoration: none;">Documentation</a>
+            </div>
         </div>
     </footer>
 </body>

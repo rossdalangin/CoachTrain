@@ -91,7 +91,10 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
             'perceived_likelihood' => $offer->perceived_likelihood,
             'time_delay'           => $offer->time_delay,
             'effort_sacrifice'     => $offer->effort_sacrifice,
+            'upsell_offer_id'      => $offer->upsell_offer_id,
+            'order_bump_offer_id'  => $offer->order_bump_offer_id,
             'is_active'            => 1,
+            'created_at'           => current_time( 'mysql' ),
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );

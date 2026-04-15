@@ -54,14 +54,17 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
         $user_id = $this->get_current_user_id();
         $params = $request->get_params();
 
-        $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
+        $result = $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
             'user_id'    => $user_id,
             'title'      => sanitize_text_field( $params['title'] ),
             'category'   => sanitize_text_field( $params['category'] ?? 'Uncategorized' ),
             'type'       => sanitize_text_field( $params['type'] ),
             'url'        => esc_url_raw( $params['url'] ),
             'visibility' => sanitize_text_field( $params['visibility'] ?? 'public' ),
+            'created_at' => current_time( 'mysql' ),
         ) );
+
+        if ( false === $result ) return $this->error( 'Failed to create resource' );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
     }

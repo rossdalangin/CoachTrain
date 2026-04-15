@@ -34,10 +34,12 @@ class CCE_Mailer {
 	 */
 	public function send_template( $template_id, $lead_id ) {
 		global $wpdb;
-		$template = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE id = %d", $template_id ) );
-		$lead     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+		$lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+        if ( ! $lead ) return false;
 
-		if ( ! $template || ! $lead ) {
+		$template = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE id = %d AND user_id = %d", $template_id, $lead->user_id ) );
+
+		if ( ! $template ) {
 			return false;
 		}
 

@@ -63,6 +63,33 @@
                         <p class="description">What "pain" are you removing? What do they NOT have to do anymore?</p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Upsell Offer</th>
+                    <td>
+                        <select name="upsell_offer_id" class="regular-text">
+                            <option value="0">None</option>
+                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Downsell Offer</th>
+                    <td>
+                        <select name="downsell_offer_id" class="regular-text">
+                            <option value="0">None</option>
+                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Order Bump</th>
+                    <td>
+                        <select name="order_bump_offer_id" class="regular-text">
+                            <option value="0">None</option>
+                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        </select>
+                    </td>
+                </tr>
             </table>
             <?php submit_button('Create Grand Slam Offer'); ?>
         </form>
@@ -93,7 +120,10 @@
                     data-dream-outcome="<?php echo esc_attr($offer->dream_outcome); ?>"
                     data-perceived-likelihood="<?php echo esc_attr($offer->perceived_likelihood); ?>"
                     data-time-delay="<?php echo esc_attr($offer->time_delay); ?>"
-                    data-effort-sacrifice="<?php echo esc_attr($offer->effort_sacrifice); ?>">
+                    data-effort-sacrifice="<?php echo esc_attr($offer->effort_sacrifice); ?>"
+                    data-upsell-id="<?php echo $offer->upsell_offer_id; ?>"
+                    data-downsell-id="<?php echo $offer->downsell_offer_id; ?>"
+                    data-order-bump-id="<?php echo $offer->order_bump_offer_id; ?>">
                     <?php
                     $currency_code = get_option('cce_currency', 'USD');
                     $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
@@ -133,6 +163,24 @@
                 <p><label>Perceived Likelihood</label><br><textarea id="edit-offer-perceived-likelihood" class="widefat"></textarea></p>
                 <p><label>Time Delay</label><br><textarea id="edit-offer-time-delay" class="widefat"></textarea></p>
                 <p><label>Effort & Sacrifice</label><br><textarea id="edit-offer-effort-sacrifice" class="widefat"></textarea></p>
+                <p><label>Upsell Offer</label><br>
+                    <select id="edit-offer-upsell-id" class="widefat">
+                        <option value="0">None</option>
+                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                    </select>
+                </p>
+                <p><label>Downsell Offer</label><br>
+                    <select id="edit-offer-downsell-id" class="widefat">
+                        <option value="0">None</option>
+                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                    </select>
+                </p>
+                <p><label>Order Bump Offer</label><br>
+                    <select id="edit-offer-order-bump-id" class="widefat">
+                        <option value="0">None</option>
+                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                    </select>
+                </p>
                 <button type="submit" class="button button-primary">Update Offer</button>
             </form>
         </div>

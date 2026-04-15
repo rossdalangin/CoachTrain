@@ -124,10 +124,11 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 
         $title = 'New ' . ucwords( str_replace( '_', ' ', $template_id ) );
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
-            'user_id' => $user_id,
-            'title'   => $title,
-            'type'    => $template_id,
-            'status'  => 'active'
+            'user_id'    => $user_id,
+            'title'      => $title,
+            'type'       => $template_id,
+            'status'     => 'active',
+            'created_at' => current_time( 'mysql' ),
         ) );
 
         $funnel_id = $wpdb->insert_id;

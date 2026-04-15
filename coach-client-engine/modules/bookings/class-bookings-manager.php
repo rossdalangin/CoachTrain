@@ -121,6 +121,7 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 			'timezone'           => sanitize_text_field( $params['timezone'] ),
 			'status'             => 'pending',
 			'questionnaire_data' => json_encode( $params['questionnaire'] ?? array() ),
+            'created_at'         => current_time( 'mysql' ),
 		);
 
 		$result = $wpdb->insert( $table_name, $data );
@@ -131,6 +132,12 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 
 		$booking_id = $wpdb->insert_id;
 		$data['id'] = $booking_id;
+
+        // Track Conversion if in funnel
+        $step_id = absint( $params['step_id'] ?? $_COOKIE['cce_active_funnel_step'] ?? 0 );
+        if ( $step_id ) {
+            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET conversions = conversions + 1 WHERE id = %d", $step_id ) );
+        }
 
         // Log activity
         CCE_Activity_Logger::log( $data['lead_id'], 'booking', 'New consultation booked for ' . $data['start_time'] );

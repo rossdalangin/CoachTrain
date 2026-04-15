@@ -33,6 +33,9 @@ class CCE_Post_Handler {
 			'perceived_likelihood' => sanitize_textarea_field( $_POST['perceived_likelihood'] ?? '' ),
 			'time_delay'           => sanitize_textarea_field( $_POST['time_delay'] ?? '' ),
 			'effort_sacrifice'     => sanitize_textarea_field( $_POST['effort_sacrifice'] ?? '' ),
+            'upsell_offer_id'      => absint( $_POST['upsell_offer_id'] ?? 0 ),
+            'downsell_offer_id'    => absint( $_POST['downsell_offer_id'] ?? 0 ),
+            'order_bump_offer_id'  => absint( $_POST['order_bump_offer_id'] ?? 0 ),
 		);
 
 		$wpdb->insert( "{$wpdb->prefix}cce_offers", $data );
@@ -49,14 +52,18 @@ class CCE_Post_Handler {
         check_admin_referer( 'cce_save_lead_nonce' );
 
         global $wpdb;
+        $user_id = get_current_user_id();
+        $default_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC LIMIT 1", $user_id ) ) ?: 1;
+
         $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
-            'user_id'      => get_current_user_id(),
+            'user_id'      => $user_id,
             'first_name'   => sanitize_text_field( $_POST['first_name'] ),
             'last_name'    => sanitize_text_field( $_POST['last_name'] ),
             'email'        => sanitize_email( $_POST['email'] ),
             'status'       => 'cold',
-            'crm_stage_id' => 1,
+            'crm_stage_id' => $default_stage_id,
             'secure_token' => bin2hex( random_bytes( 32 ) ),
+            'created_at'   => current_time( 'mysql' ),
         ) );
 
         $lead_id = $wpdb->insert_id;
@@ -80,6 +87,7 @@ class CCE_Post_Handler {
             'start_time' => sanitize_text_field( $_POST['start_time'] ),
             'timezone'   => sanitize_text_field( $_POST['timezone'] ),
             'status'     => 'confirmed',
+            'created_at' => current_time( 'mysql' ),
         ) );
 
         $booking_id = $wpdb->insert_id;

@@ -92,18 +92,19 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
             $redirect_url = 'https://www.paypal.com/checkoutnow?token=' . bin2hex(random_bytes(10));
         }
 
+        $pending_id = 'PENDING_' . bin2hex( random_bytes( 8 ) );
 		$wpdb->insert( "{$wpdb->prefix}cce_payments", array(
             'user_id'        => $user_id,
 			'lead_id'        => $lead_id,
 			'offer_id'       => $offer_id,
-			'transaction_id' => 'PENDING_' . time(),
+			'transaction_id' => $pending_id,
 			'gateway'        => $gateway,
 			'amount'         => $offer->price,
 			'status'         => 'pending',
 		) );
 
         // Track Conversion if in funnel
-        $step_id = absint( $_COOKIE['cce_active_funnel_step'] ?? 0 );
+        $step_id = absint( $params['step_id'] ?? $_COOKIE['cce_active_funnel_step'] ?? 0 );
         if ( $step_id ) {
             $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET conversions = conversions + 1 WHERE id = %d", $step_id ) );
         }

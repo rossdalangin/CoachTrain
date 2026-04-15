@@ -107,6 +107,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
             'content'     => sanitize_textarea_field( $params['content'] ),
             'rating'      => absint( $params['rating'] ?? 5 ),
             'status'      => 'active',
+            'created_at'  => current_time( 'mysql' ),
         );
 
         $result = $wpdb->insert( "{$wpdb->prefix}cce_testimonials", $data );

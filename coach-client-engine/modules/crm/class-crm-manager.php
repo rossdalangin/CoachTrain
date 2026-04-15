@@ -123,12 +123,15 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     public function get_lead_stats( $request ) {
         global $wpdb;
         $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
 
-        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT source, created_at FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
-        $total_paid = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
-        $appointments = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d", $lead_id ) );
-        $tasks_total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d", $lead_id ) );
-        $tasks_done = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND status = 'completed'", $lead_id ) );
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT source, created_at FROM {$wpdb->prefix}cce_leads WHERE id = %d AND user_id = %d", $lead_id, $user_id ) );
+        if ( ! $lead ) return $this->error( 'Lead not found' );
+
+        $total_paid = $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE lead_id = %d AND user_id = %d AND status = 'completed'", $lead_id, $user_id ) );
+        $appointments = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d AND user_id = %d", $lead_id, $user_id ) );
+        $tasks_total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND user_id = %d", $lead_id, $user_id ) );
+        $tasks_done = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_tasks WHERE lead_id = %d AND user_id = %d AND status = 'completed'", $lead_id, $user_id ) );
 
         return $this->success( array(
             'source'       => $lead->source ?? 'Direct',

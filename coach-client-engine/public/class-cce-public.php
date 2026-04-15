@@ -67,7 +67,7 @@ class CCE_Public {
 
         $wpdb->update(
             "{$wpdb->prefix}cce_payments",
-            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . time() ),
+            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . bin2hex(random_bytes(8)) ),
             array( 'lead_id' => $lead_id, 'offer_id' => $offer_id, 'status' => 'pending' )
         );
 
@@ -86,6 +86,7 @@ class CCE_Public {
 		$atts = shortcode_atts( array(
 			'offer_id' => 1,
             'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
 
         $offer_id = absint( $atts['offer_id'] );
@@ -117,6 +118,7 @@ class CCE_Public {
 				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer_id ); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
                 <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
 				<select name="gateway" required>
 					<option value="stripe">Stripe</option>
 					<option value="paypal">PayPal</option>
@@ -200,15 +202,15 @@ class CCE_Public {
                 <?php
                 switch ( $current_step->step_type ) {
                     case 'optin':
-                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id ) );
+                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'booking':
-                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id ) );
+                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'checkout':
                         $config = json_decode( $current_step->config, true );
                         $offer_id = absint( $config['offer_id'] ?? 1 );
-                        echo $this->render_checkout( array( 'offer_id' => $offer_id ) );
+                        echo $this->render_checkout( array( 'offer_id' => $offer_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'thank_you':
                         $config = json_decode( $current_step->config, true );
@@ -434,6 +436,7 @@ class CCE_Public {
 			'title' => 'Schedule Your Free Consultation',
             'redirect' => '',
             'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
 
 		ob_start();
@@ -446,6 +449,7 @@ class CCE_Public {
 			<form class="cce-public-booking-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
                 <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
                 <div style="margin-bottom:15px;">
                     <label>Preferred Date & Time</label>
 				    <input type="datetime-local" name="start_time" required>
@@ -539,6 +543,7 @@ class CCE_Public {
 			'type'  => 'inline',
             'redirect' => '',
             'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
 
 		ob_start();
@@ -549,6 +554,7 @@ class CCE_Public {
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
 			<form class="cce-public-lead-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
                 <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
 				<input type="text" name="first_name" placeholder="First Name" required>
 				<input type="email" name="email" placeholder="Email Address" required>
 				<button type="submit" class="button">Send Me the Guide</button>

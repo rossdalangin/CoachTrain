@@ -46,6 +46,9 @@ class Coach_Client_Engine {
         require_once $path . 'modules/portal/class-onboarding-manager.php';
         require_once $path . 'modules/proof/class-proof-manager.php';
         require_once $path . 'modules/automation/class-automation-manager.php';
+
+        // Instantiate Automation Manager early to listen for hooks
+        new CCE_Automation_Manager();
 	}
 
 	/**

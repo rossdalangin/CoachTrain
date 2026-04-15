@@ -438,6 +438,9 @@ jQuery(document).ready(function($) {
         $('#edit-offer-perceived-likelihood').val($row.data('perceived-likelihood'));
         $('#edit-offer-time-delay').val($row.data('time-delay'));
         $('#edit-offer-effort-sacrifice').val($row.data('effort-sacrifice'));
+        $('#edit-offer-upsell-id').val($row.data('upsell-id'));
+        $('#edit-offer-downsell-id').val($row.data('downsell-id'));
+        $('#edit-offer-order-bump-id').val($row.data('order-bump-id'));
         $('#cce-edit-offer-modal').show();
     });
 
@@ -451,7 +454,10 @@ jQuery(document).ready(function($) {
             dream_outcome: $('#edit-offer-dream-outcome').val(),
             perceived_likelihood: $('#edit-offer-perceived-likelihood').val(),
             time_delay: $('#edit-offer-time-delay').val(),
-            effort_sacrifice: $('#edit-offer-effort-sacrifice').val()
+            effort_sacrifice: $('#edit-offer-effort-sacrifice').val(),
+            upsell_offer_id: $('#edit-offer-upsell-id').val(),
+            downsell_offer_id: $('#edit-offer-downsell-id').val(),
+            order_bump_offer_id: $('#edit-offer-order-bump-id').val()
         };
         cceApi('offers/' + id, 'POST', data, function(res) {
             if(res.success) location.reload();

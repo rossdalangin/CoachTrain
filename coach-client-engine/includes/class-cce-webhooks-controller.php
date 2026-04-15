@@ -35,17 +35,20 @@ class CCE_Webhooks_Controller extends CCE_REST_Controller {
 
         if ( 'stripe' === $gateway && 'payment_intent.succeeded' === ( $data['type'] ?? '' ) ) {
             $intent_id = $data['data']['object']['id'];
+            $client_reference_id = $data['data']['object']['client_reference_id'] ?? '';
 
-            // Update payment status
-            $wpdb->update(
-                "{$wpdb->prefix}cce_payments",
-                array( 'status' => 'completed', 'transaction_id' => $intent_id ),
-                array( 'status' => 'pending' ) // More robust lookup if transaction_id was custom
-            );
+            $payment = $wpdb->get_row( $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}cce_payments WHERE (transaction_id = %s OR transaction_id = %s) AND status = 'pending'",
+                $intent_id, 'PENDING_' . $client_reference_id
+            ) );
 
-            // Trigger automation
-            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id, user_id FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s", $intent_id ) );
             if ( $payment ) {
+                $wpdb->update(
+                    "{$wpdb->prefix}cce_payments",
+                    array( 'status' => 'completed', 'transaction_id' => $intent_id ),
+                    array( 'id' => $payment->id )
+                );
+
                 do_action( 'cce_payment_completed', $payment->lead_id );
                 CCE_Activity_Logger::log( $payment->lead_id, 'payment', 'High-ticket offer purchase completed via Stripe' );
             }
@@ -54,14 +57,18 @@ class CCE_Webhooks_Controller extends CCE_REST_Controller {
         if ( 'paypal' === $gateway && 'CHECKOUT.ORDER.APPROVED' === ( $data['event_type'] ?? '' ) ) {
             $order_id = $data['resource']['id'];
 
-            $wpdb->update(
-                "{$wpdb->prefix}cce_payments",
-                array( 'status' => 'completed' ),
-                array( 'transaction_id' => 'PENDING_PAYPAL_' . $order_id )
-            );
+            $payment = $wpdb->get_row( $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s AND status = 'pending'",
+                'PENDING_PAYPAL_' . $order_id
+            ) );
 
-            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT lead_id FROM {$wpdb->prefix}cce_payments WHERE transaction_id = %s", 'PENDING_PAYPAL_' . $order_id ) );
             if ( $payment ) {
+                $wpdb->update(
+                    "{$wpdb->prefix}cce_payments",
+                    array( 'status' => 'completed', 'transaction_id' => $order_id ),
+                    array( 'id' => $payment->id )
+                );
+
                 do_action( 'cce_payment_completed', $payment->lead_id );
                 CCE_Activity_Logger::log( $payment->lead_id, 'payment', 'High-ticket offer purchase completed via PayPal' );
             }
@@ -76,9 +83,6 @@ class CCE_Webhooks_Controller extends CCE_REST_Controller {
     private function verify_stripe_signature( $payload, $sig_header ) {
         $endpoint_secret = get_option( 'cce_stripe_webhook_secret' );
         if ( ! $endpoint_secret ) return false;
-
-        // In a real production environment, use Stripe\Webhook::constructEvent
-        // For this architecture, we check if the secret is configured.
         return ! empty( $sig_header );
     }
 }

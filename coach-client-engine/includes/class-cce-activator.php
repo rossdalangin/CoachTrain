@@ -213,39 +213,6 @@ class CCE_Activator {
 			dbDelta( $sql );
 		}
 
-        // Seed default CRM stages if empty
-        $count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_crm_stages" );
-        if ( 0 == $count ) {
-            $stages = ['New', 'Contacted', 'Booked', 'Closed'];
-            foreach ( $stages as $index => $stage ) {
-                $wpdb->insert(
-                    "{$wpdb->prefix}cce_crm_stages",
-                    [
-                        'name' => $stage,
-                        'stage_order' => $index + 1
-                    ]
-                );
-            }
-        }
-
-        // Seed default Funnel Templates if empty
-        $funnel_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels" );
-        if ( 0 == $funnel_count ) {
-            $templates = [
-                ['title' => 'Lead Magnet Funnel', 'type' => 'lead_magnet'],
-                ['title' => 'Consultation Funnel', 'type' => 'consultation'],
-                ['title' => 'Webinar Funnel', 'type' => 'webinar'],
-            ];
-            foreach ( $templates as $template ) {
-                $wpdb->insert(
-                    "{$wpdb->prefix}cce_funnels",
-                    [
-                        'title' => $template['title'],
-                        'type' => $template['type'],
-                        'status' => 'draft'
-                    ]
-                );
-            }
-        }
+        // Default seeding is now handled dynamically per user in CCE_CRM_Manager and individual modules to support multi-tenancy.
 	}
 }

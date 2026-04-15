@@ -38,21 +38,22 @@
         <div style="display:flex; gap:30px; margin-top:10px;">
             <?php
             global $wpdb;
+            $user_id = get_current_user_id();
             $setup_steps = [
                 'License Key' => [
-                    'check' => get_option('cce_license_key'),
+                    'check' => get_user_meta($user_id, 'cce_license_key', true) ?: get_option('cce_license_key'),
                     'desc'  => 'Unlock Pro features'
                 ],
                 'Stripe Connected' => [
-                    'check' => get_option('cce_stripe_api_key'),
+                    'check' => get_user_meta($user_id, 'cce_stripe_api_key', true) ?: get_option('cce_stripe_api_key'),
                     'desc'  => 'Accept high-ticket payments'
                 ],
                 'Lead Magnet' => [
-                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels WHERE user_id = %d", get_current_user_id())),
+                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_funnels WHERE user_id = %d", $user_id)),
                     'desc'  => 'Create your first opt-in page'
                 ],
                 'Coaching Offer' => [
-                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers WHERE user_id = %d", get_current_user_id())),
+                    'check' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_offers WHERE user_id = %d", $user_id)),
                     'desc'  => 'Define your Grand Slam Offer'
                 ],
             ];
