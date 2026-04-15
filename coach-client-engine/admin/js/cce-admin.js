@@ -483,7 +483,44 @@ jQuery(document).ready(function($) {
 
         $row.show();
         loadFunnelSteps(funnelId, $container);
+        loadFunnelViz(funnelId);
     });
+
+    function loadFunnelViz(funnelId) {
+        cceApi('funnels/' + funnelId + '/steps', 'GET', {}, function(res) {
+            if (res.success && res.data.length > 0) {
+                const $viz = $('.funnel-viz-' + funnelId);
+                const $track = $('.viz-track-' + funnelId);
+                $track.html('');
+                $viz.show();
+
+                res.data.forEach((step, idx) => {
+                    const visits = parseInt(step.visits || 0);
+                    const convs = parseInt(step.conversions || 0);
+                    const rate = visits > 0 ? ((convs / visits) * 100).toFixed(1) : 0;
+
+                    let html = `<div style="text-align:center; min-width:120px; padding:15px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="font-size:11px; color:#64748b; margin-bottom:5px; text-transform:uppercase;">Step ${idx + 1}</div>
+                        <div style="font-weight:700; margin-bottom:10px;">${step.title}</div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px;">
+                            <span>Visits:</span><strong>${visits}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:12px;">
+                            <span>Convs:</span><strong>${convs}</strong>
+                        </div>
+                        <div style="margin-top:10px; padding-top:5px; border-top:1px solid #f1f5f9; font-size:14px; font-weight:800; color:#2563eb;">
+                            ${rate}%
+                        </div>
+                    </div>`;
+
+                    if (idx < res.data.length - 1) {
+                        html += `<div style="color:#94a3b8; font-size:20px;">→</div>`;
+                    }
+                    $track.append(html);
+                });
+            }
+        });
+    }
 
     function loadFunnelSteps(funnelId, $container) {
         cceApi('funnels/' + funnelId + '/steps', 'GET', {}, function(res) {

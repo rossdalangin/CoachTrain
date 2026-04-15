@@ -164,6 +164,7 @@ class Coach_Client_Engine {
                             'primary_color' => get_user_meta( $user_id, 'cce_primary_color', true ) ?: get_option( 'cce_primary_color', '#0073aa' ),
                             'coach_name' => get_user_meta( $user_id, 'cce_coach_name', true ) ?: get_option( 'cce_coach_name', '' ),
                             'default_currency' => get_user_meta( $user_id, 'cce_currency', true ) ?: get_option( 'cce_currency', 'USD' ),
+                            'test_mode' => (bool) get_user_meta( $user_id, 'cce_test_mode', true ),
                         )
                     );
                 },
@@ -194,6 +195,9 @@ class Coach_Client_Engine {
                     }
                     if ( isset( $params['default_currency'] ) ) {
                         update_user_meta( $user_id, 'cce_currency', sanitize_text_field( $params['default_currency'] ) );
+                    }
+                    if ( isset( $params['test_mode'] ) ) {
+                        update_user_meta( $user_id, 'cce_test_mode', (bool) $params['test_mode'] );
                     }
                     return array( 'success' => true );
                 },

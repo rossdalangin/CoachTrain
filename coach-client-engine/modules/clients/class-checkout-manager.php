@@ -73,12 +73,22 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 
 		// Process payment based on gateway
         $redirect_url = '';
-        if ( 'stripe' === $gateway ) {
-            $stripe = new CCE_Stripe_Wrapper( get_option( 'cce_stripe_api_key' ) );
+        $is_test = (bool) get_user_meta( $user_id, 'cce_test_mode', true );
+
+        if ( $is_test ) {
+            $redirect_url = add_query_arg( array(
+                'cce_simulate_payment' => 1,
+                'gateway' => $gateway,
+                'offer_id' => $offer_id,
+                'lead_id' => $lead_id,
+                'nonce' => wp_create_nonce('cce_sim_payment')
+            ), home_url('/') );
+        } elseif ( 'stripe' === $gateway ) {
+            $stripe = new CCE_Stripe_Wrapper( get_user_meta( $user_id, 'cce_stripe_api_key', true ) );
             // In a real implementation, we would create a Stripe Checkout Session here
             $redirect_url = 'https://checkout.stripe.com/pay/' . bin2hex(random_bytes(16));
         } elseif ( 'paypal' === $gateway ) {
-            $paypal = new CCE_Paypal_Wrapper( get_option( 'cce_paypal_client_id' ), '' );
+            $paypal = new CCE_Paypal_Wrapper( get_user_meta( $user_id, 'cce_paypal_client_id', true ), '' );
             $redirect_url = 'https://www.paypal.com/checkoutnow?token=' . bin2hex(random_bytes(10));
         }
 

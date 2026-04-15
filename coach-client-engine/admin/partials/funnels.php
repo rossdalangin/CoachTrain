@@ -47,6 +47,10 @@
                             <div class="steps-container-<?php echo $funnel->id; ?>" style="margin-top:10px;">
                                 <em>Loading steps...</em>
                             </div>
+                            <div class="funnel-viz-<?php echo $funnel->id; ?>" style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px; display:none;">
+                                <h5>Visual Performance (Conversion Waterfall)</h5>
+                                <div class="viz-track-<?php echo $funnel->id; ?>" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;"></div>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; else: ?>

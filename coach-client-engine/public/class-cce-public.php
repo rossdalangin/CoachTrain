@@ -14,7 +14,69 @@ class CCE_Public {
 		add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
 		add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
         add_shortcode( 'cce_funnel', array( $this, 'render_funnel' ) );
+        add_action( 'template_redirect', array( $this, 'handle_payment_simulation' ) );
+        add_action( 'rest_api_init', array( $this, 'register_portal_auth_routes' ) );
 	}
+
+    /**
+     * Register portal auth routes.
+     */
+    public function register_portal_auth_routes() {
+        register_rest_route( 'cce/v1', '/portal/auth', array(
+            'methods' => 'POST',
+            'callback' => array( $this, 'handle_portal_login' ),
+            'permission_callback' => '__return_true',
+        ) );
+    }
+
+    /**
+     * Handle portal login.
+     */
+    public function handle_portal_login( $request ) {
+        global $wpdb;
+        $email = sanitize_email( $request->get_param( 'email' ) );
+
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT id, secure_token FROM {$wpdb->prefix}cce_leads WHERE email = %s", $email ) );
+
+        if ( ! $lead ) {
+            return array( 'success' => false, 'message' => 'No record found with that email.' );
+        }
+
+        // Set cookie
+        setcookie( 'cce_lead_token', $lead->secure_token, time() + ( 30 * DAY_IN_SECONDS ), '/' );
+
+        return array( 'success' => true, 'secure_token' => $lead->secure_token );
+    }
+
+    /**
+     * Handle payment simulation for test mode.
+     */
+    public function handle_payment_simulation() {
+        if ( ! isset( $_GET['cce_simulate_payment'] ) ) return;
+
+        if ( ! wp_verify_nonce( $_GET['nonce'] ?? '', 'cce_sim_payment' ) ) {
+            wp_die( 'Security check failed' );
+        }
+
+        global $wpdb;
+        $lead_id = absint( $_GET['lead_id'] );
+        $offer_id = absint( $_GET['offer_id'] );
+        $gateway = sanitize_text_field( $_GET['gateway'] );
+
+        $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_payments",
+            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . time() ),
+            array( 'lead_id' => $lead_id, 'offer_id' => $offer_id, 'status' => 'pending' )
+        );
+
+        do_action( 'cce_payment_completed', $lead_id );
+        CCE_Activity_Logger::log( $lead_id, 'payment', 'TEST PAYMENT: Simulation completed for ' . $gateway );
+
+        wp_redirect( add_query_arg( 'payment_success', '1', wp_get_referer() ?: home_url() ) );
+        exit;
+    }
 
 	/**
 	 * Render checkout form.
@@ -173,7 +235,37 @@ class CCE_Public {
 		$lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
 
 		if ( ! $lead ) {
-			return '<p>Please log in or capture your lead info first.</p>';
+			?>
+            <div class="cce-client-portal cce-portal-login">
+                <h3>Access Your Private Portal</h3>
+                <p>Enter your email address to access your coaching roadmap and resources.</p>
+                <form id="cce-portal-login-form">
+                    <input type="email" id="portal-email" placeholder="you@example.com" required style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px;">
+                    <button type="submit" class="button" style="width:100%; padding:12px; background:var(--cce-primary, #0073aa); color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Access Portal</button>
+                </form>
+                <div id="portal-login-message" style="margin-top:15px;"></div>
+                <script>
+                document.getElementById('cce-portal-login-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('portal-email').value;
+                    fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/auth' ) ); ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            document.getElementById('portal-login-message').innerHTML = '<p style="color:red">' + res.message + '</p>';
+                        }
+                    });
+                });
+                </script>
+            </div>
+            <?php
+            return ob_get_clean();
 		}
 
         $completed = json_decode( $lead->onboarding_progress ?: '[]', true );

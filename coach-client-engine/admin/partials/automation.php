@@ -8,8 +8,21 @@
         <button class="cce-automation-tab-link" data-tab="templates" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Email Templates</button>
     </div>
 
+    <?php
+    $engine = new Coach_Client_Engine();
+    $is_pro = $engine->is_pro();
+    ?>
+
     <div id="tab-rules" class="cce-automation-tab-content">
-        <div class="cce-card" style="margin-bottom:20px;">
+        <?php if ( ! $is_pro ): ?>
+            <div class="notice notice-info" style="margin: 20px 0; border-left-color: #ffb700; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h2 style="margin-top:0;">🤖 Automate Your Coaching Business (PRO)</h2>
+                <p>Standard users can send basic welcome emails. Upgrade to PRO to use <strong>CRM Move Triggers</strong>, <strong>Scheduled Task Creation</strong>, and <strong>Multi-Step Follow-up Sequences</strong>.</p>
+                <a href="?page=cce-settings#general" class="button button-primary">Upgrade to Pro</a>
+            </div>
+        <?php endif; ?>
+
+        <div class="cce-card" style="margin-bottom:20px; <?php echo ! $is_pro ? 'opacity: 0.6; pointer-events: none;' : ''; ?>">
             <h3>Create New Automation Rule</h3>
             <form id="cce-add-automation-form">
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
@@ -74,7 +87,7 @@
             </form>
         </div>
 
-        <div class="cce-card">
+        <div class="cce-card" style="<?php echo ! $is_pro ? 'opacity: 0.6; pointer-events: none;' : ''; ?>">
             <h3>Active Automation Rules</h3>
             <table class="wp-list-table widefat fixed striped">
                 <thead>

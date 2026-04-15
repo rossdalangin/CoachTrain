@@ -62,6 +62,15 @@
                     <th scope="row">Primary Color</th>
                     <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_primary_color', true ) ?: get_option('cce_primary_color', '#0073aa') ); ?>"></td>
                 </tr>
+                <tr>
+                    <th scope="row">Test Mode</th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="test_mode" value="1" <?php checked( get_user_meta( get_current_user_id(), 'cce_test_mode', true ) ); ?>>
+                            Enable Payment Simulation (Bypasses real Stripe/PayPal for testing)
+                        </label>
+                    </td>
+                </tr>
             </table>
         </div>
 
@@ -161,6 +170,7 @@
             e.preventDefault();
             const data = {};
             $(this).serializeArray().forEach(item => data[item.name] = item.value);
+            data.test_mode = $('[name="test_mode"]').is(':checked') ? 1 : 0;
 
             $.ajax({
                 url: cceAdmin.restUrl + 'settings',
