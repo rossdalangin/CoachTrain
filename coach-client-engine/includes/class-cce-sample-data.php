@@ -8,6 +8,8 @@ class CCE_Sample_Data {
         global $wpdb;
         $user_id = get_current_user_id();
 
+        if ( ! $user_id ) return false;
+
         // 1. Seed CRM Stages
         $stages = ['New Lead', 'Contacted', 'Booking Scheduled', 'Consultation Done', 'Closed - Won', 'Closed - Lost'];
         foreach ( $stages as $idx => $name ) {
@@ -65,24 +67,43 @@ class CCE_Sample_Data {
         }
 
         // 4. Seed Funnels
-        $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
-            'user_id' => $user_id,
-            'title'   => 'High-Ticket VSL Funnel',
-            'type'    => 'Consultation',
-            'status'  => 'active'
-        ) );
-        $funnel_id = $wpdb->insert_id;
+        $funnels = [
+            [
+                'title' => 'High-Ticket VSL Funnel',
+                'type'  => 'Consultation',
+                'steps' => ['Opt-in Page', 'VSL Video', 'Booking Page', 'Thank You']
+            ],
+            [
+                'title' => '6-Figure Webinar Funnel',
+                'type'  => 'Webinar',
+                'steps' => ['Registration', 'Webinar Room', 'Application Page', 'Confirmation']
+            ],
+            [
+                'title' => '5-Day Client Acquisition Challenge',
+                'type'  => 'Challenge',
+                'steps' => ['Sign Up', 'Day 1-5 Lessons', 'VIP Upgrade', 'Closing Call']
+            ]
+        ];
 
-        $steps = ['Opt-in Page', 'VSL Video', 'Booking Page', 'Thank You'];
-        foreach ( $steps as $idx => $s ) {
-            $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
-                'user_id'    => $user_id,
-                'funnel_id'  => $funnel_id,
-                'title'      => $s,
-                'step_order' => $idx,
-                'visits'     => rand(100, 500),
-                'conversions'=> rand(10, 50)
+        foreach ($funnels as $f_data) {
+            $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
+                'user_id' => $user_id,
+                'title'   => $f_data['title'],
+                'type'    => $f_data['type'],
+                'status'  => 'active'
             ) );
+            $funnel_id = $wpdb->insert_id;
+
+            foreach ( $f_data['steps'] as $idx => $s ) {
+                $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                    'user_id'    => $user_id,
+                    'funnel_id'  => $funnel_id,
+                    'title'      => $s,
+                    'step_order' => $idx,
+                    'visits'     => rand(100, 500),
+                    'conversions'=> rand(10, 50)
+                ) );
+            }
         }
 
         // 5. Seed Analytics Data (Visitors)
@@ -177,6 +198,16 @@ class CCE_Sample_Data {
                 'name'    => 'Direct Response Booking Invite',
                 'subject' => 'Ready to scale?',
                 'content' => '<h1>{{first_name}}, let\'s get serious.</h1><p>If you want to achieve {{dream_outcome}} in the next 90 days, we need to talk. Book your strategy session here.</p>'
+            ],
+            [
+                'name'    => 'Webinar Indoctrination #1',
+                'subject' => 'Why traditional {{industry}} is dead...',
+                'content' => '<h1>Hey {{first_name}}!</h1><p>The old way of doing things is over. In the webinar tomorrow, I\'ll show you the new framework for {{dream_outcome}}.</p>'
+            ],
+            [
+                'name'    => 'Post-Purchase Ascension',
+                'subject' => 'Welcome to the inner circle!',
+                'content' => '<h1>{{first_name}}, you made it.</h1><p>Most people just watch. You took action. Here are your first steps to scaling to $1M...</p>'
             ]
         ];
         foreach ($templates as $t) {

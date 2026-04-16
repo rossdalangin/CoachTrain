@@ -36,6 +36,7 @@ class CCE_Admin {
             'Portal'     => 'cce-portal',
             'Proof'      => 'cce-proof',
             'Analytics'  => 'cce-analytics',
+            'Templates'  => 'cce-templates',
             'Payments'   => 'cce-payments',
             'Settings'   => 'cce-settings',
         ];
@@ -137,6 +138,13 @@ class CCE_Admin {
      */
     public function render_analytics() {
         include plugin_dir_path( __FILE__ ) . '../admin/partials/analytics.php';
+    }
+
+    /**
+     * Render Templates.
+     */
+    public function render_templates() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/templates.php';
     }
 
     /**

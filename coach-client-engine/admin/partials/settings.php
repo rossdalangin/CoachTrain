@@ -12,7 +12,8 @@
         </h2>
     </div>
 
-    <form id="cce-settings-form" style="margin-top:20px;">
+    <div id="cce-settings-sections" style="margin-top:20px;">
+        <form id="cce-settings-form">
         <div id="section-general" class="cce-settings-section">
             <table class="form-table">
                 <tr>
@@ -156,19 +157,17 @@
             </div>
         </div>
 
+        </form>
+
         <div id="section-status" class="cce-settings-section" style="display:none;">
-            <div class="cce-card" style="border-left: 4px solid #00a32a;">
+            <div class="cce-card" style="border-left: 4px solid #00a32a; margin-bottom: 20px;">
                 <h3>🚀 One-Click Demo Mode</h3>
                 <p>Want to see how the Coach Client Engine looks with a full pipeline of leads, bookings, and active clients? Click the button below to populate all 15+ database tables with strategically aligned sample data.</p>
-                <form action="<?php echo admin_url('admin-post.php'); ?>" method="post">
-                    <input type="hidden" name="action" value="cce_generate_sample_data">
-                    <?php wp_nonce_field('cce_generate_sample_data_nonce'); ?>
-                    <button type="submit" class="button button-primary button-hero">Populate Sample Data</button>
-                </form>
+                <button type="button" id="cce-generate-sample-data" class="button button-primary button-hero">Populate Sample Data</button>
                 <p style="font-size:11px; color:#888; margin-top:10px;">Note: This will add new records to your database. It will not delete your existing data.</p>
             </div>
 
-            <div class="cce-card" style="margin-top:20px;">
+            <div class="cce-card">
                 <h3>Diagnostic Check</h3>
                 <table class="wp-list-table widefat fixed striped">
                     <thead><tr><th>Component</th><th>Status</th></tr></thead>
@@ -188,10 +187,10 @@
             </div>
         </div>
 
-        <p class="submit">
-            <button type="submit" class="button button-primary">Save Settings</button>
+        <p class="submit" id="cce-settings-submit-container">
+            <button type="submit" form="cce-settings-form" class="button button-primary">Save Settings</button>
         </p>
-    </form>
+    </div>
 
     <script>
     jQuery(document).ready(function($) {
@@ -200,7 +199,36 @@
             $('.nav-tab').removeClass('nav-tab-active');
             $(this).addClass('nav-tab-active');
             $('.cce-settings-section').hide();
-            $('#section-' + $(this).attr('href').substring(1)).show();
+
+            var target = $(this).attr('href').substring(1);
+            $('#section-' + target).show();
+
+            if (target === 'status' || target === 'shortcodes' || target === 'licensing') {
+                $('#cce-settings-submit-container').hide();
+            } else {
+                $('#cce-settings-submit-container').show();
+            }
+        });
+
+        $('#cce-generate-sample-data').on('click', function() {
+            const $btn = $(this);
+            $btn.prop('disabled', true).text('Generating...');
+
+            $.ajax({
+                url: cceAdmin.restUrl + 'maintenance/sample-data',
+                method: 'POST',
+                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+                success: function(res) {
+                    if (res.success) {
+                        alert(res.message);
+                        window.location.reload();
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while generating sample data.');
+                    $btn.prop('disabled', false).text('Populate Sample Data');
+                }
+            });
         });
 
         $('#cce-settings-form').on('submit', function(e) {

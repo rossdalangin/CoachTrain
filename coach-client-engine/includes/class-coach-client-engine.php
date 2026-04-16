@@ -152,6 +152,20 @@ class Coach_Client_Engine {
      * Register REST API routes.
      */
     public function register_rest_routes() {
+        register_rest_route( 'cce/v1', '/maintenance/sample-data', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => function() {
+                    if ( class_exists( 'CCE_Sample_Data' ) ) {
+                        CCE_Sample_Data::generate();
+                        return array( 'success' => true, 'message' => 'Sample data generated successfully!' );
+                    }
+                    return new WP_Error( 'error', 'Sample data generator not found', array( 'status' => 500 ) );
+                },
+                'permission_callback' => array( $this, 'check_rest_permission' ),
+            )
+        ) );
+
         register_rest_route( 'cce/v1', '/settings', array(
             array(
                 'methods'             => 'GET',

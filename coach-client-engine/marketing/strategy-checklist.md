@@ -29,6 +29,12 @@ Follow this checklist to ensure your Engine is tuned for maximum client acquisit
 
 ---
 
+## 5. Pre-Built Template Utilization
+- [ ] **Templates Selected:** Have you chosen a template from the **Strategic Template Library** (VSL, Webinar, or Challenge)?
+- [ ] **Copy Customized:** Have you replaced the placeholder text (like `{{dream_outcome}}`) with your specific offer language?
+- [ ] **Automation Linked:** Have you connected your funnel opt-in to the appropriate email indoctrination sequence?
+- [ ] **Demo Mode Check:** Have you used the **One-Click Demo Mode** in Settings to visualize how your data will flow before going live?
+
 # 🚀 Sales Strategy: The "Consultant-to-Consultant" Approach
 
 When selling this plugin to other coaches, remember that they aren't buying a plugin; they are buying **Professionalism** and **Freedom**.
