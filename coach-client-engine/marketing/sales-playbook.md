@@ -78,3 +78,5 @@ I developed a plugin called Coach Client Engine that specifically integrates the
 - **Scientifically Structured:** Built around the **Value Equation** (Dream Outcome, Likelihood, Time, Effort).
 - **Automated Nurture:** Never let a lead go cold again.
 - **Client Excellence:** A professional portal that makes your onboarding look world-class.
+- **Multi-Tenant Ready:** Perfect for agencies managing multiple coaches, with isolated data and settings for every WordPress user.
+- **One-Click Demo:** Instantly show clients what a fully functional engine looks like with our sample data generator.

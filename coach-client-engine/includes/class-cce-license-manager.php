@@ -37,6 +37,21 @@ class CCE_License_Manager extends CCE_REST_Controller {
             return $this->error( 'License key is required' );
         }
 
+        // Validate checksum using secret salt (same as issuer tool)
+        $secret_salt = 'cce_ultra_secret_salt_12345';
+        $parts = explode('-', $license_key);
+        $is_valid_format = false;
+        if (count($parts) === 3 && $parts[0] === 'PRO') {
+            $random_part = strtolower($parts[1]);
+            $checksum = strtolower($parts[2]);
+            $expected_checksum = substr(md5($random_part . $secret_salt), 0, 4);
+            $is_valid_format = ($checksum === $expected_checksum);
+        }
+
+        if ( ! $is_valid_format ) {
+            return $this->error( 'Invalid license key format or checksum' );
+        }
+
         // Check if license exists and is not assigned to another user
         $existing = $wpdb->get_row( $wpdb->prepare(
             "SELECT * FROM {$wpdb->prefix}cce_licenses WHERE license_key = %s",
@@ -44,17 +59,13 @@ class CCE_License_Manager extends CCE_REST_Controller {
         ) );
 
         if ( ! $existing ) {
-            // For demo purposes, if it starts with PRO- and is 16 chars, we "create" it
-            if ( strpos( $license_key, 'PRO-' ) === 0 && strlen( $license_key ) >= 12 ) {
-                 $wpdb->insert( "{$wpdb->prefix}cce_licenses", array(
-                    'license_key' => $license_key,
-                    'user_id'     => $user_id,
-                    'status'      => 'active'
-                ) );
-                update_option( 'cce_license_key', $license_key );
-                return $this->success( array( 'message' => 'License activated successfully!' ) );
-            }
-            return $this->error( 'Invalid license key' );
+             $wpdb->insert( "{$wpdb->prefix}cce_licenses", array(
+                'license_key' => $license_key,
+                'user_id'     => $user_id,
+                'status'      => 'active'
+            ) );
+            update_option( 'cce_license_key', $license_key );
+            return $this->success( array( 'message' => 'License activated successfully!' ) );
         }
 
         if ( $existing->user_id != 0 && $existing->user_id != $user_id ) {

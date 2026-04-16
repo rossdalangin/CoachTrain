@@ -91,7 +91,8 @@ class CCE_Sample_Data {
         // 6. Seed Testimonials
         $testimonials = [
             ['name' => 'Steve Jobs', 'content' => 'The Coach Client Engine transformed how we think about our sales funnel.'],
-            ['name' => 'Elon Musk', 'content' => 'Incredible ROI. The automation is efficient and reliable.']
+            ['name' => 'Elon Musk', 'content' => 'Incredible ROI. The automation is efficient and reliable.'],
+            ['name' => 'Richard Branson', 'content' => 'Brilliant simplicity for high-ticket client acquisition.']
         ];
         foreach ( $testimonials as $t ) {
             $wpdb->insert( "{$wpdb->prefix}cce_testimonials", array(
@@ -102,5 +103,94 @@ class CCE_Sample_Data {
                 'status'      => 'active'
             ) );
         }
+
+        // 7. Seed Bookings
+        $lead_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE user_id = %d LIMIT 3", $user_id ) );
+        foreach ( $lead_ids as $idx => $lid ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_bookings", array(
+                'user_id'    => $user_id,
+                'lead_id'    => $lid,
+                'start_time' => date('Y-m-d H:i:s', strtotime('+' . ($idx + 1) . ' days')),
+                'timezone'   => 'America/New_York',
+                'status'     => 'confirmed'
+            ) );
+        }
+
+        // 8. Seed Payments
+        $offer_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_offers WHERE user_id = %d LIMIT 1", $user_id ) );
+        if ( $offer_id && !empty($lead_ids) ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_payments", array(
+                'user_id'        => $user_id,
+                'lead_id'        => $lead_ids[0],
+                'offer_id'       => $offer_id,
+                'amount'         => 5000,
+                'currency'       => 'USD',
+                'status'         => 'completed',
+                'transaction_id' => 'ch_sample_' . uniqid(),
+                'gateway'        => 'stripe'
+            ) );
+        }
+
+        // 9. Seed Activity Log
+        if ( !empty($lead_ids) ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_activity_log", array(
+                'user_id'       => $user_id,
+                'lead_id'       => $lead_ids[0],
+                'activity_type' => 'payment_received',
+                'description'   => 'Client paid $5000 for Elite Business Coaching.'
+            ) );
+        }
+
+        // 10. Seed Tasks
+        if ( !empty($lead_ids) ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
+                'user_id'  => $user_id,
+                'lead_id'  => $lead_ids[0],
+                'title'    => 'Onboarding Call',
+                'due_date' => date('Y-m-d H:i:s', strtotime('+2 days')),
+                'status'   => 'pending'
+            ) );
+        }
+
+        // 11. Seed Automation Rules
+        $wpdb->insert( "{$wpdb->prefix}cce_automation_rules", array(
+            'user_id'       => $user_id,
+            'trigger_event' => 'cce_lead_created',
+            'action_type'   => 'send_email',
+            'config'        => json_encode(['template_id' => 1]),
+            'is_active'     => 1
+        ) );
+
+        // 12. Seed Email Templates
+        $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
+            'user_id' => $user_id,
+            'name'    => 'Welcome Sequence #1',
+            'subject' => 'Welcome to the inner circle!',
+            'content' => '<h1>Hey {{first_name}}!</h1><p>Thanks for joining. Here is your first resource...</p>'
+        ) );
+
+        // 13. Seed Resources
+        $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
+            'user_id'  => $user_id,
+            'title'    => 'Million Dollar Offer Guide',
+            'category' => 'Strategy',
+            'type'     => 'PDF',
+            'url'      => '#'
+        ) );
+
+        // 14. Seed Questions
+        $wpdb->insert( "{$wpdb->prefix}cce_questions", array(
+            'user_id'        => $user_id,
+            'question_text'  => 'What is your current monthly revenue?',
+            'question_type'  => 'select',
+            'question_order' => 1
+        ) );
+
+        // 15. Seed Onboarding Tasks
+        $wpdb->insert( "{$wpdb->prefix}cce_onboarding_tasks", array(
+            'user_id'    => $user_id,
+            'task_name'  => 'Watch the Welcome Video',
+            'task_order' => 1
+        ) );
     }
 }

@@ -143,27 +143,29 @@
                 <div class="notice notice-info inline"><p>Looking to sell this plugin? Contact us for white-label licensing options.</p></div>
 
                 <div style="margin-top:20px; background:#f9f9f9; padding:15px; border:1px solid #ddd; border-radius:5px;">
-                    <h4>🚀 Reseller & Distribution Guide</h4>
+                    <h4>🚀 Reseller & Distribution Guide (Owner Only)</h4>
                     <p>If you plan to sell the Coach Client Engine as a SaaS or a stand-alone product, consider the following:</p>
                     <ol>
                         <li><strong>Multi-Tenancy:</strong> The engine is already built to isolate data by <code>user_id</code>. Each WordPress user has their own leads, funnels, and settings.</li>
                         <li><strong>API Key Management:</strong> Encourage users to enter their own Stripe/PayPal keys in the "Payments" tab.</li>
                         <li><strong>Custom Branding:</strong> Use the "Branding" tab to let users change the primary color of their forms and portal.</li>
-                        <li><strong>License Verification:</strong> You can replace the check in <code>CCE_License_Manager</code> with a call to your own licensing server.</li>
+                        <li><strong>License Verification:</strong> Use the standalone <code>cce-license-issuer</code> tool (located in the plugin directory) to generate valid keys for your buyers.</li>
+                        <li><strong>Checksum Security:</strong> The system uses a secret salt to verify keys offline. Do not share your <code>license-issuer.php</code> file with anyone.</li>
                     </ol>
                 </div>
             </div>
         </div>
 
         <div id="section-status" class="cce-settings-section" style="display:none;">
-            <div class="cce-card">
-                <h3>Maintenance & Data</h3>
-                <p>Use these tools to manage your engine's data. <strong>Warning:</strong> Sample data generation will add new records to your database.</p>
+            <div class="cce-card" style="border-left: 4px solid #00a32a;">
+                <h3>🚀 One-Click Demo Mode</h3>
+                <p>Want to see how the Coach Client Engine looks with a full pipeline of leads, bookings, and active clients? Click the button below to populate all 15+ database tables with strategically aligned sample data.</p>
                 <form action="<?php echo admin_url('admin-post.php'); ?>" method="post">
                     <input type="hidden" name="action" value="cce_generate_sample_data">
                     <?php wp_nonce_field('cce_generate_sample_data_nonce'); ?>
-                    <button type="submit" class="button button-secondary">Generate Sample Data</button>
+                    <button type="submit" class="button button-primary button-hero">Populate Sample Data</button>
                 </form>
+                <p style="font-size:11px; color:#888; margin-top:10px;">Note: This will add new records to your database. It will not delete your existing data.</p>
             </div>
 
             <div class="cce-card" style="margin-top:20px;">
