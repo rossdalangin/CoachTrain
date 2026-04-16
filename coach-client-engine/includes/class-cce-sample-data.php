@@ -4,7 +4,7 @@
  */
 class CCE_Sample_Data {
 
-    public static function generate() {
+    public static function generate($model_type = 'standard') {
         global $wpdb;
         $user_id = get_current_user_id();
 
@@ -41,20 +41,23 @@ class CCE_Sample_Data {
         }
 
         // 3. Seed Offers
-        $offers = [
-            [
-                'title' => 'Elite Business Coaching',
-                'price' => 5000,
-                'outcome' => 'Scale to $10k/mo in 90 days',
-                'likelihood' => '90% success rate with verified case studies'
-            ],
-            [
-                'title' => 'Grand Slam Offer Workshop',
-                'price' => 497,
-                'outcome' => 'Create your irresistible offer in 4 hours',
-                'likelihood' => 'Step-by-step proven frameworks'
-            ]
-        ];
+        $offers = [];
+        if ($model_type === 'agency') {
+            $offers = [
+                ['title' => 'Done-For-You Lead Machine', 'price' => 2500, 'outcome' => '30 Qualified leads/mo', 'likelihood' => 'Performance Guarantee'],
+                ['title' => 'Agency Growth Mastermind', 'price' => 10000, 'outcome' => 'Scale to 7-Figures', 'likelihood' => 'Proven Roadmap']
+            ];
+        } elseif ($model_type === 'membership') {
+            $offers = [
+                ['title' => 'Inner Circle Membership', 'price' => 97, 'outcome' => 'Weekly Coaching & Community', 'likelihood' => 'Direct access to mentors'],
+                ['title' => 'Scaling Accelerator', 'price' => 2997, 'outcome' => 'Intensive 12-week shift', 'likelihood' => 'Curated curriculum']
+            ];
+        } else {
+            $offers = [
+                ['title' => 'Elite Business Coaching', 'price' => 5000, 'outcome' => 'Scale to $10k/mo in 90 days', 'likelihood' => '90% success rate with verified case studies'],
+                ['title' => 'Grand Slam Offer Workshop', 'price' => 497, 'outcome' => 'Create your irresistible offer in 4 hours', 'likelihood' => 'Step-by-step proven frameworks']
+            ];
+        }
         foreach ( $offers as $o ) {
             $wpdb->insert( "{$wpdb->prefix}cce_offers", array(
                 'user_id'              => $user_id,
@@ -67,23 +70,24 @@ class CCE_Sample_Data {
         }
 
         // 4. Seed Funnels
-        $funnels = [
-            [
-                'title' => 'High-Ticket VSL Funnel',
-                'type'  => 'Consultation',
-                'steps' => ['Opt-in Page', 'VSL Video', 'Booking Page', 'Thank You']
-            ],
-            [
-                'title' => '6-Figure Webinar Funnel',
-                'type'  => 'Webinar',
-                'steps' => ['Registration', 'Webinar Room', 'Application Page', 'Confirmation']
-            ],
-            [
-                'title' => '5-Day Client Acquisition Challenge',
-                'type'  => 'Challenge',
-                'steps' => ['Sign Up', 'Day 1-5 Lessons', 'VIP Upgrade', 'Closing Call']
-            ]
-        ];
+        $funnels = [];
+        if ($model_type === 'agency') {
+            $funnels = [
+                ['title' => 'Outreach Strategy Funnel', 'type' => 'Consultation', 'steps' => ['Landing Page', 'Portfolio', 'Calendar', 'Success']],
+                ['title' => 'Lead Gen VSL', 'type' => 'VSL', 'steps' => ['Opt-in', 'VSL', 'Booking', 'Thank You']]
+            ];
+        } elseif ($model_type === 'membership') {
+            $funnels = [
+                ['title' => 'Membership Enrollment', 'type' => 'Squeeze', 'steps' => ['Sales Page', 'Checkout', 'Upsell', 'Welcome']],
+                ['title' => 'Value Ladder Webinar', 'type' => 'Webinar', 'steps' => ['Registration', 'Broadast', 'Offer', 'Confirmation']]
+            ];
+        } else {
+            $funnels = [
+                ['title' => 'High-Ticket VSL Funnel', 'type' => 'Consultation', 'steps' => ['Opt-in Page', 'VSL Video', 'Booking Page', 'Thank You']],
+                ['title' => '6-Figure Webinar Funnel', 'type' => 'Webinar', 'steps' => ['Registration', 'Webinar Room', 'Application Page', 'Confirmation']],
+                ['title' => '5-Day Client Acquisition Challenge', 'type' => 'Challenge', 'steps' => ['Sign Up', 'Day 1-5 Lessons', 'VIP Upgrade', 'Closing Call']]
+            ];
+        }
 
         foreach ($funnels as $f_data) {
             $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(

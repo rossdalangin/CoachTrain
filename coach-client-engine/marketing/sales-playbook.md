@@ -73,7 +73,30 @@ I developed a plugin called Coach Client Engine that specifically integrates the
 
 ---
 
-## 💡 4. Key Selling Points (The "Engine" Advantage)
+## 📞 5. The "High-Ticket" Sales Script
+**The Goal:** Move from "Info-Seeker" to "Action-Taker" in 30 minutes.
+
+1. **The Discovery (10 mins):** "Tell me about your current lead flow. What's the 'Tech Tax' look like for you right now?"
+2. **The Gap (5 mins):** "If you don't automate this, how many leads will you lose in the next 6 months?"
+3. **The Solution (10 mins):** "The Engine handles the CRM, Funnels, and Automation so you can just coach. It's built on the Hormozi Value Equation."
+4. **The Close (5 mins):** "Ready to deploy your first 'Grand Slam' offer today?"
+
+---
+
+## 🛑 6. Objection Handling Guide
+
+**"It's too expensive."**
+*Response:* "Compared to a $300/mo ClickFunnels subscription and a $100/mo CRM, the Engine pays for itself in 60 days. Plus, how much is your manual 'admin time' worth?"
+
+**"I'm not a tech person."**
+*Response:* "That's exactly why we built it. If you can use WordPress, you can use the Engine. We have one-click templates for everything."
+
+**"I already have a CRM."**
+*Response:* "Is your CRM built specifically for the Hormozi Value Equation? Does it link directly to your funnels and client portal without third-party tools? The Engine is built for transformation, not just data."
+
+---
+
+## 💡 7. Key Selling Points (The "Engine" Advantage)
 - **Zero Tech Overwhelm:** Works inside the WordPress you already know.
 - **Scientifically Structured:** Built around the **Value Equation** (Dream Outcome, Likelihood, Time, Effort).
 - **Automated Nurture:** Never let a lead go cold again.

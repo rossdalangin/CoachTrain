@@ -155,12 +155,30 @@ class Coach_Client_Engine {
         register_rest_route( 'cce/v1', '/maintenance/sample-data', array(
             array(
                 'methods'             => 'POST',
-                'callback'            => function() {
+                'callback'            => function( $request ) {
                     if ( class_exists( 'CCE_Sample_Data' ) ) {
-                        CCE_Sample_Data::generate();
+                        $model = $request->get_param('model') ?: 'standard';
+                        CCE_Sample_Data::generate($model);
                         return array( 'success' => true, 'message' => 'Sample data generated successfully!' );
                     }
                     return new WP_Error( 'error', 'Sample data generator not found', array( 'status' => 500 ) );
+                },
+                'permission_callback' => array( $this, 'check_rest_permission' ),
+            )
+        ) );
+
+        register_rest_route( 'cce/v1', '/maintenance/clear-data', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => function() {
+                    global $wpdb;
+                    $user_id = get_current_user_id();
+                    $tables = ['leads', 'bookings', 'offers', 'funnels', 'funnel_steps', 'payments', 'crm_stages', 'activity_log', 'tasks', 'testimonials', 'automation_rules', 'email_templates', 'resources', 'questions', 'onboarding_tasks'];
+                    foreach($tables as $t) {
+                        $wpdb->delete("{$wpdb->prefix}cce_{$t}", ['user_id' => $user_id]);
+                    }
+                    delete_user_meta($user_id, 'cce_total_visitors');
+                    return array( 'success' => true, 'message' => 'User data cleared successfully!' );
                 },
                 'permission_callback' => array( $this, 'check_rest_permission' ),
             )
