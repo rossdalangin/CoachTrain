@@ -62,7 +62,14 @@
             <table class="form-table">
                 <tr>
                     <th scope="row">Primary Color</th>
-                    <td><input type="color" name="primary_color" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_primary_color', true ) ?: get_option('cce_primary_color', '#0073aa') ); ?>"></td>
+                    <td>
+                        <input type="color" id="cce-primary-color-input" name="primary_color" value="<?php echo esc_attr( get_user_meta( get_current_user_id(), 'cce_primary_color', true ) ?: get_option('cce_primary_color', '#0073aa') ); ?>">
+                        <div id="cce-branding-preview" style="margin-top:10px; padding:15px; border:1px solid #ddd; border-radius:8px; display:inline-block;">
+                            <span style="font-size:11px; color:#888; display:block; margin-bottom:5px;">Live Preview</span>
+                            <button type="button" class="button button-primary" id="cce-preview-button">Sample Button</button>
+                            <div style="margin-top:10px; width:100px; height:4px; border-radius:2px;" id="cce-preview-accent"></div>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="row">Test Mode</th>
@@ -230,6 +237,12 @@
                 }
             });
         });
+
+        $('#cce-primary-color-input').on('input', function() {
+            const color = $(this).val();
+            $('#cce-preview-button').css('background-color', color);
+            $('#cce-preview-accent').css('background-color', color);
+        }).trigger('input');
 
         $('#cce-settings-form').on('submit', function(e) {
             e.preventDefault();

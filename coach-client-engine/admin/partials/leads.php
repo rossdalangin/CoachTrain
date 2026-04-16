@@ -77,6 +77,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Status</th>
+                <th>Tags</th>
                 <th>Date</th>
                 <th>Actions</th>
             </tr>
@@ -88,11 +89,13 @@
                     data-last-name="<?php echo esc_attr($lead->last_name); ?>"
                     data-email="<?php echo esc_attr($lead->email); ?>"
                     data-phone="<?php echo esc_attr($lead->phone); ?>"
-                    data-status="<?php echo esc_attr($lead->status); ?>">
+                    data-status="<?php echo esc_attr($lead->status); ?>"
+                    data-tags="<?php echo esc_attr($lead->tags); ?>">
                     <td><input type="checkbox" class="cce-lead-checkbox" value="<?php echo $lead->id; ?>"></td>
                     <td><strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong></td>
                     <td><?php echo esc_html( $lead->email ); ?></td>
                     <td><span class="status-tag"><?php echo esc_html( strtoupper( $lead->status ) ); ?></span></td>
+                    <td><small style="color:#666;"><?php echo esc_html($lead->tags ?: '-'); ?></small></td>
                     <td><?php echo esc_html( $lead->created_at ); ?></td>
                     <td>
                         <button class="button button-small cce-edit-lead" data-lead-id="<?php echo $lead->id; ?>">Edit</button>
@@ -123,6 +126,7 @@
                         <option value="hot">HOT</option>
                     </select>
                 </p>
+                <p><label>Tags (comma separated)</label><br><input type="text" name="tags" id="edit-lead-tags" class="widefat" placeholder="Consultant, Agency, High-Ticket"></p>
                 <button type="submit" class="button button-primary">Update Lead</button>
             </form>
         </div>

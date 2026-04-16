@@ -25,6 +25,7 @@ class CCE_Activator {
 				status varchar(50) DEFAULT 'cold',
 				crm_stage_id bigint(20),
 				onboarding_progress longtext,
+				tags text,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
@@ -81,6 +82,7 @@ class CCE_Activator {
 				step_order int,
 				step_type varchar(50),
 				config longtext,
+				tracking_scripts text,
 				visits bigint(20) DEFAULT 0,
 				conversions bigint(20) DEFAULT 0,
 				PRIMARY KEY  (id)

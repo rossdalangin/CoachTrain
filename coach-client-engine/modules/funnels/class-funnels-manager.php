@@ -203,6 +203,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 'step_order' => $index + 1,
                 'step_type'  => sanitize_text_field( $step['type'] ),
                 'config'     => json_encode( $step['config'] ?? array() ),
+                'tracking_scripts' => $step['tracking_scripts'] ?? '',
             ) );
         }
 

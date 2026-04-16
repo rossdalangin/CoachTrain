@@ -420,7 +420,8 @@ jQuery(document).ready(function($) {
             last_name: $('#edit-lead-last-name').val(),
             email: $('#edit-lead-email').val(),
             phone: $('#edit-lead-phone').val(),
-            status: $('#edit-lead-status').val()
+            status: $('#edit-lead-status').val(),
+            tags: $('#edit-lead-tags').val()
         };
         cceApi('leads/' + id, 'POST', data, function(res) {
             if(res.success) location.reload();

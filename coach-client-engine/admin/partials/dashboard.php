@@ -70,6 +70,22 @@
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="cce-card" style="border-left: 4px solid #673ab7; grid-column: span 2;">
+            <h3>📈 7-Day Revenue Trend</h3>
+            <div style="height:150px; position:relative; margin-top:10px; display:flex; align-items:flex-end; gap:10px; padding-bottom:20px;">
+                <?php
+                $max_revenue = max(array_column($summary['revenue_history'], 'amount')) ?: 1;
+                foreach($summary['revenue_history'] as $h):
+                    $height = ($h['amount'] / $max_revenue) * 100;
+                ?>
+                    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;">
+                        <div style="width:100%; background:#673ab7; height:<?php echo $height; ?>%; border-radius:4px 4px 0 0; min-height:2px;"></div>
+                        <small style="font-size:9px; color:#888;"><?php echo date('D', strtotime($h['date'])); ?></small>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <div class="cce-card strategy-insights" style="border-left: 4px solid #0073aa;">
             <h3>💎 Master Architect Strategy Insights</h3>
             <p>Based on your current data, here is your path to 3–5 clients this month:</p>

@@ -40,6 +40,14 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/tags', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'update_lead_tags' ),
+                'permission_callback' => array( $this, 'check_permission' ),
+            ),
+        ) );
+
         register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/status', array(
 			array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
@@ -121,6 +129,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             'email'       => sanitize_email( $params['email'] ),
             'phone'       => sanitize_text_field( $params['phone'] ?? '' ),
             'status'      => sanitize_text_field( $params['status'] ?? 'cold' ),
+            'tags'        => sanitize_text_field( $params['tags'] ?? '' ),
         );
 
         $wpdb->update( "{$wpdb->prefix}cce_leads", $data, array( 'id' => $id, 'user_id' => $user_id ) );
@@ -161,6 +170,24 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         $user_id = $this->get_current_user_id();
         $wpdb->delete( "{$wpdb->prefix}cce_leads", array( 'id' => $lead_id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Lead deleted' ) );
+    }
+
+    /**
+     * Update lead tags.
+     */
+    public function update_lead_tags( $request ) {
+        global $wpdb;
+        $id = $request['id'];
+        $tags = sanitize_text_field( $request->get_param('tags') );
+        $user_id = $this->get_current_user_id();
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_leads",
+            array( 'tags' => $tags ),
+            array( 'id' => $id, 'user_id' => $user_id )
+        );
+
+        return $this->success();
     }
 
     /**

@@ -73,6 +73,7 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             'show_rate'       => $total_bookings > 0 ? round( ( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE user_id = %d AND status = 'completed'", $user_id ) ) / $total_bookings ) * 100, 1 ) : 0,
             'funnel_stats'    => $this->get_funnel_leads_stats(),
             'projections'     => $this->get_projections(),
+            'revenue_history' => $this->get_revenue_history(),
             'pending_tasks'   => $this->get_pending_tasks(),
             'pipeline'        => array(
                 array( 'label' => 'Total Visitors', 'value' => (int) get_user_meta( $user_id, 'cce_total_visitors', true ) ),
@@ -145,6 +146,21 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
         $score += ($activities * 5);
 
         return $score;
+    }
+
+    /**
+     * Get revenue history for the last 7 days.
+     */
+    private function get_revenue_history() {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        $history = [];
+        for ( $i = 6; $i >= 0; $i-- ) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $amount = (float) $wpdb->get_var( $wpdb->prepare( "SELECT SUM(amount) FROM {$wpdb->prefix}cce_payments WHERE user_id = %d AND status = 'completed' AND DATE(created_at) = %s", $user_id, $date ) );
+            $history[] = ['date' => $date, 'amount' => $amount];
+        }
+        return $history;
     }
 
     /**

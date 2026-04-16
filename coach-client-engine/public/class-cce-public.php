@@ -196,6 +196,9 @@ class CCE_Public {
         $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
 
 		ob_start();
+        if ( ! empty( $current_step->tracking_scripts ) ) {
+            echo $current_step->tracking_scripts;
+        }
 		?>
 		<div class="cce-funnel-wrapper" data-funnel-id="<?php echo $funnel_id; ?>" data-step-index="<?php echo $current_step_index; ?>">
 			<div class="cce-funnel-step">
