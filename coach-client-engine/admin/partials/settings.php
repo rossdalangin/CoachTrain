@@ -7,6 +7,7 @@
             <a href="#payments" class="nav-tab">Payments</a>
             <a href="#branding" class="nav-tab">Branding</a>
             <a href="#shortcodes" class="nav-tab">Shortcodes</a>
+            <a href="#licensing" class="nav-tab">Licensing</a>
             <a href="#status" class="nav-tab">System Status</a>
         </h2>
     </div>
@@ -130,8 +131,42 @@
             </div>
         </div>
 
+        <div id="section-licensing" class="cce-settings-section" style="display:none;">
+            <div class="cce-card">
+                <h3>How Licensing Works</h3>
+                <p>To unlock the full potential of the Coach Client Engine (PRO), you need a valid license key. License keys are tied to your account and can be managed from our official portal.</p>
+                <ul style="list-style:disc; padding-left:20px;">
+                    <li><strong>PRO Features:</strong> Advanced Automation, Strategic Analytics, and Priority Support.</li>
+                    <li><strong>Getting a Key:</strong> Visit <a href="https://coachclientengine.com" target="_blank">coachclientengine.com</a> to purchase a license.</li>
+                    <li><strong>Activation:</strong> Enter your key in the "General" tab and save settings.</li>
+                </ul>
+                <div class="notice notice-info inline"><p>Looking to sell this plugin? Contact us for white-label licensing options.</p></div>
+
+                <div style="margin-top:20px; background:#f9f9f9; padding:15px; border:1px solid #ddd; border-radius:5px;">
+                    <h4>🚀 Reseller & Distribution Guide</h4>
+                    <p>If you plan to sell the Coach Client Engine as a SaaS or a stand-alone product, consider the following:</p>
+                    <ol>
+                        <li><strong>Multi-Tenancy:</strong> The engine is already built to isolate data by <code>user_id</code>. Each WordPress user has their own leads, funnels, and settings.</li>
+                        <li><strong>API Key Management:</strong> Encourage users to enter their own Stripe/PayPal keys in the "Payments" tab.</li>
+                        <li><strong>Custom Branding:</strong> Use the "Branding" tab to let users change the primary color of their forms and portal.</li>
+                        <li><strong>License Verification:</strong> You can replace the check in <code>CCE_License_Manager</code> with a call to your own licensing server.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
         <div id="section-status" class="cce-settings-section" style="display:none;">
             <div class="cce-card">
+                <h3>Maintenance & Data</h3>
+                <p>Use these tools to manage your engine's data. <strong>Warning:</strong> Sample data generation will add new records to your database.</p>
+                <form action="<?php echo admin_url('admin-post.php'); ?>" method="post">
+                    <input type="hidden" name="action" value="cce_generate_sample_data">
+                    <?php wp_nonce_field('cce_generate_sample_data_nonce'); ?>
+                    <button type="submit" class="button button-secondary">Generate Sample Data</button>
+                </form>
+            </div>
+
+            <div class="cce-card" style="margin-top:20px;">
                 <h3>Diagnostic Check</h3>
                 <table class="wp-list-table widefat fixed striped">
                     <thead><tr><th>Component</th><th>Status</th></tr></thead>

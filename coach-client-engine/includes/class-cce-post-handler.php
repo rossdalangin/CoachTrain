@@ -11,7 +11,25 @@ class CCE_Post_Handler {
         add_action( 'admin_post_cce_export_leads', array( $this, 'export_leads' ) );
         add_action( 'admin_post_cce_export_bookings', array( $this, 'export_bookings' ) );
         add_action( 'admin_post_cce_export_payments', array( $this, 'export_payments' ) );
+        add_action( 'admin_post_cce_generate_sample_data', array( $this, 'generate_sample_data' ) );
 	}
+
+    /**
+     * Generate sample data.
+     */
+    public function generate_sample_data() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_generate_sample_data_nonce' );
+
+        if ( class_exists( 'CCE_Sample_Data' ) ) {
+            CCE_Sample_Data::generate();
+            wp_redirect( admin_url( 'admin.php?page=cce-settings&message=sample_data_success#status' ) );
+            exit;
+        }
+
+        wp_redirect( admin_url( 'admin.php?page=cce-settings&message=sample_data_error#status' ) );
+        exit;
+    }
 
 	/**
 	 * Save coaching offer.

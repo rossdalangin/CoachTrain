@@ -28,6 +28,7 @@ class Coach_Client_Engine {
         require_once $path . 'includes/class-cce-mailer.php';
         require_once $path . 'includes/class-cce-activity-logger.php';
         require_once $path . 'includes/class-cce-license-manager.php';
+        require_once $path . 'includes/class-cce-sample-data.php';
         require_once $path . 'public/class-cce-public.php';
 
         // Modules
