@@ -76,8 +76,14 @@ As coaches, our time belongs with our clients. But we often spend 80% of our wee
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Access the dashboard from the "Coach Engine" menu in the admin sidebar.
 
-## Usage
-This plugin is built with a classic WordPress PHP architecture, making it easy to extend and customize. No NPM build is required.
+## ⚙️ Administration & Reselling
+If you are the owner of this plugin and intend to sell licenses, please refer to the `cce-license-issuer` directory. This contains a standalone tool (not for distribution) that generates valid PRO keys based on a secure checksum logic.
+
+### How to Issue Licenses:
+1. Navigate to the `cce-license-issuer/` folder.
+2. Run `php license-issuer.php` from your command line.
+3. Choose "Generate New License" to get a key starting with `PRO-`.
+4. Provide this key to your buyer.
 
 ## 🚀 Consultant Strategy Guide (The "Hormozi/Brunson" Method)
 To get 3–5 high-paying clients monthly with this engine:

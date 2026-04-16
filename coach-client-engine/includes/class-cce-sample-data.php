@@ -162,12 +162,31 @@ class CCE_Sample_Data {
         ) );
 
         // 12. Seed Email Templates
-        $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
-            'user_id' => $user_id,
-            'name'    => 'Welcome Sequence #1',
-            'subject' => 'Welcome to the inner circle!',
-            'content' => '<h1>Hey {{first_name}}!</h1><p>Thanks for joining. Here is your first resource...</p>'
-        ) );
+        $templates = [
+            [
+                'name'    => 'Hormozi Value Sequence #1',
+                'subject' => 'The truth about {{dream_outcome}}...',
+                'content' => '<h1>Hey {{first_name}}!</h1><p>Most people fail at {{dream_outcome}} because they focus on the wrong things. Here is the secret to increasing your likelihood of success...</p>'
+            ],
+            [
+                'name'    => 'Brunson Epiphany Bridge',
+                'subject' => 'How I finally cracked the code',
+                'content' => '<h1>I was stuck, {{first_name}}...</h1><p>I tried everything until I realized that the secret wasn\'t more work, it was a better system. Here is the story of how I built the Coach Client Engine.</p>'
+            ],
+            [
+                'name'    => 'Direct Response Booking Invite',
+                'subject' => 'Ready to scale?',
+                'content' => '<h1>{{first_name}}, let\'s get serious.</h1><p>If you want to achieve {{dream_outcome}} in the next 90 days, we need to talk. Book your strategy session here.</p>'
+            ]
+        ];
+        foreach ($templates as $t) {
+            $wpdb->insert( "{$wpdb->prefix}cce_email_templates", array(
+                'user_id' => $user_id,
+                'name'    => $t['name'],
+                'subject' => $t['subject'],
+                'content' => $t['content']
+            ) );
+        }
 
         // 13. Seed Resources
         $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
