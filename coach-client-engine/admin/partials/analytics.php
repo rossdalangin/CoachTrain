@@ -3,7 +3,8 @@
     <hr class="wp-header-end">
 
     <?php
-    $is_pro = (new Coach_Client_Engine())->is_pro();
+    $engine = new Coach_Client_Engine();
+    $is_pro = $engine->is_pro();
 
     if ( ! $is_pro ) {
         echo '<div class="notice notice-info" style="margin: 20px 0; border-left-color: #ffb700; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">

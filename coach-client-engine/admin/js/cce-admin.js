@@ -86,6 +86,7 @@ jQuery(document).ready(function($) {
         $('#edit-action-config-reminder').toggle(val === 'schedule_reminder');
         $('#edit-action-config-task').toggle(val === 'create_task');
         $('#edit-action-config-webhook').toggle(val === 'trigger_webhook');
+        $('#edit-action-config-tag').toggle(val === 'add_tag' || val === 'remove_tag');
     });
 
     $('#cce-edit-rule-form').on('submit', function(e) {
@@ -182,46 +183,8 @@ jQuery(document).ready(function($) {
         loadNotes(leadId);
         loadTasks(leadId);
         loadMilestones(leadId);
-        loadMilestones(leadId);
         loadStats(leadId);
         $('#cce-contact-status').html('');
-    });
-
-    function loadMilestones(leadId) {
-        cceApi('crm/leads/' + leadId + '/milestones', 'GET', {}, function(res) {
-            if (res.success) {
-                let html = '<ul style="padding-left:0; list-style:none;">';
-                res.data.forEach(m => {
-                    const checked = m.is_completed == 1 ? 'checked' : '';
-                    html += `<li style="padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between;">
-                        <label><input type="checkbox" ${checked} class="cce-toggle-milestone" data-id="${m.id}" data-lead-id="${leadId}"> ${m.title}</label>
-                        <button class="button button-small cce-delete-milestone" data-id="${m.id}" data-lead-id="${leadId}">×</button>
-                    </li>`;
-                });
-                html += '</ul>';
-                $('#cce-milestones-content').html(res.data.length ? html : '<p>No milestones set.</p>');
-            }
-        });
-    }
-
-    $(document).on('change', '.cce-toggle-milestone', function() {
-        const leadId = $(this).data('lead-id');
-        cceApi('crm/leads/' + leadId + '/milestones/' + $(this).data('id'), 'POST', { is_completed: $(this).is(':checked') }, () => loadMilestones(leadId));
-    });
-
-    $(document).on('click', '.cce-delete-milestone', function() {
-        if(!confirm('Delete milestone?')) return;
-        const leadId = $(this).data('lead-id');
-        cceApi('crm/leads/' + leadId + '/milestones/' + $(this).data('id'), 'DELETE', {}, () => loadMilestones(leadId));
-    });
-
-    $('#cce-add-milestone-form').on('submit', function(e) {
-        e.preventDefault();
-        const leadId = $(this).find('.cce-lead-id-field').val();
-        cceApi('crm/leads/' + leadId + '/milestones', 'POST', { title: $('#cce-new-milestone-title').val() }, function() {
-            $('#cce-new-milestone-title').val('');
-            loadMilestones(leadId);
-        });
     });
 
     function loadStats(leadId) {
@@ -810,6 +773,7 @@ jQuery(document).ready(function($) {
         $('#action-config-reminder').toggle(val === 'schedule_reminder');
         $('#action-config-task').toggle(val === 'create_task');
         $('#action-config-webhook').toggle(val === 'trigger_webhook');
+        $('#action-config-tag').toggle(val === 'add_tag' || val === 'remove_tag');
     });
 
     $('.cce-delete-rule').on('click', function() {

@@ -352,26 +352,6 @@ class CCE_Public {
                     <?php endif; ?>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
-					<h4>Your Success Milestones</h4>
-                    <div id="cce-portal-milestones" style="margin-bottom:30px;">
-                        <?php
-                        $milestones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d ORDER BY created_at ASC", $lead->id));
-                        if($milestones): foreach($milestones as $m):
-                        ?>
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:<?php echo $m->is_completed ? '#f0fdf4' : '#f8fafc'; ?>; border-radius:8px;">
-                                <span style="font-size:20px;"><?php echo $m->is_completed ? '🏆' : '🎯'; ?></span>
-                                <div>
-                                    <div style="font-weight:bold; <?php echo $m->is_completed ? 'text-decoration:line-through; color:#166534;' : ''; ?>"><?php echo esc_html($m->title); ?></div>
-                                    <?php if($m->completed_at): ?>
-                                        <small style="color:#166534;">Achieved on <?php echo date('M d, Y', strtotime($m->completed_at)); ?></small>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; else: ?>
-                            <p style="font-size:12px; color:#666;">No specific milestones set yet. Focus on your roadmap!</p>
-                        <?php endif; ?>
-                    </div>
-
 					<h4>Your Journey Milestones</h4>
                     <div id="cce-portal-milestones" style="margin-bottom:30px;">
                         <?php

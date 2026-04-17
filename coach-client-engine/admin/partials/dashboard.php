@@ -3,7 +3,6 @@
     <p class="description">Welcome back, fellow consultant. This dashboard is your "Mission Control" for acquiring high-ticket clients. Use these metrics to identify bottlenecks in your funnel and scale your impact.</p>
 
     <?php
-    $engine = new Coach_Client_Engine();
     if ( class_exists( 'CCE_Analytics_Manager' ) ) {
         $analytics = new CCE_Analytics_Manager();
         $summary_res = $analytics->get_summary( new WP_REST_Request() );

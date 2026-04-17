@@ -3,24 +3,32 @@
     <p class="description">Access pre-built frameworks based on high-performance coaching models. You can edit these templates to match your brand and offer.</p>
 
     <div class="cce-card" style="margin-bottom: 30px; border-top: 4px solid #0073aa;">
-        <h3>🚀 One-Click Business Model Deployment</h3>
-        <p>Choose your coaching business model below. Deploying a model will populate your Engine with tailored Funnels, Offers, and Email Sequences.</p>
+        <h3>💎 Masterpiece Strategy Vault</h3>
+        <p>Deploy full, cross-linked business frameworks based on industry titans. These frameworks automatically create your Funnels, Offers, and Automation rules.</p>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-top:15px;">
-            <div style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">
-                <h4>Agency Model</h4>
-                <p style="font-size:12px;">For Done-For-You services. Includes Lead Gen VSLs and Outreach Strategy funnels.</p>
-                <button type="button" class="button button-secondary cce-deploy-model" data-model="agency">Deploy Agency Model</button>
+            <!-- Hormozi Strategy -->
+            <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:10px;">TITAN FRAMEWORK</div>
+                <h4 style="margin:0 0 10px 0;">The Hormozi Launch</h4>
+                <p style="font-size:12px; color:#64748b;">Built for "Offers so good they feel stupid saying no." Includes VSL Funnel + High-Ticket Offer + Value Ascension Emails.</p>
+                <button type="button" class="button button-primary cce-deploy-strategy" data-strategy="hormozi" style="width:100%; margin-top:10px;">Deploy Full Strategy</button>
             </div>
-            <div style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">
-                <h4>Mastery Coach</h4>
-                <p style="font-size:12px;">For high-ticket 1-on-1 coaching. Includes VSL, Webinar, and Challenge frameworks.</p>
-                <button type="button" class="button button-secondary cce-deploy-model" data-model="standard">Deploy Mastery Model</button>
+
+            <!-- Brunson Strategy -->
+            <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background:#dcfce7; color:#166534; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:10px;">TITAN FRAMEWORK</div>
+                <h4 style="margin:0 0 10px 0;">The Brunson Webinar</h4>
+                <p style="font-size:12px; color:#64748b;">The perfect webinar framework for group scaling. Includes Webinar Funnel + Order Bump Offer + Indoctrination Sequence.</p>
+                <button type="button" class="button button-primary cce-deploy-strategy" data-strategy="brunson" style="width:100%; margin-top:10px;">Deploy Full Strategy</button>
             </div>
-            <div style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">
-                <h4>Membership / Group</h4>
-                <p style="font-size:12px;">For low-ticket recurring or group programs. Includes Value Ladder and Sales funnels.</p>
-                <button type="button" class="button button-secondary cce-deploy-model" data-model="membership">Deploy Membership Model</button>
+
+            <!-- Custom Business Models -->
+            <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                <div style="background:#f1f5f9; color:#475569; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:10px;">MODEL DEPLOYMENT</div>
+                <h4 style="margin:0 0 10px 0;">Agency Builder</h4>
+                <p style="font-size:12px; color:#64748b;">For DFY services. Populates the Engine with Lead Gen funnels and cold outreach automation templates.</p>
+                <button type="button" class="button button-secondary cce-deploy-model" data-model="agency" style="width:100%; margin-top:10px;">Deploy Agency Model</button>
             </div>
         </div>
     </div>
@@ -72,6 +80,26 @@
 
 <script>
 jQuery(document).ready(function($) {
+    $('.cce-deploy-strategy').on('click', function() {
+        if (!confirm('This will deploy a full cross-linked strategy. Continue?')) return;
+        const $btn = $(this);
+        const strategy = $btn.data('strategy');
+        $btn.prop('disabled', true).text('Building Strategy...');
+
+        $.ajax({
+            url: cceAdmin.restUrl + 'maintenance/sample-data',
+            method: 'POST',
+            data: { model: strategy, linked: true },
+            beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+            success: function(res) {
+                if (res.success) {
+                    alert('Strategy deployed successfully! All Funnels, Offers, and Emails are now linked.');
+                    window.location.reload();
+                }
+            }
+        });
+    });
+
     $('.cce-deploy-model').on('click', function() {
         if (!confirm('This will add new sample data to your account. Continue?')) return;
 

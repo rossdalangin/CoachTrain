@@ -224,20 +224,6 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 ['title' => 'Book Strategy Session', 'type' => 'booking'],
                 ['title' => 'Enroll', 'type' => 'checkout']
             ];
-        } elseif ( 'vsl' === $template_id ) {
-            $steps = [
-                ['title' => 'Opt-in', 'type' => 'optin'],
-                ['title' => 'Video Sales Letter', 'type' => 'thank_you'],
-                ['title' => 'Apply Now', 'type' => 'booking'],
-                ['title' => 'Confirmation', 'type' => 'thank_you']
-            ];
-        } elseif ( 'tripwire' === $template_id ) {
-            $steps = [
-                ['title' => 'Sales Page', 'type' => 'optin'],
-                ['title' => 'Checkout', 'type' => 'checkout'],
-                ['title' => 'Upsell Offer', 'type' => 'checkout'],
-                ['title' => 'Thank You', 'type' => 'thank_you']
-            ];
         }
 
         if ( ! empty( $steps ) ) {
@@ -305,8 +291,6 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
             array( 'id' => 'lead_magnet', 'title' => 'Lead Magnet Funnel', 'description' => 'Perfect for building your email list.' ),
             array( 'id' => 'consultation', 'title' => 'Consultation Funnel', 'description' => 'Ideal for high-ticket coaching bookings.' ),
             array( 'id' => 'webinar', 'title' => 'Webinar Funnel', 'description' => 'Best for automated sales presentations.' ),
-            array( 'id' => 'vsl', 'title' => 'High-Ticket VSL', 'description' => 'A video-driven sales process for elite services.' ),
-            array( 'id' => 'tripwire', 'title' => 'Low-Ticket Tripwire', 'description' => 'Great for acquiring customers with a small purchase first.' ),
         );
         return $this->success( $templates );
     }

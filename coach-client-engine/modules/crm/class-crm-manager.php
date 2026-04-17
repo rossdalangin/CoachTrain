@@ -21,32 +21,6 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			),
 		) );
 
-        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/milestones', array(
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_milestones' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'add_milestone' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-			),
-		) );
-
-        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/milestones/(?P<m_id>\d+)', array(
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_milestone' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_milestone' ),
-				'permission_callback' => array( $this, 'check_permission' ),
-			),
-		) );
-
         register_rest_route( $this->namespace, '/crm/activities', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -138,6 +112,32 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_lead_stats' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/milestones', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_milestones' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_milestone' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/crm/leads/(?P<id>\d+)/milestones/(?P<mid>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_milestone' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+            array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_milestone' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
@@ -397,6 +397,74 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
     }
 
     /**
+     * Get milestones for a lead.
+     */
+    public function get_milestones( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $milestones = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d AND user_id = %d ORDER BY created_at ASC", $lead_id, $user_id ) );
+        return $this->success( $milestones );
+    }
+
+    /**
+     * Add milestone.
+     */
+    public function add_milestone( $request ) {
+        global $wpdb;
+        $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $title = sanitize_text_field( $request->get_param( 'title' ) );
+
+        $wpdb->insert( "{$wpdb->prefix}cce_milestones", array(
+            'user_id' => $user_id,
+            'lead_id' => $lead_id,
+            'title'   => $title,
+        ) );
+
+        CCE_Activity_Logger::log( $lead_id, 'milestone', 'New milestone added: ' . $title );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Update milestone.
+     */
+    public function update_milestone( $request ) {
+        global $wpdb;
+        $mid = absint( $request['mid'] );
+        $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $is_completed = (bool) $request->get_param( 'is_completed' );
+
+        $wpdb->update( "{$wpdb->prefix}cce_milestones",
+            array(
+                'is_completed' => $is_completed,
+                'completed_at' => $is_completed ? current_time( 'mysql' ) : null
+            ),
+            array( 'id' => $mid, 'lead_id' => $lead_id, 'user_id' => $user_id )
+        );
+
+        if ( $is_completed ) {
+             CCE_Activity_Logger::log( $lead_id, 'milestone', 'Milestone completed!' );
+        }
+
+        return $this->success();
+    }
+
+    /**
+     * Delete milestone.
+     */
+    public function delete_milestone( $request ) {
+        global $wpdb;
+        $mid = absint( $request['mid'] );
+        $lead_id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_milestones", array( 'id' => $mid, 'lead_id' => $lead_id, 'user_id' => $user_id ) );
+        return $this->success();
+    }
+
+    /**
      * Get Pipeline (Leads grouped by stages).
      */
     public function get_pipeline( $request ) {
@@ -427,69 +495,5 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         }
 
         return $this->success( $pipeline );
-    }
-
-    /**
-     * Get milestones for a lead.
-     */
-    public function get_milestones( $request ) {
-        global $wpdb;
-        $lead_id = absint( $request['id'] );
-        $user_id = $this->get_current_user_id();
-        $milestones = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d AND user_id = %d ORDER BY created_at DESC", $lead_id, $user_id ) );
-        return $this->success( $milestones );
-    }
-
-    /**
-     * Add milestone.
-     */
-    public function add_milestone( $request ) {
-        global $wpdb;
-        $lead_id = absint( $request['id'] );
-        $user_id = $this->get_current_user_id();
-        $title = sanitize_text_field( $request->get_param( 'title' ) );
-
-        $wpdb->insert( "{$wpdb->prefix}cce_milestones", array(
-            'user_id' => $user_id,
-            'lead_id' => $lead_id,
-            'title'   => $title,
-            'is_completed' => 0
-        ) );
-
-        CCE_Activity_Logger::log( $lead_id, 'milestone_created', 'New milestone set: ' . $title );
-
-        return $this->success( array( 'id' => $wpdb->insert_id ) );
-    }
-
-    /**
-     * Update milestone.
-     */
-    public function update_milestone( $request ) {
-        global $wpdb;
-        $m_id = absint( $request['m_id'] );
-        $user_id = $this->get_current_user_id();
-        $is_completed = (bool) $request->get_param( 'is_completed' );
-
-        $wpdb->update(
-            "{$wpdb->prefix}cce_milestones",
-            array(
-                'is_completed' => $is_completed ? 1 : 0,
-                'completed_at' => $is_completed ? current_time( 'mysql' ) : null
-            ),
-            array( 'id' => $m_id, 'user_id' => $user_id )
-        );
-
-        return $this->success();
-    }
-
-    /**
-     * Delete milestone.
-     */
-    public function delete_milestone( $request ) {
-        global $wpdb;
-        $m_id = absint( $request['m_id'] );
-        $user_id = $this->get_current_user_id();
-        $wpdb->delete( "{$wpdb->prefix}cce_milestones", array( 'id' => $m_id, 'user_id' => $user_id ) );
-        return $this->success();
     }
 }

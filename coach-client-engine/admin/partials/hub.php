@@ -6,24 +6,6 @@
         <input type="search" id="cce-hub-search" placeholder="Search resources (e.g. Hormozi, Sales Script)..." class="widefat" style="padding:12px; font-size:16px; border-radius:8px;">
     </div>
 
-    <div class="cce-card" style="margin-bottom:30px; padding:40px; background:#1e293b; color:#fff; border:none; text-align:center;">
-        <h3>🗺 Your High-Ticket Ascension Roadmap</h3>
-        <p style="color:#94a3b8; font-size:12px;">From lead capture to world-class fulfillment.</p>
-        <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-top:30px;">
-            <div style="flex:1; padding:20px; border:1px dashed #475569; border-radius:12px;">
-                <span style="font-size:24px;">🧲</span><br><strong>Lead Magnet</strong><br><small style="color:#94a3b8;">Value-First Capture</small>
-            </div>
-            <div style="font-size:24px; color:#475569;">→</div>
-            <div style="flex:1; padding:20px; border:1px solid #3b82f6; background:rgba(59,130,246,0.1); border-radius:12px;">
-                <span style="font-size:24px;">📞</span><br><strong>Strategy Session</strong><br><small style="color:#94a3b8;">Hormozi Value Alignment</small>
-            </div>
-            <div style="font-size:24px; color:#475569;">→</div>
-            <div style="flex:1; padding:20px; border:1px solid #10b981; background:rgba(16,185,129,0.1); border-radius:12px;">
-                <span style="font-size:24px;">🏢</span><br><strong>Client Portal</strong><br><small style="color:#94a3b8;">Premium Onboarding</small>
-            </div>
-        </div>
-    </div>
-
     <div id="cce-hub-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap:20px;">
 
         <!-- Strategy Guides -->
@@ -76,9 +58,9 @@
 
         <!-- Scaling & Ops -->
         <div class="cce-card hub-item" data-tags="scaling,ops,hiring,team,roadmap">
-            <span class="dashicons dashicons-chart-line" style="font-size:30px; width:30px; height:30px; color:#2563eb;"></span>
+            <span class="dashicons dashicons-chart-line" style="font-size:30px; width:30px; height:30px; color:#673ab7;"></span>
             <h3>Scaling & Operations</h3>
-            <p>The 7-figure scaling roadmap and high-performance team hiring guides.</p>
+            <p>The 7-figure roadmap and guides for hiring high-performance setters and closers.</p>
             <button type="button" class="button button-secondary cce-open-hub-resource" data-file="scaling-and-ops.md">Open Guide</button>
         </div>
 
@@ -96,6 +78,15 @@
 
     <script>
     jQuery(document).ready(function($) {
+        $(document).on('change', '.cce-md-content input[type="checkbox"]', function() {
+            const checklistId = 'cce_hub_progress_' + $(this).closest('.cce-md-content').find('h1').text().replace(/\s+/g, '_').toLowerCase();
+            const checked = [];
+            $(this).closest('.cce-md-content').find('input[type="checkbox"]:checked').each(function() {
+                checked.push($(this).next('label').text() || $(this).parent().text());
+            });
+            localStorage.setItem(checklistId, JSON.stringify(checked));
+        });
+
         $('.cce-open-hub-resource').on('click', function() {
             const file = $(this).data('file');
             $('#cce-hub-modal-content').html('Loading...');
@@ -108,7 +99,20 @@
                 beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
                 success: function(res) {
                     if (res.success) {
-                        $('#cce-hub-modal-content').html(res.content);
+                        let content = res.content;
+                        // Replace [ ] and [x] with checkboxes
+                        content = content.replace(/\[ \]/g, '<input type="checkbox">');
+                        content = content.replace(/\[x\]/g, '<input type="checkbox" checked>');
+
+                        $('#cce-hub-modal-content').html(content);
+
+                        // Load progress
+                        const checklistId = 'cce_hub_progress_' + $(this).closest('.hub-item').find('h3').text().replace(/\s+/g, '_').toLowerCase();
+                        const saved = JSON.parse(localStorage.getItem(checklistId) || '[]');
+                        $('#cce-hub-modal-content input[type="checkbox"]').each(function() {
+                            const text = $(this).next('label').text() || $(this).parent().text();
+                            if (saved.includes(text)) $(this).prop('checked', true);
+                        });
                     }
                 }
             });

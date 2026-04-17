@@ -158,7 +158,8 @@ class Coach_Client_Engine {
                 'callback'            => function( $request ) {
                     if ( class_exists( 'CCE_Sample_Data' ) ) {
                         $model = $request->get_param('model') ?: 'standard';
-                        CCE_Sample_Data::generate($model);
+                        $linked = (bool) $request->get_param('linked');
+                        CCE_Sample_Data::generate($model, $linked);
                         return array( 'success' => true, 'message' => 'Sample data generated successfully!' );
                     }
                     return new WP_Error( 'error', 'Sample data generator not found', array( 'status' => 500 ) );
@@ -297,8 +298,8 @@ class Coach_Client_Engine {
         $proof_manager = new CCE_Proof_Manager();
         $proof_manager->register_routes();
 
-        // Use singleton or existing instance if possible, for now just register routes without constructor side effects
-        (new CCE_Automation_Manager())->register_routes();
+        $automation_manager = new CCE_Automation_Manager();
+        $automation_manager->register_routes();
 
         $license_manager = new CCE_License_Manager();
         $license_manager->register_routes();

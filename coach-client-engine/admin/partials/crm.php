@@ -49,24 +49,25 @@
         $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
         ?>
 
-        <div class="cce-kanban-wrapper" id="cce-kanban-board" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
+        <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
             <?php
             $analytics = new CCE_Analytics_Manager();
             foreach ( $stages as $stage ):
             ?>
                 <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
                     <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
-                    <div class="kanban-cards cce-kanban-column" data-stage-id="<?php echo $stage->id; ?>" style="min-height:200px;">
+                    <div class="kanban-cards cce-kanban-column" data-stage-id="<?php echo $stage->id; ?>" style="min-height:100px;">
                         <?php
                         $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
                         if ($leads): foreach ( $leads as $lead ):
                             $engagement_score = $analytics->calculate_engagement_score( $lead->id );
+                            $heat_color = $engagement_score > 50 ? '#d63638' : ($engagement_score > 20 ? '#ffb700' : '#0073aa');
                         ?>
-                            <div class="cce-card cce-kanban-card" data-lead-id="<?php echo $lead->id; ?>" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px; cursor:move; background:#fff;">
+                            <div class="cce-card cce-kanban-card" data-lead-id="<?php echo $lead->id; ?>" style="margin-bottom:10px; border-top:none; border-left:4px solid <?php echo $heat_color; ?>; padding:15px; cursor:move; background:#fff;">
                                 <div style="display:flex; justify-content:space-between; align-items:start;">
                                     <div>
                                         <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
-                                        <div style="font-size:10px; color:#666;">Engagement: <span style="color:#00a32a; font-weight:bold;"><?php echo $engagement_score; ?></span></div>
+                                        <div style="font-size:10px; color:#666;">Engagement: <span style="color:<?php echo $heat_color; ?>; font-weight:bold;"><?php echo $engagement_score; ?></span></div>
                                         <?php if($lead->tags): ?>
                                             <div style="margin-top:5px; display:flex; gap:3px; flex-wrap:wrap;">
                                                 <?php foreach(explode(',', $lead->tags) as $tag): ?>
@@ -184,19 +185,6 @@
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="cce-new-task-title" placeholder="New task title..." style="flex:1; border-radius:8px;" required>
                             <button type="submit" class="button button-primary">Add Task</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div id="cce-tab-milestones" class="cce-tab-content" style="display:none;">
-                <div id="cce-milestones-content" style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
-                <div class="cce-add-milestone-section">
-                    <form id="cce-add-milestone-form">
-                        <input type="hidden" class="cce-lead-id-field">
-                        <div style="display:flex; gap:10px;">
-                            <input type="text" id="cce-new-milestone-title" placeholder="New milestone (e.g. First $1k day)..." style="flex:1; border-radius:8px;" required>
-                            <button type="submit" class="button button-primary">Add</button>
                         </div>
                     </form>
                 </div>

@@ -8,14 +8,11 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      * Constructor.
      */
     public function __construct() {
-        if ( did_action( 'cce_automation_init' ) ) return;
-
         add_action( 'cce_lead_created', array( $this, 'trigger_automation' ) );
         add_action( 'cce_booking_confirmed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_payment_completed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_lead_stage_changed', array( $this, 'trigger_automation' ), 10, 2 );
         add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
-        do_action( 'cce_automation_init' );
     }
 
     /**
@@ -414,6 +411,12 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             case 'trigger_webhook':
                 $this->trigger_webhook( $lead_id, $config, $hook );
                 break;
+            case 'add_tag':
+                $this->update_lead_tags_auto( $lead_id, $config, 'add' );
+                break;
+            case 'remove_tag':
+                $this->update_lead_tags_auto( $lead_id, $config, 'remove' );
+                break;
         }
     }
 
@@ -440,6 +443,36 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             ) ),
             'headers'   => array( 'Content-Type' => 'application/json' )
         ) );
+    }
+
+    /**
+     * Auto update lead tags.
+     */
+    private function update_lead_tags_auto( $lead_id, $config, $action ) {
+        global $wpdb;
+        $tag_to_modify = sanitize_text_field( $config['tag_name'] ?? '' );
+        if ( ! $tag_to_modify ) return;
+
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT tags, user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+        if ( ! $lead ) return;
+
+        $tags = array_filter( array_map( 'trim', explode( ',', $lead->tags ) ) );
+
+        if ( 'add' === $action ) {
+            if ( ! in_array( $tag_to_modify, $tags ) ) {
+                $tags[] = $tag_to_modify;
+            }
+        } else {
+            $tags = array_diff( $tags, [$tag_to_modify] );
+        }
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_leads",
+            array( 'tags' => implode( ', ', $tags ) ),
+            array( 'id' => $lead_id, 'user_id' => $lead->user_id )
+        );
+
+        CCE_Activity_Logger::log( $lead_id, 'tag_change', "Tag '$tag_to_modify' $action" . "ed via automation." );
     }
 
     /**

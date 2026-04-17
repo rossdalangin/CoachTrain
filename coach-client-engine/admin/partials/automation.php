@@ -11,11 +11,12 @@
     </div>
 
     <?php
-    $is_pro = (new Coach_Client_Engine())->is_pro();
+    $engine = new Coach_Client_Engine();
+    $is_pro = $engine->is_pro();
     ?>
 
     <div id="tab-rules" class="cce-automation-tab-content">
-        <?php if ( ! $is_pro ): ?>
+        <?php if ( ! CCE_License_Manager::check_feature('automation_rules') ): ?>
             <div class="notice notice-info" style="margin: 20px 0; border-left-color: #ffb700; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <h2 style="margin-top:0;">🤖 Automate Your Coaching Business (PRO)</h2>
                 <p>Standard users can send basic welcome emails. Upgrade to PRO to use <strong>CRM Move Triggers</strong>, <strong>Scheduled Task Creation</strong>, and <strong>Multi-Step Follow-up Sequences</strong>.</p>
@@ -23,7 +24,7 @@
             </div>
         <?php endif; ?>
 
-        <div class="cce-card" style="margin-bottom:20px; <?php echo ! $is_pro ? 'opacity: 0.6; pointer-events: none;' : ''; ?>">
+        <div class="cce-card" style="margin-bottom:20px; <?php echo ! CCE_License_Manager::check_feature('automation_rules') ? 'opacity: 0.6; pointer-events: none;' : ''; ?>">
             <h3>Create New Automation Rule</h3>
             <form id="cce-add-automation-form">
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
@@ -43,6 +44,8 @@
                             <option value="move_stage">Move to CRM Stage</option>
                             <option value="schedule_reminder">Schedule Reminder</option>
                             <option value="create_task">Create Task</option>
+                            <option value="add_tag">Add Tag to Lead</option>
+                            <option value="remove_tag">Remove Tag from Lead</option>
                             <option value="trigger_webhook">Trigger Webhook</option>
                         </select>
                     </div>
@@ -64,6 +67,10 @@
                     <div id="action-config-task" style="display:none;">
                         <label>Task Title</label><br>
                         <input type="text" name="config[task_title]" placeholder="e.g. Call lead back" class="regular-text">
+                    </div>
+                    <div id="action-config-tag" style="display:none;">
+                        <label>Tag Name</label><br>
+                        <input type="text" name="config[tag_name]" placeholder="e.g. Qualified" class="regular-text">
                     </div>
                     <div id="action-config-webhook" style="display:none;">
                         <label>Select Webhook</label><br>
@@ -198,7 +205,10 @@
     </div>
 
     <div id="tab-broadcast" class="cce-automation-tab-content" style="display:none;">
-        <div class="cce-card">
+        <?php if ( ! CCE_License_Manager::check_feature('broadcasts') ): ?>
+            <div class="notice notice-info"><p>Upgrade to PLATINUM to send strategic email broadcasts to your leads.</p></div>
+        <?php endif; ?>
+        <div class="cce-card" style="<?php echo ! CCE_License_Manager::check_feature('broadcasts') ? 'opacity: 0.6; pointer-events: none;' : ''; ?>">
             <h3>Send Strategic Broadcast</h3>
             <p class="description">Email your leads based on their tags. Perfect for webinar invitations or new offer launches.</p>
             <form id="cce-broadcast-form">

@@ -1,39 +1,34 @@
 # 🚀 The 7-Figure Scaling Roadmap
 
-Moving from $10k/mo to $100k/mo requires a shift from "Labor" to "Assets".
+Moving from Solopreneur to CEO requires a shift in systems and mindset.
 
-## Phase 1: Foundation ($0 - $10k/mo)
-- **Goal:** Find your **Grand Slam Offer**.
-- **Focus:** 1-on-1 coaching, high manual outreach, testing outcomes.
-- **Engine:** Use the Leads & CRM modules to track every conversation.
+## Phase 1: Foundation (0-$10k/mo)
+- **Goal:** Product-Market Fit.
+- **System:** Master the **Grand Slam Offer**.
+- **Action:** Manual outreach and organic content.
 
-## Phase 2: Systematization ($10k - $30k/mo)
-- **Goal:** Remove yourself from the lead gen.
-- **Focus:** Automated **Webinar Funnels** and **Paid Ads**.
-- **Engine:** Deploy the Webinar Funnel template and monitor conversion ratios.
+## Phase 2: Systematization ($10k-$30k/mo)
+- **Goal:** Predictable Lead Flow.
+- **System:** Deploy the **Webinar Funnel**.
+- **Action:** Implement **Outgoing Webhooks** to sync leads with your fulfillment team.
 
-## Phase 3: Team Expansion ($30k - $100k/mo)
-- **Goal:** Build an "Owner-Independent" business.
-- **Focus:** Hiring Setters, Closers, and Success Coaches.
-- **Engine:** Use the **Multi-Tenant** capabilities to give your team isolated access to specific lead pipelines.
+## Phase 3: Scaling ($30k-$100k/mo+)
+- **Goal:** Leverage.
+- **System:** The **Platinum Automation Engine**.
+- **Action:** Hire a "Setter" and a "Closer". Use **CRM Milestones** to track team performance.
 
 ---
 
 # 👥 High-Performance Team Hiring Guide
 
-When you scale, you need the right people in the right seats.
+When you scale, your team becomes your engine.
 
-### 1. The Appointment Setter
-- **Role:** Turns "Cold" leads into "Warm" bookings.
-- **KPI:** Number of strategy sessions booked per week.
-- **Engine Access:** Give them access to the **Leads** and **CRM** modules.
-
-### 2. The Closer (Sales Pro)
-- **Role:** Conducts strategy sessions and closes high-ticket deals.
-- **KPI:** Closing percentage and average contract value.
-- **Engine Access:** Give them access to the **CRM** and **Payments** modules.
-
-### 3. The Success Coach
-- **Role:** Handles client fulfillment and retention.
-- **KPI:** Client retention rate and milestone achievement.
-- **Engine Access:** Give them access to the **Client Portal** and **Milestones**.
+1. **The Appointment Setter:**
+   - Role: Manages the **CRM "New" column**.
+   - Goal: Move leads from Opt-in to Booking.
+2. **The Sales Closer:**
+   - Role: Conducts the Strategy Sessions.
+   - Goal: Convert Bookings to Paid Clients.
+3. **The Success Manager:**
+   - Role: Manages the **Client Portal** and **Milestones**.
+   - Goal: Increase Retention and Ascension.

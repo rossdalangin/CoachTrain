@@ -140,32 +140,6 @@
         </div>
 
         <div id="section-licensing" class="cce-settings-section" style="display:none;">
-            <?php
-            $license_manager = new CCE_License_Manager();
-            $license_res = $license_manager->get_license_status( new WP_REST_Request() );
-            $l_status = is_wp_error($license_res) ? [] : $license_res->get_data()['data'];
-            ?>
-            <div class="cce-card" style="margin-bottom:20px; border-left:4px solid <?php echo $l_status['is_pro'] ? '#00a32a' : '#ffb700'; ?>;">
-                <h3>Current License Status</h3>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <p style="font-size:18px; font-weight:bold; margin-bottom:5px;">
-                            <?php echo $l_status['is_pro'] ? '💎 PLATINUM / PRO ACTIVE' : '⚠️ STANDARD LICENSE'; ?>
-                        </p>
-                        <p style="font-size:12px; color:#666;">
-                            <?php if($l_status['is_pro']): ?>
-                                Your key: <code><?php echo $l_status['license_key']; ?></code> | Type: Perpetual Pro
-                            <?php else: ?>
-                                Basic features enabled. Enter a PRO key to unlock automation and analytics.
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                    <?php if(!$l_status['is_pro']): ?>
-                        <a href="https://coachclientengine.com" target="_blank" class="button button-primary">Get Pro Key</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-
             <div class="cce-card">
                 <h3>How Licensing Works</h3>
                 <p>To unlock the full potential of the Coach Client Engine (PRO), you need a valid license key. License keys are tied to your account and can be managed from our official portal.</p>

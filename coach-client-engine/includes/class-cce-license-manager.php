@@ -116,6 +116,17 @@ class CCE_License_Manager extends CCE_REST_Controller {
     }
 
     /**
+     * Check if a specific feature is enabled for the user.
+     */
+    public static function check_feature( $feature ) {
+        $is_pro = self::is_user_pro();
+        if ( $is_pro ) return true;
+
+        $pro_features = ['automation_rules', 'advanced_analytics', 'broadcasts', 'webhooks', 'conditional_funnels'];
+        return ! in_array( $feature, $pro_features );
+    }
+
+    /**
      * Static helper to check if current user is pro.
      */
     public static function is_user_pro( $user_id = null ) {

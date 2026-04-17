@@ -243,6 +243,17 @@ class CCE_Activator {
 				completed_at datetime,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_strategies (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id bigint(20) UNSIGNED DEFAULT 0,
+				title varchar(255),
+				description text,
+				config longtext,
+				is_public tinyint(1) DEFAULT 0,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
 			) $charset_collate;"
 		];
 

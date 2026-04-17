@@ -4,7 +4,7 @@
  */
 class CCE_Sample_Data {
 
-    public static function generate($model_type = 'standard') {
+    public static function generate($model_type = 'standard', $is_linked = false) {
         global $wpdb;
         $user_id = get_current_user_id();
 
@@ -42,7 +42,15 @@ class CCE_Sample_Data {
 
         // 3. Seed Offers
         $offers = [];
-        if ($model_type === 'agency') {
+        if ($model_type === 'hormozi') {
+            $offers = [
+                ['title' => 'Hormozi Grand Slam Offer', 'price' => 5000, 'outcome' => 'The $100M Result', 'likelihood' => 'Unbeatable Guarantee']
+            ];
+        } elseif ($model_type === 'brunson') {
+            $offers = [
+                ['title' => 'Webinar Special Stack', 'price' => 997, 'outcome' => 'Funnel Mastery', 'likelihood' => 'Step-by-step framework']
+            ];
+        } elseif ($model_type === 'agency') {
             $offers = [
                 ['title' => 'Done-For-You Lead Machine', 'price' => 2500, 'outcome' => '30 Qualified leads/mo', 'likelihood' => 'Performance Guarantee'],
                 ['title' => 'Agency Growth Mastermind', 'price' => 10000, 'outcome' => 'Scale to 7-Figures', 'likelihood' => 'Proven Roadmap']
@@ -71,7 +79,15 @@ class CCE_Sample_Data {
 
         // 4. Seed Funnels
         $funnels = [];
-        if ($model_type === 'agency') {
+        if ($model_type === 'hormozi') {
+            $funnels = [
+                ['title' => 'The Hormozi VSL Funnel', 'type' => 'Consultation', 'steps' => ['Landing Page', 'VSL Video', 'Booking', 'Success']]
+            ];
+        } elseif ($model_type === 'brunson') {
+            $funnels = [
+                ['title' => 'Perfect Webinar Funnel', 'type' => 'Webinar', 'steps' => ['Registration', 'Broadcast', 'Order', 'Success']]
+            ];
+        } elseif ($model_type === 'agency') {
             $funnels = [
                 ['title' => 'Outreach Strategy Funnel', 'type' => 'Consultation', 'steps' => ['Landing Page', 'Portfolio', 'Calendar', 'Success']],
                 ['title' => 'Lead Gen VSL', 'type' => 'VSL', 'steps' => ['Opt-in', 'VSL', 'Booking', 'Thank You']]
