@@ -44,9 +44,16 @@
         </div>
         <div style="flex:1; border-left:1px solid #eee; padding-left:20px;">
             <h3>Import Leads (CSV)</h3>
-            <p style="font-size:12px; color:#666;">Moving from another CRM? Upload your list here. <br>Format: <code>first_name,last_name,email</code></p>
+            <p style="font-size:12px; color:#666;">Moving from another CRM? Upload your list and map your columns.</p>
             <input type="file" id="cce-import-csv" accept=".csv" style="display:block; margin-bottom:10px;">
-            <button class="button" id="cce-start-import">Start Import</button>
+
+            <div id="cce-import-mapping" style="display:none; margin-top:15px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                <h4>Map CSV Columns</h4>
+                <div id="cce-mapping-fields"></div>
+                <button class="button button-primary" id="cce-execute-import" style="margin-top:10px;">Execute Import</button>
+            </div>
+
+            <button class="button" id="cce-start-import">Prepare Import</button>
             <div id="import-status" style="margin-top:10px;"></div>
         </div>
     </div>

@@ -18,7 +18,7 @@ class CCE_Activator {
 				user_id bigint(20) UNSIGNED DEFAULT 0,
 				first_name varchar(100),
 				last_name varchar(100),
-				email varchar(100) UNIQUE,
+				email varchar(100),
 				phone varchar(20),
 				secure_token varchar(100),
 				source varchar(100),
@@ -26,9 +26,13 @@ class CCE_Activator {
 				crm_stage_id bigint(20),
 				onboarding_progress longtext,
 				tags text,
+				utm_source varchar(100),
+				utm_medium varchar(100),
+				utm_campaign varchar(100),
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-				PRIMARY KEY  (id)
+				PRIMARY KEY  (id),
+				UNIQUE KEY user_email (user_id, email)
 			) $charset_collate;",
 
 			"CREATE TABLE {$wpdb->prefix}cce_bookings (
@@ -83,6 +87,7 @@ class CCE_Activator {
 				step_type varchar(50),
 				config longtext,
 				tracking_scripts text,
+				logic text,
 				visits bigint(20) DEFAULT 0,
 				conversions bigint(20) DEFAULT 0,
 				PRIMARY KEY  (id)
@@ -204,6 +209,38 @@ class CCE_Activator {
 				license_key varchar(255) UNIQUE,
 				user_id bigint(20) UNSIGNED DEFAULT 0,
 				status varchar(50) DEFAULT 'active',
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_webhooks (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id bigint(20) UNSIGNED DEFAULT 0,
+				name varchar(255),
+				url varchar(255),
+				events text,
+				is_active tinyint(1) DEFAULT 1,
+				created_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_resource_access (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id bigint(20) UNSIGNED DEFAULT 0,
+				lead_id bigint(20) UNSIGNED DEFAULT 0,
+				resource_id bigint(20) UNSIGNED DEFAULT 0,
+				accessed_at datetime DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY  (id)
+			) $charset_collate;",
+
+			"CREATE TABLE {$wpdb->prefix}cce_milestones (
+				id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id bigint(20) UNSIGNED DEFAULT 0,
+				lead_id bigint(20) UNSIGNED DEFAULT 0,
+				title varchar(255),
+				description text,
+				is_completed tinyint(1) DEFAULT 0,
+				completed_at datetime,
 				created_at datetime DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY  (id)
 			) $charset_collate;"

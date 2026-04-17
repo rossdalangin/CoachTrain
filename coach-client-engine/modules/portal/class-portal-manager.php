@@ -44,6 +44,14 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
 				'permission_callback' => '__return_true',
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/portal/resources/track', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'track_resource_access' ),
+				'permission_callback' => '__return_true',
+			),
+		) );
 	}
 
     /**
@@ -108,6 +116,27 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
         CCE_Activity_Logger::log( $lead->id, 'milestone', "Onboarding step completed: $step_name" );
 
         return $this->success( array( 'message' => 'Step marked as complete' ) );
+    }
+
+    /**
+     * Track resource access.
+     */
+    public function track_resource_access( $request ) {
+        global $wpdb;
+        $resource_id = absint( $request->get_param( 'resource_id' ) );
+        $token = $_COOKIE['cce_lead_token'] ?? '';
+
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT id, user_id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+        if ( ! $lead ) return $this->error( 'Lead not authenticated' );
+
+        $wpdb->insert( "{$wpdb->prefix}cce_resource_access", array(
+            'user_id'     => $lead->user_id,
+            'lead_id'     => $lead->id,
+            'resource_id' => $resource_id,
+            'accessed_at' => current_time( 'mysql' ),
+        ) );
+
+        return $this->success();
     }
 
     /**

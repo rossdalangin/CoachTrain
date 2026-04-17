@@ -85,6 +85,7 @@ jQuery(document).ready(function($) {
         $('#edit-action-config-stage').toggle(val === 'move_stage');
         $('#edit-action-config-reminder').toggle(val === 'schedule_reminder');
         $('#edit-action-config-task').toggle(val === 'create_task');
+        $('#edit-action-config-webhook').toggle(val === 'trigger_webhook');
     });
 
     $('#cce-edit-rule-form').on('submit', function(e) {
@@ -99,7 +100,8 @@ jQuery(document).ready(function($) {
                 template_id: $('#edit-config-template-id').val(),
                 stage_id: $('#edit-config-stage-id').val(),
                 delay_hours: $('#edit-config-delay').val(),
-                task_title: $('#edit-config-task-title').val()
+                task_title: $('#edit-config-task-title').val(),
+                webhook_id: $('#edit-config-webhook-id').val()
             }
         };
         // Reuse create rule endpoint if it supports ID or create a new one
@@ -179,8 +181,47 @@ jQuery(document).ready(function($) {
 
         loadNotes(leadId);
         loadTasks(leadId);
+        loadMilestones(leadId);
+        loadMilestones(leadId);
         loadStats(leadId);
         $('#cce-contact-status').html('');
+    });
+
+    function loadMilestones(leadId) {
+        cceApi('crm/leads/' + leadId + '/milestones', 'GET', {}, function(res) {
+            if (res.success) {
+                let html = '<ul style="padding-left:0; list-style:none;">';
+                res.data.forEach(m => {
+                    const checked = m.is_completed == 1 ? 'checked' : '';
+                    html += `<li style="padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between;">
+                        <label><input type="checkbox" ${checked} class="cce-toggle-milestone" data-id="${m.id}" data-lead-id="${leadId}"> ${m.title}</label>
+                        <button class="button button-small cce-delete-milestone" data-id="${m.id}" data-lead-id="${leadId}">×</button>
+                    </li>`;
+                });
+                html += '</ul>';
+                $('#cce-milestones-content').html(res.data.length ? html : '<p>No milestones set.</p>');
+            }
+        });
+    }
+
+    $(document).on('change', '.cce-toggle-milestone', function() {
+        const leadId = $(this).data('lead-id');
+        cceApi('crm/leads/' + leadId + '/milestones/' + $(this).data('id'), 'POST', { is_completed: $(this).is(':checked') }, () => loadMilestones(leadId));
+    });
+
+    $(document).on('click', '.cce-delete-milestone', function() {
+        if(!confirm('Delete milestone?')) return;
+        const leadId = $(this).data('lead-id');
+        cceApi('crm/leads/' + leadId + '/milestones/' + $(this).data('id'), 'DELETE', {}, () => loadMilestones(leadId));
+    });
+
+    $('#cce-add-milestone-form').on('submit', function(e) {
+        e.preventDefault();
+        const leadId = $(this).find('.cce-lead-id-field').val();
+        cceApi('crm/leads/' + leadId + '/milestones', 'POST', { title: $('#cce-new-milestone-title').val() }, function() {
+            $('#cce-new-milestone-title').val('');
+            loadMilestones(leadId);
+        });
     });
 
     function loadStats(leadId) {
@@ -228,6 +269,57 @@ jQuery(document).ready(function($) {
             }
         });
     }
+
+    function loadMilestones(leadId) {
+        cceApi('crm/leads/' + leadId + '/milestones', 'GET', {}, function(res) {
+            if (res.success) {
+                let html = '<ul style="padding-left:0; list-style:none;">';
+                res.data.forEach(m => {
+                    const checked = m.is_completed == 1 ? 'checked' : '';
+                    const title = $('<div>').text(m.title).html();
+                    html += `<li style="padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between; align-items:center;">
+                        <label>
+                            <input type="checkbox" ${checked} class="cce-toggle-milestone" data-id="${m.id}" data-lead-id="${leadId}">
+                            ${title}
+                        </label>
+                        <button class="button button-small cce-delete-milestone" data-id="${m.id}" data-lead-id="${leadId}" style="color:#d63638;">×</button>
+                    </li>`;
+                });
+                html += '</ul>';
+                $('#cce-milestones-content').html(res.data.length ? html : '<p>No milestones tracked.</p>');
+            }
+        });
+    }
+
+    $(document).on('change', '.cce-toggle-milestone', function() {
+        const leadId = $(this).data('lead-id');
+        const id = $(this).data('id');
+        const completed = $(this).is(':checked') ? 1 : 0;
+        cceApi('crm/leads/' + leadId + '/milestones/' + id, 'POST', { is_completed: completed }, function() {
+            loadMilestones(leadId);
+        });
+    });
+
+    $(document).on('click', '.cce-delete-milestone', function() {
+        if(!confirm('Delete milestone?')) return;
+        const leadId = $(this).data('lead-id');
+        const id = $(this).data('id');
+        cceApi('crm/leads/' + leadId + '/milestones/' + id, 'DELETE', {}, function() {
+            loadMilestones(leadId);
+        });
+    });
+
+    $('#cce-add-milestone-form').on('submit', function(e) {
+        e.preventDefault();
+        const leadId = $(this).find('.cce-lead-id-field').val();
+        const title = $('#cce-new-milestone-title').val();
+        cceApi('crm/leads/' + leadId + '/milestones', 'POST', { title: title }, function(res) {
+            if (res.success) {
+                $('#cce-new-milestone-title').val('');
+                loadMilestones(leadId);
+            }
+        });
+    });
 
     function loadTasks(leadId) {
         cceApi('crm/leads/' + leadId + '/tasks', 'GET', {}, function(res) {
@@ -398,6 +490,25 @@ jQuery(document).ready(function($) {
     $('.cce-delete-template').on('click', function() {
         if(!confirm('Delete template?')) return;
         cceApi('automation/templates/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+    });
+
+    $('#cce-broadcast-form').on('submit', function(e) {
+        e.preventDefault();
+        const $btn = $(this).find('button');
+        const originalText = $btn.text();
+        $btn.prop('disabled', true).text('Sending Broadcast...');
+
+        const data = {
+            tag: $(this).find('[name="tag"]').val(),
+            template_id: $(this).find('[name="template_id"]').val()
+        };
+
+        cceApi('automation/broadcast', 'POST', JSON.stringify(data), function(res) {
+            $btn.prop('disabled', false).text(originalText);
+            if (res.success) {
+                $('#broadcast-status').html('<div class="notice notice-success inline"><p>Broadcast sent to ' + res.data.count + ' leads!</p></div>');
+            }
+        });
     });
 
     $('.cce-edit-lead').on('click', function() {
@@ -683,7 +794,8 @@ jQuery(document).ready(function($) {
                 template_id: formData.get('config[template_id]'),
                 stage_id: formData.get('config[stage_id]'),
                 delay_hours: formData.get('config[delay_hours]'),
-                task_title: formData.get('config[task_title]')
+                task_title: formData.get('config[task_title]'),
+                webhook_id: formData.get('config[webhook_id]')
             }
         };
         cceApi('automation/rules', 'POST', JSON.stringify(data), function(res) {
@@ -697,11 +809,32 @@ jQuery(document).ready(function($) {
         $('#action-config-stage').toggle(val === 'move_stage');
         $('#action-config-reminder').toggle(val === 'schedule_reminder');
         $('#action-config-task').toggle(val === 'create_task');
+        $('#action-config-webhook').toggle(val === 'trigger_webhook');
     });
 
     $('.cce-delete-rule').on('click', function() {
         if(!confirm('Delete rule?')) return;
         cceApi('automation/rules/' + $(this).data('rule-id'), 'DELETE', {}, () => location.reload());
+    });
+
+    // Automation: Add Webhook
+    $('#cce-add-webhook-form').on('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            name: $(this).find('[name="name"]').val(),
+            url: $(this).find('[name="url"]').val()
+        };
+        cceApi('automation/webhooks', 'POST', data, function(res) {
+            if (res.success) location.reload();
+        });
+    });
+
+    $(document).on('click', '.cce-delete-webhook', function() {
+        if (!confirm('Delete this webhook?')) return;
+        const id = $(this).data('id');
+        cceApi('automation/webhooks/' + id, 'DELETE', {}, function(res) {
+            if (res.success) $('#webhook-row-' + id).remove();
+        });
     });
 
     // Automation: Add Template
@@ -717,47 +850,79 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Leads: Import CSV
+    // Leads: Import CSV with Mapping
+    let csvData = [];
     $('#cce-start-import').on('click', function() {
         const file = $('#cce-import-csv')[0].files[0];
-        if (!file) {
-            alert('Please select a CSV file.');
-            return;
-        }
+        if (!file) { alert('Select CSV'); return; }
 
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
-            const lines = text.split('\n');
-            const leads = [];
+            const lines = text.split('\n').filter(l => l.trim() !== '');
+            const headers = lines[0].split(',').map(h => h.trim());
+            csvData = lines.slice(1).map(l => l.split(','));
 
-            lines.forEach((line, index) => {
-                if (index === 0 && line.toLowerCase().includes('email')) return; // Skip header
-                const parts = line.split(',');
-                if (parts.length >= 3) {
-                    leads.push({
-                        first_name: parts[0].trim(),
-                        last_name: parts[1].trim(),
-                        email: parts[2].trim()
-                    });
-                }
+            let mappingHtml = '';
+            ['first_name', 'last_name', 'email', 'phone'].forEach(field => {
+                mappingHtml += `<div style="margin-bottom:10px;">
+                    <label style="display:block; font-size:11px;">${field.replace('_', ' ').toUpperCase()}</label>
+                    <select class="cce-map-field" data-field="${field}" style="width:100%;">
+                        <option value="">-- Skip --</option>
+                        ${headers.map((h, i) => `<option value="${i}">${h}</option>`).join('')}
+                    </select>
+                </div>`;
             });
 
-            if (leads.length === 0) {
-                alert('No valid leads found in CSV.');
-                return;
-            }
-
-            $('#import-status').text('Importing ' + leads.length + ' leads...');
-            cceApi('leads/import', 'POST', JSON.stringify({ leads: leads }), function(res) {
-                if (res.success) {
-                    alert('Successfully imported ' + res.data.count + ' leads!');
-                    location.reload();
-                }
-            });
+            $('#cce-mapping-fields').html(mappingHtml);
+            $('#cce-import-mapping').show();
+            $('#cce-start-import').hide();
         };
         reader.readAsText(file);
     });
+
+    $('#cce-execute-import').on('click', function() {
+        const mapping = {};
+        $('.cce-map-field').each(function() {
+            if ($(this).val() !== '') mapping[$(this).data('field')] = parseInt($(this).val());
+        });
+
+        const leads = csvData.map(row => {
+            const lead = {};
+            for (const [field, index] of Object.entries(mapping)) {
+                lead[field] = row[index] ? row[index].trim() : '';
+            }
+            return lead;
+        });
+
+        $('#import-status').text('Importing ' + leads.length + ' leads...');
+        cceApi('leads/import', 'POST', JSON.stringify({ leads: leads }), function(res) {
+            if (res.success) {
+                alert('Imported ' + res.data.count + ' leads!');
+                location.reload();
+            }
+        });
+    });
+
+    // CRM: Drag and Drop
+    $('.cce-kanban-column').sortable({
+        connectWith: '.cce-kanban-column',
+        placeholder: 'cce-kanban-placeholder',
+        cursor: 'move',
+        opacity: 0.7,
+        update: function(event, ui) {
+            if (this === ui.item.parent()[0]) {
+                const leadId = ui.item.data('lead-id');
+                const stageId = $(this).data('stage-id');
+
+                cceApi('crm/leads/' + leadId + '/stage', 'POST', { stage_id: stageId }, function(res) {
+                    if (res.success) {
+                        console.log('Lead moved to stage:', stageId);
+                    }
+                });
+            }
+        }
+    }).disableSelection();
 
     // CRM: Quick Task
     $(document).on('submit', '.cce-quick-task-form', function(e) {

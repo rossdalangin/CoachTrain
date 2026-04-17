@@ -16,7 +16,20 @@ class CCE_Public {
         add_shortcode( 'cce_funnel', array( $this, 'render_funnel' ) );
         add_action( 'template_redirect', array( $this, 'handle_payment_simulation' ) );
         add_action( 'rest_api_init', array( $this, 'register_portal_auth_routes' ) );
+        add_action( 'init', array( $this, 'capture_utm_parameters' ) );
 	}
+
+    /**
+     * Capture UTM parameters.
+     */
+    public function capture_utm_parameters() {
+        $params = ['utm_source', 'utm_medium', 'utm_campaign'];
+        foreach ( $params as $p ) {
+            if ( isset( $_GET[$p] ) ) {
+                setcookie( 'cce_' . $p, sanitize_text_field( $_GET[$p] ), time() + DAY_IN_SECONDS, '/' );
+            }
+        }
+    }
 
     /**
      * Register portal auth routes.
@@ -195,6 +208,18 @@ class CCE_Public {
 
         $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
 
+        // Conditional Logic Check
+        if ( ! empty( $current_step->logic ) ) {
+            $logic = json_decode( $current_step->logic, true );
+            if ( $logic && ! empty( $logic['redirect_tag'] ) ) {
+                $token = $_COOKIE['cce_lead_token'] ?? '';
+                $lead = $wpdb->get_row( $wpdb->prepare( "SELECT tags FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+                if ( $lead && strpos( $lead->tags, $logic['trigger_tag'] ) !== false ) {
+                    $next_step_url = esc_url($logic['redirect_url']);
+                }
+            }
+        }
+
 		ob_start();
         if ( ! empty( $current_step->tracking_scripts ) ) {
             echo $current_step->tracking_scripts;
@@ -316,7 +341,7 @@ class CCE_Public {
                                     <li style="margin-bottom:8px; padding:10px; background:#f9f9f9; border-radius:5px;">
                                         <div style="display:flex; justify-content:space-between; align-items:center;">
                                             <span><strong>[<?php echo esc_html($r->type); ?>]</strong> <?php echo esc_html($r->title); ?></span>
-                                            <a href="<?php echo esc_url($r->url); ?>" class="button button-small" target="_blank">Access</a>
+                                            <a href="<?php echo esc_url($r->url); ?>" class="button button-small cce-resource-link" data-id="<?php echo $r->id; ?>" target="_blank">Access</a>
                                         </div>
                                     </li>
                                 <?php endforeach; ?>
@@ -327,7 +352,44 @@ class CCE_Public {
                     <?php endif; ?>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
-					<h4>Your Progress</h4>
+					<h4>Your Success Milestones</h4>
+                    <div id="cce-portal-milestones" style="margin-bottom:30px;">
+                        <?php
+                        $milestones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d ORDER BY created_at ASC", $lead->id));
+                        if($milestones): foreach($milestones as $m):
+                        ?>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:<?php echo $m->is_completed ? '#f0fdf4' : '#f8fafc'; ?>; border-radius:8px;">
+                                <span style="font-size:20px;"><?php echo $m->is_completed ? '🏆' : '🎯'; ?></span>
+                                <div>
+                                    <div style="font-weight:bold; <?php echo $m->is_completed ? 'text-decoration:line-through; color:#166534;' : ''; ?>"><?php echo esc_html($m->title); ?></div>
+                                    <?php if($m->completed_at): ?>
+                                        <small style="color:#166534;">Achieved on <?php echo date('M d, Y', strtotime($m->completed_at)); ?></small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; else: ?>
+                            <p style="font-size:12px; color:#666;">No specific milestones set yet. Focus on your roadmap!</p>
+                        <?php endif; ?>
+                    </div>
+
+					<h4>Your Journey Milestones</h4>
+                    <div id="cce-portal-milestones" style="margin-bottom:30px;">
+                        <?php
+                        $milestones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d ORDER BY created_at ASC", $lead->id));
+                        if ($milestones): foreach ($milestones as $m): ?>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                <span style="font-size:20px;"><?php echo $m->is_completed ? '🏆' : '⚪'; ?></span>
+                                <span style="<?php echo $m->is_completed ? 'font-weight:bold; color:#00a32a;' : 'color:#666;'; ?>">
+                                    <?php echo esc_html($m->title); ?>
+                                    <?php if($m->is_completed) echo '<br><small style="font-weight:normal; color:#888;">Completed: ' . $m->completed_at . '</small>'; ?>
+                                </span>
+                            </div>
+                        <?php endforeach; else: ?>
+                            <p style="color:#888; font-size:12px;">Your milestones will appear here as we progress through the program.</p>
+                        <?php endif; ?>
+                    </div>
+
+					<h4>Your To-Do List</h4>
 					<?php
                         $has_booking = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d AND status != 'cancelled'", $lead->id ) );
                         if ( ! $has_booking ) {
@@ -343,6 +405,17 @@ class CCE_Public {
 			</div>
 		</div>
         <script>
+        document.querySelectorAll('.cce-resource-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const resourceId = this.getAttribute('data-id');
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/resources/track' ) ); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resource_id: resourceId })
+                });
+            });
+        });
+
         document.querySelectorAll('.cce-portal-complete').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 if (this.checked) {

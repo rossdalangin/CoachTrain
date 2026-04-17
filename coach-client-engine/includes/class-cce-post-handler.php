@@ -12,7 +12,22 @@ class CCE_Post_Handler {
         add_action( 'admin_post_cce_export_bookings', array( $this, 'export_bookings' ) );
         add_action( 'admin_post_cce_export_payments', array( $this, 'export_payments' ) );
         add_action( 'admin_post_cce_generate_sample_data', array( $this, 'generate_sample_data' ) );
+        add_action( 'admin_post_cce_repair_db', array( $this, 'repair_db' ) );
 	}
+
+    /**
+     * Force DB Repair.
+     */
+    public function repair_db() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_repair_db_nonce' );
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-cce-activator.php';
+        CCE_Activator::activate();
+
+        wp_redirect( admin_url( 'admin.php?page=cce-settings&message=repair_success#status' ) );
+        exit;
+    }
 
     /**
      * Generate sample data.

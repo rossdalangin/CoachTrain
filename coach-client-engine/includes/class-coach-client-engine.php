@@ -184,6 +184,29 @@ class Coach_Client_Engine {
             )
         ) );
 
+        register_rest_route( 'cce/v1', '/maintenance/hub-resource', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => function( $request ) {
+                    $file = sanitize_text_field( $request->get_param('file') );
+                    $path = plugin_dir_path( dirname( __FILE__ ) ) . 'marketing/' . $file;
+                    if ( ! file_exists( $path ) ) return new WP_Error('not_found', 'File not found');
+
+                    $content = file_get_contents( $path );
+                    // Basic MD to HTML conversion
+                    $content = preg_replace('/^# (.*)$/m', '<h1>$1</h1>', $content);
+                    $content = preg_replace('/^## (.*)$/m', '<h2>$1</h2>', $content);
+                    $content = preg_replace('/^### (.*)$/m', '<h3>$1</h3>', $content);
+                    $content = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $content);
+                    $content = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2" target="_blank">$1</a>', $content);
+                    $content = nl2br($content);
+
+                    return array( 'success' => true, 'content' => $content );
+                },
+                'permission_callback' => array( $this, 'check_rest_permission' ),
+            )
+        ) );
+
         register_rest_route( 'cce/v1', '/settings', array(
             array(
                 'methods'             => 'GET',
@@ -274,8 +297,8 @@ class Coach_Client_Engine {
         $proof_manager = new CCE_Proof_Manager();
         $proof_manager->register_routes();
 
-        $automation_manager = new CCE_Automation_Manager();
-        $automation_manager->register_routes();
+        // Use singleton or existing instance if possible, for now just register routes without constructor side effects
+        (new CCE_Automation_Manager())->register_routes();
 
         $license_manager = new CCE_License_Manager();
         $license_manager->register_routes();

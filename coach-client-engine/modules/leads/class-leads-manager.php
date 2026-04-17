@@ -251,6 +251,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             'source'       => $source,
 			'status'       => 'cold',
             'crm_stage_id' => $default_stage_id,
+            'utm_source'   => $_COOKIE['cce_utm_source'] ?? '',
+            'utm_medium'   => $_COOKIE['cce_utm_medium'] ?? '',
+            'utm_campaign' => $_COOKIE['cce_utm_campaign'] ?? '',
             'created_at'   => current_time( 'mysql' ),
 		);
 

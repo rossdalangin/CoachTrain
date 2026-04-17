@@ -65,7 +65,79 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
+
+        register_rest_route( $this->namespace, '/funnels/(?P<id>\d+)/export', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'export_funnel' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/funnels/import', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'import_funnel' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
 	}
+
+    /**
+     * Export funnel as JSON.
+     */
+    public function export_funnel( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d AND user_id = %d", $id, $user_id ) );
+        if ( ! $funnel ) return $this->error( 'Funnel not found' );
+
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d", $id ) );
+
+        return $this->success( array(
+            'funnel' => $funnel,
+            'steps'  => $steps,
+            'v'      => '1.0'
+        ) );
+    }
+
+    /**
+     * Import funnel from JSON.
+     */
+    public function import_funnel( $request ) {
+        global $wpdb;
+        $data = $request->get_json_params();
+        $user_id = $this->get_current_user_id();
+
+        if ( empty( $data['funnel'] ) || empty( $data['steps'] ) ) {
+            return $this->error( 'Invalid export data' );
+        }
+
+        $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
+            'user_id'    => $user_id,
+            'title'      => $data['funnel']['title'] . ' (Imported)',
+            'type'       => $data['funnel']['type'],
+            'status'     => 'draft',
+            'created_at' => current_time( 'mysql' ),
+        ) );
+
+        $funnel_id = $wpdb->insert_id;
+
+        foreach ( $data['steps'] as $step ) {
+            $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
+                'user_id'    => $user_id,
+                'funnel_id'  => $funnel_id,
+                'title'      => $step['title'],
+                'step_order' => $step['step_order'],
+                'step_type'  => $step['step_type'],
+                'config'     => $step['config'],
+                'tracking_scripts' => $step['tracking_scripts'] ?? '',
+            ) );
+        }
+
+        return $this->success( array( 'id' => $funnel_id ) );
+    }
 
     /**
      * Duplicate funnel.
@@ -152,6 +224,20 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 ['title' => 'Book Strategy Session', 'type' => 'booking'],
                 ['title' => 'Enroll', 'type' => 'checkout']
             ];
+        } elseif ( 'vsl' === $template_id ) {
+            $steps = [
+                ['title' => 'Opt-in', 'type' => 'optin'],
+                ['title' => 'Video Sales Letter', 'type' => 'thank_you'],
+                ['title' => 'Apply Now', 'type' => 'booking'],
+                ['title' => 'Confirmation', 'type' => 'thank_you']
+            ];
+        } elseif ( 'tripwire' === $template_id ) {
+            $steps = [
+                ['title' => 'Sales Page', 'type' => 'optin'],
+                ['title' => 'Checkout', 'type' => 'checkout'],
+                ['title' => 'Upsell Offer', 'type' => 'checkout'],
+                ['title' => 'Thank You', 'type' => 'thank_you']
+            ];
         }
 
         if ( ! empty( $steps ) ) {
@@ -204,6 +290,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 'step_type'  => sanitize_text_field( $step['type'] ),
                 'config'     => json_encode( $step['config'] ?? array() ),
                 'tracking_scripts' => $step['tracking_scripts'] ?? '',
+                'logic'      => $step['logic'] ?? '',
             ) );
         }
 
@@ -218,6 +305,8 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
             array( 'id' => 'lead_magnet', 'title' => 'Lead Magnet Funnel', 'description' => 'Perfect for building your email list.' ),
             array( 'id' => 'consultation', 'title' => 'Consultation Funnel', 'description' => 'Ideal for high-ticket coaching bookings.' ),
             array( 'id' => 'webinar', 'title' => 'Webinar Funnel', 'description' => 'Best for automated sales presentations.' ),
+            array( 'id' => 'vsl', 'title' => 'High-Ticket VSL', 'description' => 'A video-driven sales process for elite services.' ),
+            array( 'id' => 'tripwire', 'title' => 'Low-Ticket Tripwire', 'description' => 'Great for acquiring customers with a small purchase first.' ),
         );
         return $this->success( $templates );
     }

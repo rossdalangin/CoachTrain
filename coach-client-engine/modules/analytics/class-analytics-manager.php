@@ -72,6 +72,8 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             'lead_to_client'  => $total_leads > 0 ? round( ($total_clients / $total_leads) * 100, 1 ) : 0,
             'show_rate'       => $total_bookings > 0 ? round( ( $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE user_id = %d AND status = 'completed'", $user_id ) ) / $total_bookings ) * 100, 1 ) : 0,
             'funnel_stats'    => $this->get_funnel_leads_stats(),
+            'resource_engagement' => $this->get_resource_engagement(),
+            'attribution'     => $this->get_attribution_stats(),
             'projections'     => $this->get_projections(),
             'revenue_history' => $this->get_revenue_history(),
             'pending_tasks'   => $this->get_pending_tasks(),
@@ -161,6 +163,39 @@ class CCE_Analytics_Manager extends CCE_REST_Controller {
             $history[] = ['date' => $date, 'amount' => $amount];
         }
         return $history;
+    }
+
+    /**
+     * Get resource engagement stats.
+     */
+    private function get_resource_engagement() {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        return $wpdb->get_results( $wpdb->prepare( "
+            SELECT r.title, COUNT(a.id) as access_count
+            FROM {$wpdb->prefix}cce_resource_access a
+            JOIN {$wpdb->prefix}cce_resources r ON a.resource_id = r.id
+            WHERE a.user_id = %d
+            GROUP BY r.id
+            ORDER BY access_count DESC
+            LIMIT 5
+        ", $user_id ) );
+    }
+
+    /**
+     * Get lead attribution stats.
+     */
+    private function get_attribution_stats() {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        return $wpdb->get_results( $wpdb->prepare( "
+            SELECT utm_source, COUNT(*) as count
+            FROM {$wpdb->prefix}cce_leads
+            WHERE user_id = %d AND utm_source IS NOT NULL AND utm_source != ''
+            GROUP BY utm_source
+            ORDER BY count DESC
+            LIMIT 5
+        ", $user_id ) );
     }
 
     /**

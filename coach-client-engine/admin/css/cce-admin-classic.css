@@ -55,3 +55,11 @@
 .status-tag.status-pending { background: #fff3cd; color: #856404; }
 .status-tag.status-cancelled { background: #f8d7da; color: #721c24; }
 .status-tag.status-completed { background: #d1ecf1; color: #0c5460; }
+
+.cce-kanban-placeholder {
+    border: 2px dashed #cbd5e1;
+    background: #f8fafc;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    height: 100px;
+}

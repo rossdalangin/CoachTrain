@@ -8,11 +8,14 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      * Constructor.
      */
     public function __construct() {
+        if ( did_action( 'cce_automation_init' ) ) return;
+
         add_action( 'cce_lead_created', array( $this, 'trigger_automation' ) );
         add_action( 'cce_booking_confirmed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_payment_completed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_lead_stage_changed', array( $this, 'trigger_automation' ), 10, 2 );
         add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
+        do_action( 'cce_automation_init' );
     }
 
     /**
@@ -67,6 +70,35 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
             array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/webhooks', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_webhooks' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_webhook' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/webhooks/(?P<id>\d+)', array(
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_webhook' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/broadcast', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'send_broadcast' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
@@ -170,6 +202,77 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         $user_id = $this->get_current_user_id();
         $templates = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_email_templates WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
         return $this->success( $templates );
+    }
+
+    /**
+     * Get webhooks.
+     */
+    public function get_webhooks( $request ) {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        $webhooks = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_webhooks WHERE user_id = %d ORDER BY created_at DESC", $user_id ) );
+        return $this->success( $webhooks );
+    }
+
+    /**
+     * Create webhook.
+     */
+    public function create_webhook( $request ) {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        $params = $request->get_params();
+
+        $wpdb->insert( "{$wpdb->prefix}cce_webhooks", array(
+            'user_id' => $user_id,
+            'name'    => sanitize_text_field( $params['name'] ),
+            'url'     => esc_url_raw( $params['url'] ),
+            'events'  => 'all',
+            'is_active' => 1,
+            'created_at' => current_time( 'mysql' ),
+        ) );
+
+        return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Delete webhook.
+     */
+    public function delete_webhook( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $wpdb->delete( "{$wpdb->prefix}cce_webhooks", array( 'id' => $id, 'user_id' => $user_id ) );
+        return $this->success( array( 'message' => 'Webhook deleted' ) );
+    }
+
+    /**
+     * Send email broadcast to leads by tag.
+     */
+    public function send_broadcast( $request ) {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        $tag = sanitize_text_field( $request->get_param('tag') );
+        $template_id = absint( $request->get_param('template_id') );
+
+        if ( ! $template_id ) return $this->error( 'Template is required' );
+
+        $query = "SELECT id FROM {$wpdb->prefix}cce_leads WHERE user_id = %d";
+        $params = array( $user_id );
+        if ( ! empty( $tag ) ) {
+            $query .= " AND tags LIKE %s";
+            $params[] = '%' . $tag . '%';
+        }
+
+        $leads = $wpdb->get_col( $wpdb->prepare( $query, $params ) );
+        $mailer = new CCE_Mailer();
+        $count = 0;
+
+        foreach ( $leads as $lead_id ) {
+            $mailer->send_template( $template_id, $lead_id );
+            $count++;
+        }
+
+        return $this->success( array( 'count' => $count ) );
     }
 
     /**
@@ -308,7 +411,35 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
                 ) );
                 CCE_Activity_Logger::log( $lead_id, 'automation', 'Task created via automation rule: ' . $title );
                 break;
+            case 'trigger_webhook':
+                $this->trigger_webhook( $lead_id, $config, $hook );
+                break;
         }
+    }
+
+    /**
+     * Trigger an outgoing webhook.
+     */
+    private function trigger_webhook( $lead_id, $config, $event ) {
+        global $wpdb;
+        $webhook_id = absint( $config['webhook_id'] ?? 0 );
+        if ( ! $webhook_id ) return;
+
+        $webhook = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_webhooks WHERE id = %d AND is_active = 1", $webhook_id ) );
+        if ( ! $webhook ) return;
+
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+
+        wp_remote_post( $webhook->url, array(
+            'method'    => 'POST',
+            'timeout'   => 45,
+            'body'      => json_encode( array(
+                'event' => $event,
+                'lead'  => $lead,
+                'ts'    => time()
+            ) ),
+            'headers'   => array( 'Content-Type' => 'application/json' )
+        ) );
     }
 
     /**

@@ -6,11 +6,12 @@
     <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
         <button class="cce-automation-tab-link active" data-tab="rules" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Automation Rules</button>
         <button class="cce-automation-tab-link" data-tab="templates" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Email Templates</button>
+        <button class="cce-automation-tab-link" data-tab="webhooks" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Webhooks</button>
+        <button class="cce-automation-tab-link" data-tab="broadcast" style="background:none; border:none; padding:10px 20px; cursor:pointer;">Broadcasts</button>
     </div>
 
     <?php
-    $engine = new Coach_Client_Engine();
-    $is_pro = $engine->is_pro();
+    $is_pro = (new Coach_Client_Engine())->is_pro();
     ?>
 
     <div id="tab-rules" class="cce-automation-tab-content">
@@ -42,6 +43,7 @@
                             <option value="move_stage">Move to CRM Stage</option>
                             <option value="schedule_reminder">Schedule Reminder</option>
                             <option value="create_task">Create Task</option>
+                            <option value="trigger_webhook">Trigger Webhook</option>
                         </select>
                     </div>
                     <div id="action-config-stage" style="display:none;">
@@ -62,6 +64,15 @@
                     <div id="action-config-task" style="display:none;">
                         <label>Task Title</label><br>
                         <input type="text" name="config[task_title]" placeholder="e.g. Call lead back" class="regular-text">
+                    </div>
+                    <div id="action-config-webhook" style="display:none;">
+                        <label>Select Webhook</label><br>
+                        <select name="config[webhook_id]">
+                            <?php
+                            $webhooks = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM {$wpdb->prefix}cce_webhooks WHERE user_id = %d", $user_id));
+                            foreach($webhooks as $w) echo "<option value='{$w->id}'>{$w->name}</option>";
+                            ?>
+                        </select>
                     </div>
                     <div id="action-config-email" style="display:block;">
                         <label>Select Template</label><br>
@@ -153,6 +164,63 @@
         </div>
     </div>
 
+    <div id="tab-webhooks" class="cce-automation-tab-content" style="display:none;">
+        <div class="cce-card" style="margin-bottom:20px;">
+            <h3>Add New Webhook</h3>
+            <p class="description">Send lead data to external tools (Zapier, Make, custom scripts) when an automation rule triggers.</p>
+            <form id="cce-add-webhook-form">
+                <div style="display:flex; gap:15px;">
+                    <input type="text" name="name" placeholder="Webhook Name (e.g. Zapier Lead Handler)" class="regular-text" required>
+                    <input type="url" name="url" placeholder="https://hooks.zapier.com/..." class="large-text" required style="flex:1;">
+                    <button type="submit" class="button button-primary">Save Webhook</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="cce-card">
+            <h3>Active Webhooks</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead><tr><th>Name</th><th>URL</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="cce-webhooks-list">
+                    <?php
+                    $webhooks = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_webhooks WHERE user_id = %d ORDER BY created_at DESC", $user_id));
+                    foreach($webhooks as $w) echo "<tr id='webhook-row-{$w->id}'>
+                        <td><strong>" . esc_html($w->name) . "</strong></td>
+                        <td><code>" . esc_html($w->url) . "</code></td>
+                        <td>Active</td>
+                        <td><button class='button button-link-delete cce-delete-webhook' data-id='{$w->id}' style='color:#d63638;'>Delete</button></td>
+                    </tr>";
+                    if(!$webhooks) echo "<tr><td colspan='4'>No webhooks yet.</td></tr>";
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-broadcast" class="cce-automation-tab-content" style="display:none;">
+        <div class="cce-card">
+            <h3>Send Strategic Broadcast</h3>
+            <p class="description">Email your leads based on their tags. Perfect for webinar invitations or new offer launches.</p>
+            <form id="cce-broadcast-form">
+                <div style="display:flex; flex-direction:column; gap:15px; max-width:500px;">
+                    <div>
+                        <label>Filter by Tag (Leave empty for ALL leads)</label><br>
+                        <input type="text" name="tag" placeholder="e.g. High-Ticket" class="widefat">
+                    </div>
+                    <div>
+                        <label>Select Email Template</label><br>
+                        <select name="template_id" class="widefat" required>
+                            <option value="">Choose a template...</option>
+                            <?php foreach($templates as $t) echo "<option value='{$t->id}'>{$t->name}</option>"; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="button button-primary">Send Broadcast Now</button>
+                </div>
+            </form>
+            <div id="broadcast-status" style="margin-top:15px;"></div>
+        </div>
+    </div>
+
     <div id="tab-templates" class="cce-automation-tab-content" style="display:none;">
         <div class="cce-card" style="margin-bottom:20px;">
             <h3>Create Email Template</h3>
@@ -240,6 +308,12 @@
                     <div id="edit-action-config-task">
                         <label>Task Title</label><br>
                         <input type="text" id="edit-config-task-title" class="widefat">
+                    </div>
+                    <div id="edit-action-config-webhook">
+                        <label>Select Webhook</label><br>
+                        <select id="edit-config-webhook-id" class="widefat">
+                            <?php foreach($webhooks as $w) echo "<option value='{$w->id}'>{$w->name}</option>"; ?>
+                        </select>
                     </div>
                     <div id="edit-action-config-email">
                         <label>Select Template</label><br>

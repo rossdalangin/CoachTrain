@@ -9,6 +9,33 @@
     </div>
 
     <div id="crm-tab-kanban" class="cce-crm-tab-content">
+        <div class="cce-card" style="margin-bottom: 30px; border-bottom: 4px solid #673ab7;">
+            <h3>📊 Sales Pipeline Visibility</h3>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; height:100px; gap:5px; padding-top:20px;">
+                <?php
+                global $wpdb;
+                $user_id = get_current_user_id();
+                $stages_data = $wpdb->get_results( $wpdb->prepare( "SELECT id, name FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
+                $counts = [];
+                foreach($stages_data as $sd) {
+                    $counts[] = [
+                        'name' => $sd->name,
+                        'count' => (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $sd->id, $user_id))
+                    ];
+                }
+                $total_leads_crm = array_sum(array_column($counts, 'count')) ?: 1;
+                foreach($counts as $c):
+                    $height = ($c['count'] / $total_leads_crm) * 100;
+                ?>
+                    <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
+                        <div style="width:80%; background:#673ab7; height:<?php echo $height; ?>%; border-radius:4px 4px 0 0; min-height:2px; opacity:<?php echo 0.3 + ($height/200); ?>;"></div>
+                        <small style="font-size:10px; margin-top:5px; font-weight:bold;"><?php echo $c['count']; ?></small>
+                        <small style="font-size:9px; color:#888; text-transform:uppercase;"><?php echo esc_html($c['name']); ?></small>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div style="background:#fff9e6; border-left:4px solid #ffb700; padding:10px; font-size:12px; color:#856404;">
                 <strong>Pro Tip:</strong> Leads are most likely to convert within the first 5 minutes of opting in. Check your "New" column frequently!
@@ -22,24 +49,31 @@
         $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
         ?>
 
-        <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
+        <div class="cce-kanban-wrapper" id="cce-kanban-board" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
             <?php
             $analytics = new CCE_Analytics_Manager();
             foreach ( $stages as $stage ):
             ?>
                 <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
                     <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
-                    <div class="kanban-cards">
+                    <div class="kanban-cards cce-kanban-column" data-stage-id="<?php echo $stage->id; ?>" style="min-height:200px;">
                         <?php
                         $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
                         if ($leads): foreach ( $leads as $lead ):
                             $engagement_score = $analytics->calculate_engagement_score( $lead->id );
                         ?>
-                            <div class="cce-card" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px;">
+                            <div class="cce-card cce-kanban-card" data-lead-id="<?php echo $lead->id; ?>" style="margin-bottom:10px; border-top:none; border-left:4px solid #0073aa; padding:15px; cursor:move; background:#fff;">
                                 <div style="display:flex; justify-content:space-between; align-items:start;">
                                     <div>
                                         <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
                                         <div style="font-size:10px; color:#666;">Engagement: <span style="color:#00a32a; font-weight:bold;"><?php echo $engagement_score; ?></span></div>
+                                        <?php if($lead->tags): ?>
+                                            <div style="margin-top:5px; display:flex; gap:3px; flex-wrap:wrap;">
+                                                <?php foreach(explode(',', $lead->tags) as $tag): ?>
+                                                    <span style="background:#f1f5f9; color:#64748b; font-size:8px; padding:2px 5px; border-radius:3px;"><?php echo esc_html(trim($tag)); ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                     <select class="cce-status-toggle" data-lead-id="<?php echo $lead->id; ?>" style="font-size:9px; height:auto; padding:2px;">
                                         <option value="cold" <?php selected($lead->status, 'cold'); ?>>COLD</option>
@@ -127,6 +161,7 @@
                 <button class="cce-tab-link active" data-tab="notes" style="background:none; border:none; padding:10px 15px; cursor:pointer; border-bottom:2px solid #0073aa;">Activity</button>
                 <button class="cce-tab-link" data-tab="tasks" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Tasks</button>
                 <button class="cce-tab-link" data-tab="contact" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Contact</button>
+                <button class="cce-tab-link" data-tab="milestones" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Milestones</button>
                 <button class="cce-tab-link" data-tab="stats" style="background:none; border:none; padding:10px 15px; cursor:pointer;">Stats</button>
             </div>
 
@@ -149,6 +184,32 @@
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="cce-new-task-title" placeholder="New task title..." style="flex:1; border-radius:8px;" required>
                             <button type="submit" class="button button-primary">Add Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="cce-tab-milestones" class="cce-tab-content" style="display:none;">
+                <div id="cce-milestones-content" style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div class="cce-add-milestone-section">
+                    <form id="cce-add-milestone-form">
+                        <input type="hidden" class="cce-lead-id-field">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="cce-new-milestone-title" placeholder="New milestone (e.g. First $1k day)..." style="flex:1; border-radius:8px;" required>
+                            <button type="submit" class="button button-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="cce-tab-milestones" class="cce-tab-content" style="display:none;">
+                <div id="cce-milestones-content" style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px; background:#fcfcfc;"></div>
+                <div class="cce-add-milestone-section">
+                    <form id="cce-add-milestone-form">
+                        <input type="hidden" class="cce-lead-id-field">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="cce-new-milestone-title" placeholder="New milestone (e.g. First $1k day)..." style="flex:1; border-radius:8px;" required>
+                            <button type="submit" class="button button-primary">Add</button>
                         </div>
                     </form>
                 </div>

@@ -3,8 +3,7 @@
     <hr class="wp-header-end">
 
     <?php
-    $engine = new Coach_Client_Engine();
-    $is_pro = $engine->is_pro();
+    $is_pro = (new Coach_Client_Engine())->is_pro();
 
     if ( ! $is_pro ) {
         echo '<div class="notice notice-info" style="margin: 20px 0; border-left-color: #ffb700; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -72,6 +71,40 @@
                     </tr>
                 <?php endforeach; else: ?>
                     <tr><td colspan="4">No funnel data yet.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cce-card" style="margin-bottom:20px; <?php echo ! $is_pro ? 'opacity: 0.5; pointer-events: none; filter: blur(2px);' : ''; ?>">
+        <h3>Resource Engagement (Top Downloads)</h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead><tr><th>Resource Title</th><th>Views/Accesses</th></tr></thead>
+            <tbody>
+                <?php if (!empty($summary['resource_engagement'])): foreach($summary['resource_engagement'] as $re): ?>
+                    <tr>
+                        <td><strong><?php echo esc_html($re->title); ?></strong></td>
+                        <td><?php echo (int) $re->access_count; ?></td>
+                    </tr>
+                <?php endforeach; else: ?>
+                    <tr><td colspan="2">No engagement data yet.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cce-card" style="margin-bottom:20px; <?php echo ! $is_pro ? 'opacity: 0.5; pointer-events: none; filter: blur(2px);' : ''; ?>">
+        <h3>Lead Attribution (Top Sources)</h3>
+        <table class="wp-list-table widefat fixed striped">
+            <thead><tr><th>UTM Source</th><th>Lead Count</th></tr></thead>
+            <tbody>
+                <?php if (!empty($summary['attribution'])): foreach($summary['attribution'] as $attr): ?>
+                    <tr>
+                        <td><strong><?php echo esc_html($attr->utm_source); ?></strong></td>
+                        <td><?php echo (int) $attr->count; ?></td>
+                    </tr>
+                <?php endforeach; else: ?>
+                    <tr><td colspan="2">No attribution data yet. Use UTM parameters in your links!</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

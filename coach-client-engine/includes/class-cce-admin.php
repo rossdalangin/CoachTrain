@@ -27,6 +27,7 @@ class CCE_Admin {
 		);
 
         $pages = [
+            'Mastery Hub' => 'cce-hub',
             'Leads'      => 'cce-leads',
             'Bookings'   => 'cce-bookings',
             'Clients'    => 'cce-clients',
@@ -66,6 +67,13 @@ class CCE_Admin {
      */
     public function render_dashboard() {
         include plugin_dir_path( __FILE__ ) . '../admin/partials/dashboard.php';
+    }
+
+    /**
+     * Render Mastery Hub.
+     */
+    public function render_mastery_hub() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/hub.php';
     }
 
     /**
@@ -162,7 +170,7 @@ class CCE_Admin {
             return;
         }
         wp_enqueue_style( 'cce-admin-classic', plugin_dir_url( __FILE__ ) . '../admin/css/cce-admin-classic.css', array(), CCE_VERSION );
-        wp_enqueue_script( 'cce-admin-js', plugin_dir_url( __FILE__ ) . '../admin/js/cce-admin.js', array( 'jquery' ), CCE_VERSION, true );
+        wp_enqueue_script( 'cce-admin-js', plugin_dir_url( __FILE__ ) . '../admin/js/cce-admin.js', array( 'jquery', 'jquery-ui-sortable' ), CCE_VERSION, true );
 
         wp_localize_script( 'cce-admin-js', 'cceAdmin', array(
             'restUrl' => esc_url_raw( rest_url( 'cce/v1/' ) ),
