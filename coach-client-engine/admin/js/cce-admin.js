@@ -879,12 +879,15 @@ jQuery(document).ready(function($) {
                 const leadId = ui.item.data('lead-id');
                 const stageId = $(this).data('stage-id');
 
+                const $column = $(this);
+                $column.css('opacity', '0.5');
+
                 cceApi('crm/leads/' + leadId + '/stage', 'POST', { stage_id: stageId }, function(res) {
+                    $column.css('opacity', '1');
                     if (res.success) {
                         console.log('Lead moved to stage:', stageId);
-                        // Refresh specific data if needed without full reload
                     } else {
-                        location.reload(); // Fallback on error
+                        location.reload();
                     }
                 });
             }

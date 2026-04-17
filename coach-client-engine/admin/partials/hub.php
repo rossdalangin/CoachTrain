@@ -97,12 +97,17 @@
                     global $wpdb;
                     $custom_res = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_resources WHERE user_id = %d AND visibility = 'internal' ORDER BY created_at DESC", get_current_user_id()));
                     if($custom_res): foreach($custom_res as $r): ?>
-                        <tr>
+                        <tr id="resource-row-<?php echo $r->id; ?>"
+                            data-title="<?php echo esc_attr($r->title); ?>"
+                            data-category="<?php echo esc_attr($r->category); ?>"
+                            data-type="<?php echo esc_attr($r->type); ?>"
+                            data-url="<?php echo esc_attr($r->url); ?>">
                             <td><strong><?php echo esc_html($r->title); ?></strong></td>
                             <td><?php echo esc_html($r->category); ?></td>
                             <td><?php echo esc_html($r->type); ?></td>
                             <td>
                                 <a href="<?php echo esc_url($r->url); ?>" target="_blank" class="button button-small">View</a>
+                                <button class="button button-small cce-edit-hub-resource" data-id="<?php echo $r->id; ?>">Edit</button>
                                 <button class="button button-link-delete cce-delete-hub-resource" data-id="<?php echo $r->id; ?>" style="color:#d63638;">Delete</button>
                             </td>
                         </tr>
@@ -115,6 +120,22 @@
     </div>
 
     <!-- Resource Modal -->
+    <!-- Edit Resource Modal -->
+    <div id="cce-edit-hub-resource-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:500px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Edit Resource</h2>
+            <form id="cce-edit-hub-resource-form">
+                <input type="hidden" id="edit-resource-id">
+                <p><label>Title</label><br><input type="text" id="edit-resource-title" class="widefat" required></p>
+                <p><label>Category</label><br><input type="text" id="edit-resource-category" class="widefat"></p>
+                <p><label>Type</label><br><input type="text" id="edit-resource-type" class="widefat"></p>
+                <p><label>URL</label><br><input type="url" id="edit-resource-url" class="widefat" required></p>
+                <button type="submit" class="button button-primary">Update Resource</button>
+            </form>
+        </div>
+    </div>
+
     <div id="cce-hub-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); overflow-y:auto;">
         <div style="background:#fff; margin:2% auto; padding:40px; width:800px; max-width:90%; border-radius:12px; position:relative;">
             <span id="cce-hub-modal-close" style="position:absolute; right:25px; top:20px; cursor:pointer; font-size:30px; color:#888;">&times;</span>
@@ -180,6 +201,31 @@
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
             cceApi('hub/resources', 'POST', JSON.stringify(data), function(res) {
+                if (res.success) location.reload();
+            });
+        });
+
+        $('.cce-edit-hub-resource').on('click', function() {
+            const id = $(this).data('id');
+            const $row = $('#resource-row-' + id);
+            $('#edit-resource-id').val(id);
+            $('#edit-resource-title').val($row.data('title'));
+            $('#edit-resource-category').val($row.data('category'));
+            $('#edit-resource-type').val($row.data('type'));
+            $('#edit-resource-url').val($row.data('url'));
+            $('#cce-edit-hub-resource-modal').show();
+        });
+
+        $('#cce-edit-hub-resource-form').on('submit', function(e) {
+            e.preventDefault();
+            const id = $('#edit-resource-id').val();
+            const data = {
+                title: $('#edit-resource-title').val(),
+                category: $('#edit-resource-category').val(),
+                type: $('#edit-resource-type').val(),
+                url: $('#edit-resource-url').val()
+            };
+            cceApi('hub/resources/' + id, 'POST', JSON.stringify(data), function(res) {
                 if (res.success) location.reload();
             });
         });

@@ -27,6 +27,11 @@ class CCE_Hub_Manager extends CCE_REST_Controller {
 				'callback'            => array( $this, 'delete_resource' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
+            array(
+				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
+				'callback'            => array( $this, 'update_resource' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
 		) );
 	}
 
@@ -59,6 +64,25 @@ class CCE_Hub_Manager extends CCE_REST_Controller {
         ) );
 
         return $this->success( array( 'id' => $wpdb->insert_id ) );
+    }
+
+    /**
+     * Update hub resource.
+     */
+    public function update_resource( $request ) {
+        global $wpdb;
+        $id = absint( $request['id'] );
+        $user_id = $this->get_current_user_id();
+        $params = $request->get_params();
+
+        $wpdb->update( "{$wpdb->prefix}cce_resources", array(
+            'title'    => sanitize_text_field( $params['title'] ),
+            'category' => sanitize_text_field( $params['category'] ),
+            'type'     => sanitize_text_field( $params['type'] ),
+            'url'      => esc_url_raw( $params['url'] ),
+        ), array( 'id' => $id, 'user_id' => $user_id ) );
+
+        return $this->success( array( 'message' => 'Resource updated' ) );
     }
 
     /**

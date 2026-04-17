@@ -1,6 +1,14 @@
 <div class="wrap cce-admin-wrap">
     <h1>Scheduled Consultations</h1>
+    <p class="description">Manage your coaching schedule. Leads who book a session are automatically moved to the "Booked" stage in your CRM.</p>
     <hr class="wp-header-end">
+
+    <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #ffb700;">
+        <h3>💡 Pro Tip: Pre-Call Qualification</h3>
+        <p style="font-size:12px;">Use dynamic questions to filter leads. High-ticket sessions should only be booked by qualified prospects.</p>
+        <p style="font-size:11px; color:#666;"><strong>Example:</strong> Add a question: <em>"What is your monthly budget for growth?"</em></p>
+        <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Set up your availability and add qualifying questions in the <strong>Questionnaire Builder</strong> below.</p>
+    </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <form method="get" action="">

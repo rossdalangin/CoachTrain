@@ -6,6 +6,7 @@
     <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #00a32a;">
         <h3>💡 Pro Tip: Lead Attribution</h3>
         <p style="font-size:12px;">The system automatically captures UTM parameters. Check the <strong>Analytics</strong> tab to see which ads or posts are generating your best leads.</p>
+        <p style="font-size:11px; color:#666;"><strong>Example:</strong> Use <code>?utm_source=facebook</code> in your links to track FB traffic.</p>
         <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Add a lead manually or import your list via CSV to start tracking their engagement score.</p>
     </div>
 

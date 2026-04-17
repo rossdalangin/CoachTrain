@@ -6,16 +6,29 @@ $engine = new Coach_Client_Engine();
     <p class="description">Welcome back, fellow consultant. This dashboard is your "Mission Control" for acquiring high-ticket clients. Use these metrics to identify bottlenecks in your funnel and scale your impact.</p>
 
     <?php
+    $summary = [
+        'leads_today' => 0, 'bookings_today' => 0, 'revenue_today' => 0,
+        'lead_to_client' => 0, 'pending_tasks' => [], 'revenue_history' => [],
+        'pipeline' => [
+            ['label' => 'Visitors', 'value' => 0],
+            ['label' => 'Leads', 'value' => 0],
+            ['label' => 'Bookings', 'value' => 0],
+            ['label' => 'Clients', 'value' => 0]
+        ]
+    ];
+    $activities = [];
+
     if ( class_exists( 'CCE_Analytics_Manager' ) ) {
         $analytics = new CCE_Analytics_Manager();
         $summary_res = $analytics->get_summary( new WP_REST_Request() );
-        $summary = is_wp_error($summary_res) ? [] : $summary_res->get_data()['data'];
+        if ( ! is_wp_error($summary_res) ) {
+            $summary = array_merge($summary, $summary_res->get_data()['data']);
+        }
 
         $activity_res = $analytics->get_recent_activity( new WP_REST_Request() );
-        $activities = is_wp_error($activity_res) ? [] : $activity_res->get_data()['data'];
-    } else {
-        $summary = [];
-        $activities = [];
+        if ( ! is_wp_error($activity_res) ) {
+            $activities = $activity_res->get_data()['data'];
+        }
     }
     ?>
 

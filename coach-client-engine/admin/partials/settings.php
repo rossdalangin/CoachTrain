@@ -140,6 +140,30 @@
         </div>
 
         <div id="section-licensing" class="cce-settings-section" style="display:none;">
+            <div class="cce-card" style="margin-bottom:20px;">
+                <h3>💎 Platinum Feature Gating</h3>
+                <p class="description">Active PRO licenses unlock the following elite capabilities:</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
+                    <?php
+                    $features = [
+                        'automation_rules' => 'Visual Automation Engine',
+                        'advanced_analytics' => 'Strategic 30-Day Projections',
+                        'broadcasts' => 'Tagged Email Broadcasts',
+                        'webhooks' => 'External Tool Integration',
+                        'conditional_funnels' => 'Dynamic Funnel Branching',
+                        'hub_custom' => 'Manageable Strategic Hub'
+                    ];
+                    foreach($features as $key => $label):
+                        $unlocked = CCE_License_Manager::check_feature($key);
+                    ?>
+                        <div style="display:flex; align-items:center; gap:8px; padding:10px; border:1px solid <?php echo $unlocked ? '#00a32a' : '#ddd'; ?>; border-radius:8px; background:<?php echo $unlocked ? '#f0fdf4' : '#fff'; ?>;">
+                            <span style="font-size:16px;"><?php echo $unlocked ? '✅' : '🔒'; ?></span>
+                            <span style="font-size:12px; font-weight:bold; color:<?php echo $unlocked ? '#166534' : '#666'; ?>;"><?php echo $label; ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
             <div class="cce-card">
                 <h3>How Licensing Works</h3>
                 <p>To unlock the full potential of the Coach Client Engine (PRO), you need a valid license key. License keys are tied to your account and can be managed from our official portal.</p>

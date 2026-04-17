@@ -214,6 +214,16 @@ class CCE_Sample_Data {
         // 12. Seed Email Templates
         $templates = [
             [
+                'name'    => 'VSL Masterclass: Indoctrination',
+                'subject' => 'The truth about {{dream_outcome}}...',
+                'content' => '<h1>Hey {{first_name}}!</h1><p>Most people fail at {{dream_outcome}} because they focus on the wrong things. In our VSL Masterclass, we reveal the exact process to scale with high-touch coaching.</p>'
+            ],
+            [
+                'name'    => 'Direct Sales: Immediate Win',
+                'subject' => 'I have a gift for you ({{dream_outcome}})',
+                'content' => '<h1>{{first_name}}, let\'s get straight to it.</h1><p>I know you want {{dream_outcome}}. That is why I built this direct sales framework. It is designed for speed and impact.</p>'
+            ],
+            [
                 'name'    => 'Hormozi Value Sequence #1',
                 'subject' => 'The truth about {{dream_outcome}}...',
                 'content' => '<h1>Hey {{first_name}}!</h1><p>Most people fail at {{dream_outcome}} because they focus on the wrong things. Here is the secret to increasing your likelihood of success...</p>'
