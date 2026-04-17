@@ -1,7 +1,13 @@
 <div class="wrap cce-admin-wrap">
     <h1>Automation & Workflows</h1>
-    <p class="description">Automate your business so you can focus on coaching. Link events like "Lead Captured" to actions like "Send Email" or "Move CRM Stage".</p>
+    <p class="description">Your 24/7 Digital Assistant. Set up rules to handle the "busy work" of your coaching business.</p>
     <hr class="wp-header-end">
+
+    <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #00a32a;">
+        <h3>💡 Pro Tip: Speed to Lead</h3>
+        <p style="font-size:12px;">Automate an immediate "Welcome" email for every new lead. This increases trust and conversion by up to 300%.</p>
+        <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Create a rule below: Trigger: "New Lead Captured" → Action: "Send Email".</p>
+    </div>
 
     <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
         <button class="cce-automation-tab-link active" data-tab="rules" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Automation Rules</button>

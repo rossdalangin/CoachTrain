@@ -1,7 +1,13 @@
 <div class="wrap cce-admin-wrap">
     <h1>CRM & Pipeline</h1>
-    <p class="description">Move leads across your sales pipeline. High engagement scores indicate "Hot" leads that should be contacted immediately.</p>
+    <p class="description">Your Sales Command Center. Move leads from left to right as they progress through your sales process.</p>
     <hr class="wp-header-end">
+
+    <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #ffb700;">
+        <h3>💡 Pro Tip: Lead Heat</h3>
+        <p style="font-size:12px;">The card border color indicates lead engagement: <span style="color:#d63638;">Red = HOT</span> (Active), <span style="color:#ffb700;">Yellow = WARM</span> (Engaging), <span style="color:#0073aa;">Blue = COLD</span> (New).</p>
+        <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Drag a card to the next column to update their stage and trigger automated nurture emails.</p>
+    </div>
 
     <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
         <button class="cce-crm-tab-link active" data-tab="kanban" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Pipeline</button>

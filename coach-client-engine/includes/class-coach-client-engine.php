@@ -295,6 +295,10 @@ class Coach_Client_Engine {
         $onboarding_manager = new CCE_Onboarding_Manager();
         $onboarding_manager->register_routes();
 
+        require_once $path . 'modules/hub/class-hub-manager.php';
+        $hub_manager = new CCE_Hub_Manager();
+        $hub_manager->register_routes();
+
         $proof_manager = new CCE_Proof_Manager();
         $proof_manager->register_routes();
 

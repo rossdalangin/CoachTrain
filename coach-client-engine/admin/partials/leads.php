@@ -1,7 +1,13 @@
 <div class="wrap cce-admin-wrap">
     <h1>Leads Management</h1>
-    <p class="description">Your leads are your greatest asset. Manage, tag, and import your contacts here. Use the "Status" tags to prioritize your daily outreach.</p>
+    <p class="description">Your Private Lead Database. Capture, track, and qualify every person who enters your ecosystem.</p>
     <hr class="wp-header-end">
+
+    <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #00a32a;">
+        <h3>💡 Pro Tip: Lead Attribution</h3>
+        <p style="font-size:12px;">The system automatically captures UTM parameters. Check the <strong>Analytics</strong> tab to see which ads or posts are generating your best leads.</p>
+        <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Add a lead manually or import your list via CSV to start tracking their engagement score.</p>
+    </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
         <form method="get" action="">

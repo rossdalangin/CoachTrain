@@ -1,13 +1,25 @@
 <div class="wrap cce-admin-wrap">
     <h1>Clients & Offers</h1>
+    <p class="description">Define your high-ticket coaching programs and products. Use Hormozi's Value Equation to increase your price and perceived value.</p>
     <hr class="wp-header-end">
+
+    <div class="cce-card" style="margin-bottom:20px; border-left:4px solid #0073aa;">
+        <h3>💡 Pro Tip: The Value Equation</h3>
+        <p style="font-size:12px;">To charge more, increase the <strong>Dream Outcome</strong> and <strong>Likelihood</strong>, while decreasing <strong>Time Delay</strong> and <strong>Effort</strong>. <br>Example: <em>"Scale to $10k/mo (Outcome) in 90 days (Time) with our 1-click templates (Effort)."</em></p>
+        <p style="font-size:11px; color:#666;"><strong>What's Next?</strong> Create your "Grand Slam" offer below, then link it to a Funnel step or the Client Portal.</p>
+    </div>
 
     <div class="cce-card" style="margin-bottom:30px; border-left: 4px solid #ff4136;">
         <h3>💎 Hormozi "Grand Slam" Offer Builder</h3>
         <p style="font-size:12px; color:#666;">Craft an offer so good people feel stupid saying no. Use the Value Equation below to maximize the perceived value of your coaching.</p>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <input type="hidden" name="action" value="cce_save_offer">
-            <?php wp_nonce_field('cce_save_offer_nonce'); ?>
+            <?php
+            global $wpdb;
+            $user_id = get_current_user_id();
+            $offers = $wpdb->get_results( $wpdb->prepare( "SELECT id, title FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id ) );
+            wp_nonce_field('cce_save_offer_nonce');
+            ?>
             <table class="form-table">
                 <tr>
                     <th scope="row">Offer Title</th>
@@ -95,12 +107,10 @@
         </form>
     </div>
 
-    <?php
-    global $wpdb;
-    $user_id = get_current_user_id();
-    $offers = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id ) );
-    ?>
 
+    <?php
+    $active_offers = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id ) );
+    ?>
     <h3>Active Coaching Offers</h3>
     <table class="wp-list-table widefat fixed striped">
         <thead>
@@ -112,7 +122,7 @@
             </tr>
         </thead>
         <tbody>
-            <?php if ($offers): foreach ( $offers as $offer ): ?>
+            <?php if ($active_offers): foreach ( $active_offers as $offer ): ?>
                 <tr id="offer-row-<?php echo $offer->id; ?>"
                     data-title="<?php echo esc_attr($offer->title); ?>"
                     data-price="<?php echo esc_attr($offer->price); ?>"
@@ -166,19 +176,19 @@
                 <p><label>Upsell Offer</label><br>
                     <select id="edit-offer-upsell-id" class="widefat">
                         <option value="0">None</option>
-                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        <?php foreach($active_offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
                     </select>
                 </p>
                 <p><label>Downsell Offer</label><br>
                     <select id="edit-offer-downsell-id" class="widefat">
                         <option value="0">None</option>
-                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        <?php foreach($active_offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
                     </select>
                 </p>
                 <p><label>Order Bump Offer</label><br>
                     <select id="edit-offer-order-bump-id" class="widefat">
                         <option value="0">None</option>
-                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                        <?php foreach($active_offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
                     </select>
                 </p>
                 <button type="submit" class="button button-primary">Update Offer</button>

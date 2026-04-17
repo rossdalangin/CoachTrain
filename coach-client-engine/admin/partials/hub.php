@@ -2,6 +2,12 @@
     <h1>Mastery Hub</h1>
     <p class="description">Your central library for strategic frameworks, high-ticket scripts, and marketing excellence. Use these resources to scale your impact.</p>
 
+    <div class="cce-modal-tabs" style="display:flex; border-bottom:1px solid #ddd; margin-bottom:20px;">
+        <button class="cce-hub-tab-link active" data-tab="vault" style="background:none; border:none; padding:10px 20px; cursor:pointer; border-bottom:2px solid #0073aa;">Strategy Vault</button>
+        <button class="cce-hub-tab-link" data-tab="custom" style="background:none; border:none; padding:10px 20px; cursor:pointer;">My Custom Resources</button>
+    </div>
+
+    <div id="hub-tab-vault" class="cce-hub-tab-content">
     <div style="margin-bottom:20px;">
         <input type="search" id="cce-hub-search" placeholder="Search resources (e.g. Hormozi, Sales Script)..." class="widefat" style="padding:12px; font-size:16px; border-radius:8px;">
     </div>
@@ -65,6 +71,48 @@
         </div>
 
     </div>
+    </div>
+
+    <div id="hub-tab-custom" class="cce-hub-tab-content" style="display:none;">
+        <div class="cce-card" style="margin-bottom:20px;">
+            <h3>Add Custom Strategic Resource</h3>
+            <p class="description">Add links to your own training videos, SOPs, or external documents for quick access.</p>
+            <form id="cce-add-hub-resource-form">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <input type="text" name="title" placeholder="Resource Title" required class="regular-text">
+                    <input type="text" name="category" placeholder="Category (e.g. Sales)" class="regular-text">
+                    <input type="text" name="type" placeholder="Type (e.g. Video, PDF)" class="small-text">
+                    <input type="url" name="url" placeholder="Resource URL" required class="regular-text" style="flex:1;">
+                    <button type="submit" class="button button-primary">Save Resource</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="cce-card">
+            <h3>My Saved Resources</h3>
+            <table class="wp-list-table widefat fixed striped">
+                <thead><tr><th>Title</th><th>Category</th><th>Type</th><th>Actions</th></tr></thead>
+                <tbody id="cce-hub-custom-list">
+                    <?php
+                    global $wpdb;
+                    $custom_res = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_resources WHERE user_id = %d AND visibility = 'internal' ORDER BY created_at DESC", get_current_user_id()));
+                    if($custom_res): foreach($custom_res as $r): ?>
+                        <tr>
+                            <td><strong><?php echo esc_html($r->title); ?></strong></td>
+                            <td><?php echo esc_html($r->category); ?></td>
+                            <td><?php echo esc_html($r->type); ?></td>
+                            <td>
+                                <a href="<?php echo esc_url($r->url); ?>" target="_blank" class="button button-small">View</a>
+                                <button class="button button-link-delete cce-delete-hub-resource" data-id="<?php echo $r->id; ?>" style="color:#d63638;">Delete</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; else: ?>
+                        <tr><td colspan="4">No custom resources added yet.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Resource Modal -->
     <div id="cce-hub-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); overflow-y:auto;">
@@ -119,6 +167,30 @@
         });
 
         $('#cce-hub-modal-close').on('click', () => $('#cce-hub-modal').hide());
+
+        $('.cce-hub-tab-link').on('click', function() {
+            $('.cce-hub-tab-link').removeClass('active').css('border-bottom', 'none');
+            $(this).addClass('active').css('border-bottom', '2px solid #0073aa');
+            $('.cce-hub-tab-content').hide();
+            $('#hub-tab-' + $(this).data('tab')).show();
+        });
+
+        $('#cce-add-hub-resource-form').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            cceApi('hub/resources', 'POST', JSON.stringify(data), function(res) {
+                if (res.success) location.reload();
+            });
+        });
+
+        $('.cce-delete-hub-resource').on('click', function() {
+            if (!confirm('Delete this resource?')) return;
+            const id = $(this).data('id');
+            cceApi('hub/resources/' + id, 'DELETE', {}, function() {
+                location.reload();
+            });
+        });
 
         $('#cce-hub-search').on('input', function() {
             const term = $(this).val().toLowerCase();

@@ -1,3 +1,6 @@
+<?php
+$engine = new Coach_Client_Engine();
+?>
 <div class="wrap cce-admin-wrap">
     <h1>Coach Client Engine - Dashboard <?php if($engine->is_pro()) echo '<span style="background:linear-gradient(45deg, #e5e7eb, #94a3b8); color:#1e293b; font-size:10px; padding:3px 8px; border-radius:10px; vertical-align:middle; margin-left:10px; border:1px solid #cbd5e1;">PLATINUM</span>'; ?></h1>
     <p class="description">Welcome back, fellow consultant. This dashboard is your "Mission Control" for acquiring high-ticket clients. Use these metrics to identify bottlenecks in your funnel and scale your impact.</p>

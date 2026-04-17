@@ -1,6 +1,6 @@
 jQuery(document).ready(function($) {
     // Shared AJAX Helper
-    function cceApi(endpoint, method, data, success) {
+    window.cceApi = function(endpoint, method, data, success) {
         const ajaxSettings = {
             url: cceAdmin.restUrl + endpoint,
             method: method,
@@ -882,6 +882,9 @@ jQuery(document).ready(function($) {
                 cceApi('crm/leads/' + leadId + '/stage', 'POST', { stage_id: stageId }, function(res) {
                     if (res.success) {
                         console.log('Lead moved to stage:', stageId);
+                        // Refresh specific data if needed without full reload
+                    } else {
+                        location.reload(); // Fallback on error
                     }
                 });
             }

@@ -60,6 +60,11 @@ class CCE_Sample_Data {
                 ['title' => 'Inner Circle Membership', 'price' => 97, 'outcome' => 'Weekly Coaching & Community', 'likelihood' => 'Direct access to mentors'],
                 ['title' => 'Scaling Accelerator', 'price' => 2997, 'outcome' => 'Intensive 12-week shift', 'likelihood' => 'Curated curriculum']
             ];
+        } elseif ($model_type === 'tripwire') {
+            $offers = [
+                ['title' => 'The $27 Masterclass', 'price' => 27, 'outcome' => 'Immediate Win', 'likelihood' => 'Proven Tutorial'],
+                ['title' => 'Fast-Track Implementation', 'price' => 297, 'outcome' => 'Full Setup', 'likelihood' => 'Expert Help']
+            ];
         } else {
             $offers = [
                 ['title' => 'Elite Business Coaching', 'price' => 5000, 'outcome' => 'Scale to $10k/mo in 90 days', 'likelihood' => '90% success rate with verified case studies'],
@@ -96,6 +101,10 @@ class CCE_Sample_Data {
             $funnels = [
                 ['title' => 'Membership Enrollment', 'type' => 'Squeeze', 'steps' => ['Sales Page', 'Checkout', 'Upsell', 'Welcome']],
                 ['title' => 'Value Ladder Webinar', 'type' => 'Webinar', 'steps' => ['Registration', 'Broadast', 'Offer', 'Confirmation']]
+            ];
+        } elseif ( $model_type === 'tripwire' ) {
+            $funnels = [
+                ['title' => 'Low-Ticket Entry Funnel', 'type' => 'tripwire', 'steps' => ['Sales Page', 'Checkout', 'Upsell', 'Success']]
             ];
         } else {
             $funnels = [

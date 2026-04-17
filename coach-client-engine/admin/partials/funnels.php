@@ -61,23 +61,33 @@
     </div>
 
     <div class="cce-card" style="margin-top:20px;">
-        <h3>Pre-built Templates</h3>
+        <h3>Strategic Funnel Templates</h3>
         <p style="font-size:12px; color:#666;">Each template is designed based on Russell Brunson's DotCom Secrets frameworks for maximum conversion.</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-top:15px;">
-            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #0073aa;">
-                <h4>🧲 Lead Magnet Funnel</h4>
-                <p style="font-size:11px;">Best for building your email list. Exchange a free PDF or video for their contact info.</p>
-                <button class="button button-primary cce-use-template" data-template="lead_magnet">Use Template</button>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #0073aa; padding:20px;">
+                <h4 style="margin-top:0;">🧲 Lead Magnet</h4>
+                <p style="font-size:11px; height:40px;">Exchange a PDF for contact info. <br><strong>Step:</strong> Opt-in → Thank You</p>
+                <button class="button button-primary cce-use-template" data-template="lead_magnet" style="width:100%;">Deploy</button>
             </div>
-            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #ffb700;">
-                <h4>📅 Consultation Funnel</h4>
-                <p style="font-size:11px;">The gold standard for high-ticket coaches. Application -> Booking -> Sales Call.</p>
-                <button class="button button-primary cce-use-template" data-template="consultation">Use Template</button>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #ffb700; padding:20px;">
+                <h4 style="margin-top:0;">📅 Consultation</h4>
+                <p style="font-size:11px; height:40px;">The High-Ticket Standard. <br><strong>Steps:</strong> App → Booking → Success</p>
+                <button class="button button-primary cce-use-template" data-template="consultation" style="width:100%;">Deploy</button>
             </div>
-            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #673ab7;">
-                <h4>🎥 Webinar Funnel</h4>
-                <p style="font-size:11px;">Automated selling at scale. Teach for 45 mins then pitch your program.</p>
-                <button class="button button-primary cce-use-template" data-template="webinar">Use Template</button>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #673ab7; padding:20px;">
+                <h4 style="margin-top:0;">🎥 Webinar</h4>
+                <p style="font-size:11px; height:40px;">Automated Selling. <br><strong>Steps:</strong> Reg → VSL → Booking → Pay</p>
+                <button class="button button-primary cce-use-template" data-template="webinar" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #d63638; padding:20px;">
+                <h4 style="margin-top:0;">💎 High-Ticket VSL</h4>
+                <p style="font-size:11px; height:40px;">Hormozi style direct selling. <br><strong>Steps:</strong> Opt-in → VSL → Booking → Success</p>
+                <button class="button button-primary cce-use-template" data-template="vsl" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #22c55e; padding:20px;">
+                <h4 style="margin-top:0;">🎣 Tripwire</h4>
+                <p style="font-size:11px; height:40px;">Low-ticket entry. <br><strong>Steps:</strong> Sales → Pay → Upsell → Success</p>
+                <button class="button button-primary cce-use-template" data-template="tripwire" style="width:100%;">Deploy</button>
             </div>
         </div>
     </div>
