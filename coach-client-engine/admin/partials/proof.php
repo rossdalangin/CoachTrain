@@ -5,7 +5,9 @@
 
     <div class="cce-card" style="margin-bottom: 20px;">
         <h3>Add New Testimonial / Case Study</h3>
-        <form id="cce-add-testimonial-form">
+        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
+            <input type="hidden" name="action" value="cce_save_testimonial">
+            <?php wp_nonce_field('cce_save_testimonial_nonce'); ?>
             <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
                 <div>
                     <label>Type</label><br>

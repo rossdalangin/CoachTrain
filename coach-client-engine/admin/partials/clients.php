@@ -80,8 +80,13 @@
                     <td>
                         <select name="upsell_offer_id" class="regular-text">
                             <option value="0">None</option>
-                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                            <?php
+                            if ($offers) {
+                                foreach($offers as $o) echo "<option value='{$o->id}'>" . esc_html($o->title) . "</option>";
+                            }
+                            ?>
                         </select>
+                        <p class="description">Select an offer to show as an upsell after the main purchase.</p>
                     </td>
                 </tr>
                 <tr>
@@ -89,8 +94,13 @@
                     <td>
                         <select name="downsell_offer_id" class="regular-text">
                             <option value="0">None</option>
-                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                            <?php
+                            if ($offers) {
+                                foreach($offers as $o) echo "<option value='{$o->id}'>" . esc_html($o->title) . "</option>";
+                            }
+                            ?>
                         </select>
+                        <p class="description">Select an offer to show if the user declines the upsell.</p>
                     </td>
                 </tr>
                 <tr>
@@ -98,8 +108,13 @@
                     <td>
                         <select name="order_bump_offer_id" class="regular-text">
                             <option value="0">None</option>
-                            <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                            <?php
+                            if ($offers) {
+                                foreach($offers as $o) echo "<option value='{$o->id}'>" . esc_html($o->title) . "</option>";
+                            }
+                            ?>
                         </select>
+                        <p class="description">Select a small add-on offer to show on the checkout page.</p>
                     </td>
                 </tr>
             </table>

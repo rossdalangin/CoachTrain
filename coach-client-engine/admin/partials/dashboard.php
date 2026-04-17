@@ -123,8 +123,8 @@ $engine = new Coach_Client_Engine();
                     <ul style="list-style:none; padding:0; margin:0;">
                         <?php foreach($activities as $a): ?>
                             <li style="font-size:12px; padding:8px 0; border-bottom:1px solid #eee;">
-                                <strong><?php echo esc_html($a['lead_name'] ?: 'System'); ?>:</strong> <?php echo esc_html($a['description']); ?>
-                                <br><small style="color:#888;"><?php echo esc_html($a['created_at']); ?></small>
+                                <strong><?php echo esc_html($a->lead_name ?: 'System'); ?>:</strong> <?php echo esc_html($a->description); ?>
+                                <br><small style="color:#888;"><?php echo esc_html($a->created_at); ?></small>
                             </li>
                         <?php endforeach; ?>
                     </ul>

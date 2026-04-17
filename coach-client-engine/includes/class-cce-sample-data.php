@@ -19,7 +19,8 @@ class CCE_Sample_Data {
                 'stage_order' => $idx
             ) );
         }
-        $new_stage_id = $wpdb->insert_id - 5; // Approximate first stage ID
+        // Get the actual first stage ID for the user
+        $new_stage_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC LIMIT 1", $user_id));
 
         // 2. Seed Leads
         $leads = [
@@ -44,11 +45,13 @@ class CCE_Sample_Data {
         $offers = [];
         if ($model_type === 'hormozi') {
             $offers = [
-                ['title' => 'Hormozi Grand Slam Offer', 'price' => 5000, 'outcome' => 'The $100M Result', 'likelihood' => 'Unbeatable Guarantee']
+                ['title' => 'The $100M Mastermind', 'price' => 10000, 'outcome' => 'Scale to $1M/mo Profit', 'likelihood' => 'Proven by 100+ entrepreneurs', 'effort' => 'Done-with-you implementation', 'time' => '12 Months'],
+                ['title' => 'Grand Slam Offer Workshop', 'price' => 497, 'outcome' => 'Create your irresistible offer', 'likelihood' => 'Step-by-step workbook', 'effort' => '4 hours of work', 'time' => 'Immediate']
             ];
         } elseif ($model_type === 'brunson') {
             $offers = [
-                ['title' => 'Webinar Special Stack', 'price' => 997, 'outcome' => 'Funnel Mastery', 'likelihood' => 'Step-by-step framework']
+                ['title' => 'The Expert Secrets Stack', 'price' => 997, 'outcome' => 'Launch your message to millions', 'likelihood' => 'Perfect Webinar Script included', 'effort' => 'No tech skills needed', 'time' => '30 Days'],
+                ['title' => 'Inner Circle Mastermind', 'price' => 25000, 'outcome' => 'Total Funnel Mastery', 'likelihood' => 'Direct access to Russell', 'effort' => 'Quarterly in-person meetings', 'time' => '1 Year']
             ];
         } elseif ($model_type === 'agency') {
             $offers = [
@@ -71,6 +74,7 @@ class CCE_Sample_Data {
                 ['title' => 'Grand Slam Offer Workshop', 'price' => 497, 'outcome' => 'Create your irresistible offer in 4 hours', 'likelihood' => 'Step-by-step proven frameworks']
             ];
         }
+        $offer_ids = [];
         foreach ( $offers as $o ) {
             $wpdb->insert( "{$wpdb->prefix}cce_offers", array(
                 'user_id'              => $user_id,
@@ -78,8 +82,16 @@ class CCE_Sample_Data {
                 'price'                => $o['price'],
                 'dream_outcome'        => $o['outcome'],
                 'perceived_likelihood' => $o['likelihood'],
+                'effort_sacrifice'     => $o['effort'] ?? '',
+                'time_delay'           => $o['time'] ?? '',
                 'type'                 => 'one-time'
             ) );
+            $offer_ids[] = $wpdb->insert_id;
+        }
+
+        // Link Upsells/Downsells for Hormozi/Brunson models
+        if (count($offer_ids) >= 2) {
+            $wpdb->update("{$wpdb->prefix}cce_offers", ['upsell_offer_id' => $offer_ids[1]], ['id' => $offer_ids[0]]);
         }
 
         // 4. Seed Funnels

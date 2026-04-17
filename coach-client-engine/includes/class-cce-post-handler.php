@@ -6,6 +6,7 @@ class CCE_Post_Handler {
 
 	public function init() {
 		add_action( 'admin_post_cce_save_offer', array( $this, 'save_offer' ) );
+        add_action( 'admin_post_cce_save_testimonial', array( $this, 'save_testimonial' ) );
         add_action( 'admin_post_cce_save_lead', array( $this, 'save_lead' ) );
         add_action( 'admin_post_cce_save_booking', array( $this, 'save_booking' ) );
         add_action( 'admin_post_cce_export_leads', array( $this, 'export_leads' ) );
@@ -76,6 +77,29 @@ class CCE_Post_Handler {
 		wp_redirect( admin_url( 'admin.php?page=cce-clients&message=1' ) );
 		exit;
 	}
+
+    /**
+     * Save testimonial.
+     */
+    public function save_testimonial() {
+        if ( ! current_user_can( 'manage_options' ) ) wp_die( 'Unauthorized' );
+        check_admin_referer( 'cce_save_testimonial_nonce' );
+
+        global $wpdb;
+        $wpdb->insert( "{$wpdb->prefix}cce_testimonials", array(
+            'user_id'     => get_current_user_id(),
+            'type'        => sanitize_text_field( $_POST['type'] ),
+            'title'       => sanitize_text_field( $_POST['title'] ),
+            'client_name' => sanitize_text_field( $_POST['client_name'] ),
+            'content'     => sanitize_textarea_field( $_POST['content'] ),
+            'rating'      => absint( $_POST['rating'] ),
+            'status'      => 'active',
+            'created_at'  => current_time( 'mysql' ),
+        ) );
+
+        wp_redirect( admin_url( 'admin.php?page=cce-proof&message=1' ) );
+        exit;
+    }
 
     /**
      * Save lead.

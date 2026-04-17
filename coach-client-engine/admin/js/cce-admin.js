@@ -142,7 +142,7 @@ jQuery(document).ready(function($) {
             content: $('#edit-testimonial-content').val(),
             rating: $('#edit-testimonial-rating').val()
         };
-        cceApi('proof/testimonials/' + (id || ''), 'POST', JSON.stringify(data), function(res) {
+        cceApi('proof/testimonials/' + id, 'POST', JSON.stringify(data), function(res) {
             if(res.success) location.reload();
         });
     });
