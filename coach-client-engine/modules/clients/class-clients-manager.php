@@ -65,7 +65,7 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
     public function update_offer( $request ) {
         global $wpdb;
         $id = absint( $request['id'] );
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $data = array(
             'title'                => sanitize_text_field( $params['title'] ),
@@ -105,7 +105,7 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
      */
     public function import_offer( $request ) {
         global $wpdb;
-        $data = $request->get_json_params();
+        $data = $this->get_params( $request );
         $user_id = $this->get_current_user_id();
 
         if ( empty( $data['offer'] ) ) return $this->error( 'Invalid export data' );
@@ -178,7 +178,7 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
 	 * Create offer.
 	 */
 	public function create_offer( $request ) {
-		$params = $request->get_params();
+		$params = $this->get_params( $request );
 		$offer_model = new CCE_Offer_Model();
         $user_id = $this->get_current_user_id();
 

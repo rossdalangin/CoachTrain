@@ -289,7 +289,7 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         global $wpdb;
         $lead_id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $stage_id = absint( $request['stage_id'] );
+        $params = $this->get_params( $request ); $stage_id = absint( $params['stage_id'] );
 
         $wpdb->update( "{$wpdb->prefix}cce_leads", array( 'crm_stage_id' => $stage_id ), array( 'id' => $lead_id, 'user_id' => $user_id ) );
 

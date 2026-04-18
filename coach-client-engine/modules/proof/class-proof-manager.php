@@ -53,7 +53,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
         global $wpdb;
         $id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $wpdb->update( "{$wpdb->prefix}cce_testimonials", array(
             'type'        => sanitize_text_field( $params['type'] ?? 'testimonial' ),
@@ -97,7 +97,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
     public function create_testimonial( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $data = array(
             'user_id'     => $user_id,

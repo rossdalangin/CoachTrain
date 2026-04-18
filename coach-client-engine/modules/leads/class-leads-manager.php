@@ -121,7 +121,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         global $wpdb;
         $id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $data = array(
             'first_name' => sanitize_text_field( $params['first_name'] ),
@@ -144,7 +144,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
     public function handle_bulk_action( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
         $ids = $params['ids'] ?? [];
         $action = $params['bulk_action'] ?? '';
 
@@ -224,7 +224,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'cce_leads';
 
-		$params = $request->get_params();
+		$params = $this->get_params( $request );
         $user_id = absint( $params['user_id'] ?? 0 );
 
         $source = $_COOKIE['cce_funnel_source'] ?? 'Direct';

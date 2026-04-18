@@ -60,7 +60,7 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
     public function create_resource( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $result = $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
             'user_id'    => $user_id,

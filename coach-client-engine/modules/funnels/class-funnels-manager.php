@@ -107,7 +107,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
      */
     public function import_funnel( $request ) {
         global $wpdb;
-        $data = $request->get_json_params();
+        $data = $this->get_params( $request );
         $user_id = $this->get_current_user_id();
 
         if ( empty( $data['funnel'] ) || empty( $data['steps'] ) ) {
@@ -192,7 +192,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function create_from_template( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $template_id = sanitize_text_field( $request->get_param( 'template_id' ) );
+        $params = $this->get_params( $request ); $template_id = sanitize_text_field( $params['template_id'] );
 
         $title = 'New ' . ucwords( str_replace( '_', ' ', $template_id ) );
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
@@ -265,6 +265,13 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         $user_id = $this->get_current_user_id();
         $table_name = $wpdb->prefix . 'cce_funnel_steps';
         $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE funnel_id = %d AND user_id = %d ORDER BY step_order ASC", $funnel_id, $user_id ) );
+
+        if ( ! empty( $steps ) ) {
+            foreach ( $steps as &$step ) {
+                $step->config = json_decode( $step->config );
+            }
+        }
+
         return $this->success( $steps );
     }
 
@@ -275,7 +282,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         global $wpdb;
         $funnel_id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $steps = $request->get_param( 'steps' );
+        $params = $this->get_params( $request ); $steps = $params['steps'] ?? array();
         $table_name = $wpdb->prefix . 'cce_funnel_steps';
 
         // Simplified: Delete and re-insert for this version
@@ -327,7 +334,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'cce_funnels';
 
-		$params = $request->get_params();
+		$params = $this->get_params( $request );
         $user_id = $this->get_current_user_id();
 
 		$data = array(

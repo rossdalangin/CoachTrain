@@ -190,7 +190,7 @@ class Coach_Client_Engine {
                 'methods'             => 'GET',
                 'callback'            => function( $request ) {
                     $file = sanitize_text_field( $request->get_param('file') );
-                    $path = plugin_dir_path( __FILE__ ) . '../marketing/' . $file;
+                    $path = plugin_dir_path( dirname( __FILE__ ) ) . 'marketing/' . $file;
                     if ( ! file_exists( $path ) ) return new WP_Error('not_found', 'File not found at ' . $path);
 
                     $content = file_get_contents( $path );
@@ -234,7 +234,7 @@ class Coach_Client_Engine {
                 'methods'             => 'POST',
                 'callback'            => function( $request ) {
                     $user_id = get_current_user_id();
-                    $params = $request->get_params();
+                    $params = $request->get_json_params() ?: $request->get_params();
                     if ( isset( $params['license_key'] ) ) {
                         update_user_meta( $user_id, 'cce_license_key', sanitize_text_field( $params['license_key'] ) );
                     }

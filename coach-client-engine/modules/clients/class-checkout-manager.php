@@ -31,7 +31,7 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
     public function create_manual_payment( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
 
         $wpdb->insert( "{$wpdb->prefix}cce_payments", array(
             'user_id'        => $user_id,
@@ -55,7 +55,7 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
 	 */
 	public function process_payment( $request ) {
 		global $wpdb;
-		$params = $request->get_params();
+		$params = $this->get_params( $request );
 
 		$offer_id = absint( $params['offer_id'] );
 		$lead_id = absint( $params['lead_id'] );

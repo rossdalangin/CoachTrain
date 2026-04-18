@@ -55,4 +55,15 @@ abstract class CCE_REST_Controller extends WP_REST_Controller {
     public function get_current_user_id() {
         return get_current_user_id();
     }
+
+    /**
+     * Get request parameters, prioritizing JSON.
+     */
+    public function get_params( $request ) {
+        $params = $request->get_json_params();
+        if ( empty( $params ) ) {
+            $params = $request->get_params();
+        }
+        return $params;
+    }
 }

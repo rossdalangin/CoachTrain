@@ -54,7 +54,7 @@ class CCE_Questions_Manager extends CCE_REST_Controller {
     public function create_question( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $request->get_params();
+        $params = $this->get_params( $request );
         $order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(question_order) FROM {$wpdb->prefix}cce_questions WHERE user_id = %d", $user_id ) ) + 1;
 
         $wpdb->insert( "{$wpdb->prefix}cce_questions", array(

@@ -105,7 +105,7 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'cce_bookings';
 
-		$params = $request->get_params();
+		$params = $this->get_params( $request );
         $user_id = absint( $params['user_id'] ?? 0 );
 
         if ( ! $user_id ) {
