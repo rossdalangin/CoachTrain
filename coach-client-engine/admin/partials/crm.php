@@ -15,6 +15,16 @@
     </div>
 
     <div id="crm-tab-kanban" class="cce-crm-tab-content">
+        <div style="margin-bottom:20px; display:flex; gap:15px; align-items:center;">
+            <input type="text" id="cce-crm-search" placeholder="Search leads by name, email or tag..." style="flex:1; padding:10px; border-radius:8px;">
+            <select id="cce-crm-filter-status" style="padding:10px; border-radius:8px;">
+                <option value="">All Statuses</option>
+                <option value="cold">Cold</option>
+                <option value="warm">Warm</option>
+                <option value="hot">Hot</option>
+            </select>
+        </div>
+
         <div class="cce-card" style="margin-bottom: 30px; border-bottom: 4px solid #673ab7;">
             <h3>📊 Sales Pipeline Visibility</h3>
             <div style="display:flex; justify-content:space-between; align-items:flex-end; height:100px; gap:5px; padding-top:20px;">
@@ -55,21 +65,58 @@
         $stages = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC", $user_id ) );
         ?>
 
-        <div class="cce-kanban-wrapper" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
+        <div class="cce-kanban-wrapper" id="cce-kanban-stages-sortable" style="display:flex; gap:20px; overflow-x:auto; padding-bottom:30px;">
             <?php
             $analytics = new CCE_Analytics_Manager();
+            $projections = $analytics->get_projections();
+            $aov = $projections['aov'] ?: 5000;
+
+            // Define weights for pipeline value
+            $weights = [
+                'New' => 0.05,
+                'Contacted' => 0.15,
+                'Booking Scheduled' => 0.40,
+                'Booked' => 0.40,
+                'Consultation Done' => 0.75,
+                'Closed - Won' => 1.0,
+                'Closed' => 1.0
+            ];
+
             foreach ( $stages as $stage ):
+                $stage_leads = $wpdb->get_results( $wpdb->prepare( "SELECT id, first_name, last_name, tags, status FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
+                $count = count($stage_leads);
+                $weight = 0.1; // Default
+                foreach($weights as $key => $val) {
+                    if (stripos($stage->name, $key) !== false) { $weight = $val; break; }
+                }
+                $pipeline_val = $count * $aov * $weight;
             ?>
-                <div class="kanban-column" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
-                    <h3 style="margin-top:0; color:#4a5568;"><?php echo esc_html( $stage->name ); ?></h3>
+                <div class="kanban-column cce-kanban-stage" data-id="<?php echo $stage->id; ?>" style="min-width:280px; background:#e2e8f0; border-radius:10px; padding:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3 style="margin:0; color:#4a5568; cursor:grab;"><?php echo esc_html( $stage->name ); ?></h3>
+                        <span style="font-size:10px; background:#cbd5e0; padding:2px 6px; border-radius:10px; font-weight:bold;"><?php echo $count; ?></span>
+                    </div>
+                    <div style="font-size:11px; color:#718096; margin-bottom:15px; border-bottom:1px solid #cbd5e0; padding-bottom:5px;">
+                        Est. Value: <strong><?php echo $currency_symbol . number_format($pipeline_val, 0); ?></strong>
+                    </div>
+
                     <div class="kanban-cards cce-kanban-column" data-stage-id="<?php echo $stage->id; ?>" style="min-height:100px;">
                         <?php
-                        $leads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
-                        if ($leads): foreach ( $leads as $lead ):
+                        if ($stage_leads): foreach ( $stage_leads as $lead ):
                             $engagement_score = $analytics->calculate_engagement_score( $lead->id );
                             $heat_color = $engagement_score > 50 ? '#d63638' : ($engagement_score > 20 ? '#ffb700' : '#0073aa');
+
+                            $last_activity = $wpdb->get_var($wpdb->prepare("SELECT created_at FROM {$wpdb->prefix}cce_activity_log WHERE lead_id = %d ORDER BY created_at DESC LIMIT 1", $lead->id));
+                            $days_ago = $last_activity ? round((time() - strtotime($last_activity)) / DAY_IN_SECONDS) : '∞';
                         ?>
-                            <div class="cce-card cce-kanban-card" data-lead-id="<?php echo $lead->id; ?>" style="margin-bottom:10px; border-top:none; border-left:4px solid <?php echo $heat_color; ?>; padding:15px; cursor:move; background:#fff;">
+                            <div class="cce-card cce-kanban-card"
+                                 data-lead-id="<?php echo $lead->id; ?>"
+                                 data-search-text="<?php echo esc_attr(strtolower($lead->first_name . ' ' . $lead->last_name . ' ' . $lead->tags)); ?>"
+                                 data-status="<?php echo esc_attr($lead->status); ?>"
+                                 style="margin-bottom:10px; border-top:none; border-left:4px solid <?php echo $heat_color; ?>; padding:15px; cursor:move; background:#fff; position:relative;">
+
+                                <span title="Days since last activity" style="position:absolute; right:10px; bottom:10px; font-size:9px; color:<?php echo $days_ago > 3 ? '#d63638' : '#888'; ?>;"><?php echo $days_ago; ?>d ago</span>
+
                                 <div style="display:flex; justify-content:space-between; align-items:start;">
                                     <div>
                                         <strong><?php echo esc_html( $lead->first_name . ' ' . $lead->last_name ); ?></strong>
@@ -253,6 +300,33 @@ jQuery(document).ready(function($) {
         $(this).addClass('active').css('border-bottom', '2px solid #0073aa');
         $('.cce-crm-tab-content').hide();
         $('#crm-tab-' + $(this).data('tab')).show();
+    });
+
+    // CRM Real-time Filtering
+    $('#cce-crm-search, #cce-crm-filter-status').on('input change', function() {
+        const term = $('#cce-crm-search').val().toLowerCase();
+        const status = $('#cce-crm-filter-status').val();
+
+        $('.cce-kanban-card').each(function() {
+            const text = $(this).data('search-text');
+            const leadStatus = $(this).data('status');
+            const matchesSearch = text.includes(term);
+            const matchesStatus = !status || leadStatus === status;
+
+            $(this).toggle(matchesSearch && matchesStatus);
+        });
+    });
+
+    // Stage Reordering
+    $('#cce-kanban-stages-sortable').sortable({
+        items: '.cce-kanban-stage',
+        handle: 'h3',
+        update: function() {
+            const stageIds = $(this).sortable('toArray', { attribute: 'data-id' });
+            cceApi('crm/stages/reorder', 'POST', { stage_ids: stageIds }, function(res) {
+                if(res.success) console.log('Stages reordered');
+            });
+        }
     });
 });
 </script>

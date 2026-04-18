@@ -23,7 +23,7 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.cce-edit-template', function() {
-        const id = $(this).data('id');
+        const id = $(this).attr('data-id');
         const $row = $('#template-row-' + id);
         $('#edit-template-id').val(id);
         $('#edit-template-name').val($row.data('name'));
@@ -41,12 +41,13 @@ jQuery(document).ready(function($) {
             content: $('#edit-template-content').val()
         };
         cceApi('automation/templates/' + id, 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
 
     $(document).on('click', '.cce-edit-rule', function() {
-        const id = $(this).data('rule-id');
+        const id = $(this).attr('data-rule-id');
         const $row = $('#rule-row-' + id);
         const config = $row.data('config');
 
@@ -103,12 +104,13 @@ jQuery(document).ready(function($) {
         };
         // Reuse create rule endpoint if it supports ID or create a new one
         cceApi('automation/rules/' + id, 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
 
     $(document).on('click', '.cce-edit-testimonial', function() {
-        const id = $(this).data('id');
+        const id = $(this).attr('data-id');
         const $row = $('#testimonial-row-' + id);
         $('#edit-testimonial-id').val(id);
         $('#edit-testimonial-type').val($row.data('type'));
@@ -124,6 +126,7 @@ jQuery(document).ready(function($) {
         const formData = new FormData(this);
         const data = Object.fromEntries(formData.entries());
         cceApi('proof/testimonials', 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
@@ -139,6 +142,7 @@ jQuery(document).ready(function($) {
             rating: $('#edit-testimonial-rating').val()
         };
         cceApi('proof/testimonials/' + id, 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
@@ -151,7 +155,7 @@ jQuery(document).ready(function($) {
 
     $('.cce-delete-stage').on('click', function() {
         if(!confirm('Delete stage? leads in this stage will be orphaned.')) return;
-        cceApi('crm/stages/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+        cceApi('crm/stages/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
     });
 
     // CRM: Tabs
@@ -165,7 +169,7 @@ jQuery(document).ready(function($) {
     // CRM: View Details (Notes/Tasks/Contact/Stats)
     $(document).on('click', '.cce-view-notes, .cce-view-tasks, .cce-contact-btn', function(e) {
         e.preventDefault();
-        const leadId = $(this).data('lead-id');
+        const leadId = $(this).attr('data-lead-id');
         const leadName = $(this).data('lead-name');
         let initialTab = 'notes';
         if ($(this).hasClass('cce-view-tasks')) initialTab = 'tasks';
@@ -251,8 +255,8 @@ jQuery(document).ready(function($) {
     }
 
     $(document).on('change', '.cce-toggle-milestone', function() {
-        const leadId = $(this).data('lead-id');
-        const id = $(this).data('id');
+        const leadId = $(this).attr('data-lead-id');
+        const id = $(this).attr('data-id');
         const completed = $(this).is(':checked') ? 1 : 0;
         cceApi('crm/leads/' + leadId + '/milestones/' + id, 'POST', { is_completed: completed }, function() {
             loadMilestones(leadId);
@@ -261,8 +265,8 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-milestone', function() {
         if(!confirm('Delete milestone?')) return;
-        const leadId = $(this).data('lead-id');
-        const id = $(this).data('id');
+        const leadId = $(this).attr('data-lead-id');
+        const id = $(this).attr('data-id');
         cceApi('crm/leads/' + leadId + '/milestones/' + id, 'DELETE', {}, function() {
             loadMilestones(leadId);
         });
@@ -303,7 +307,7 @@ jQuery(document).ready(function($) {
 
     // CRM: Toggle Task
     $(document).on('change', '.cce-toggle-task', function() {
-        const leadId = $(this).data('lead-id');
+        const leadId = $(this).attr('data-lead-id');
         const taskId = $(this).data('task-id');
         const status = $(this).is(':checked') ? 'completed' : 'pending';
         cceApi('crm/leads/' + leadId + '/tasks/' + taskId, 'POST', { status: status }, function(res) {
@@ -313,7 +317,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-task', function() {
         if(!confirm('Delete task?')) return;
-        const leadId = $(this).data('lead-id');
+        const leadId = $(this).attr('data-lead-id');
         const taskId = $(this).data('task-id');
         cceApi('crm/leads/' + leadId + '/tasks/' + taskId, 'DELETE', {}, function() {
             loadTasks(leadId);
@@ -373,18 +377,20 @@ jQuery(document).ready(function($) {
 
     // CRM: Stage Update
     $(document).on('change', '.cce-stage-select', function() {
-        const leadId = $(this).data('lead-id');
+        const leadId = $(this).attr('data-lead-id');
         const stageId = $(this).val();
         cceApi('crm/leads/' + leadId + '/stage', 'POST', { stage_id: stageId }, function(res) {
+
             if (res.success) location.reload();
         });
     });
 
     // CRM: Status Toggle
     $(document).on('change', '.cce-status-toggle', function() {
-        const leadId = $(this).data('lead-id');
+        const leadId = $(this).attr('data-lead-id');
         const status = $(this).val();
         cceApi('leads/' + leadId + '/status', 'POST', { status: status }, function(res) {
+
             if (res.success) location.reload();
         });
     });
@@ -406,6 +412,7 @@ jQuery(document).ready(function($) {
         if (action === 'delete' && !confirm('Are you sure you want to delete ' + ids.length + ' leads?')) return;
 
         cceApi('leads/bulk', 'POST', { bulk_action: action, ids: ids }, function(res) {
+
             if (res.success) location.reload();
         });
     });
@@ -413,42 +420,42 @@ jQuery(document).ready(function($) {
     // Generic Actions
     $('.cce-delete-funnel').on('click', function() {
         if(!confirm('Delete funnel?')) return;
-        cceApi('funnels/' + $(this).data('funnel-id'), 'DELETE', {}, () => location.reload());
+        cceApi('funnels/' + $(this).attr('data-funnel-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-duplicate-funnel').on('click', function() {
         if(!confirm('Duplicate this funnel?')) return;
-        cceApi('funnels/' + $(this).data('funnel-id') + '/duplicate', 'POST', {}, () => location.reload());
+        cceApi('funnels/' + $(this).attr('data-funnel-id') + '/duplicate', 'POST', {}, () => location.reload());
     });
 
     $('.cce-delete-lead').on('click', function() {
         if(!confirm('Delete lead?')) return;
-        cceApi('leads/' + $(this).data('lead-id'), 'DELETE', {}, () => location.reload());
+        cceApi('leads/' + $(this).attr('data-lead-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-delete-offer').on('click', function() {
         if(!confirm('Delete offer?')) return;
-        cceApi('offers/' + $(this).data('offer-id'), 'DELETE', {}, () => location.reload());
+        cceApi('offers/' + $(this).attr('data-offer-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-duplicate-offer').on('click', function() {
         if(!confirm('Duplicate this offer?')) return;
-        cceApi('offers/' + $(this).data('offer-id') + '/duplicate', 'POST', {}, () => location.reload());
+        cceApi('offers/' + $(this).attr('data-offer-id') + '/duplicate', 'POST', {}, () => location.reload());
     });
 
     $('.cce-delete-resource').on('click', function() {
         if(!confirm('Delete resource?')) return;
-        cceApi('portal/resources/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+        cceApi('portal/resources/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-delete-testimonial').on('click', function() {
         if(!confirm('Delete testimonial?')) return;
-        cceApi('proof/testimonials/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+        cceApi('proof/testimonials/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('.cce-delete-template').on('click', function() {
         if(!confirm('Delete template?')) return;
-        cceApi('automation/templates/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+        cceApi('automation/templates/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
     });
 
     $('#cce-broadcast-form').on('submit', function(e) {
@@ -471,7 +478,7 @@ jQuery(document).ready(function($) {
     });
 
     $('.cce-edit-lead').on('click', function() {
-        const id = $(this).data('lead-id');
+        const id = $(this).attr('data-lead-id');
         const $row = $('#lead-row-' + id);
         $('#edit-lead-id').val(id);
         $('#edit-lead-first-name').val($row.data('first-name'));
@@ -494,12 +501,13 @@ jQuery(document).ready(function($) {
             tags: $('#edit-lead-tags').val()
         };
         cceApi('leads/' + id, 'POST', data, function(res) {
+
             if(res.success) location.reload();
         });
     });
 
     $('.cce-edit-offer').on('click', function() {
-        const id = $(this).data('offer-id');
+        const id = $(this).attr('data-offer-id');
         const $row = $('#offer-row-' + id);
         $('#edit-offer-id').val(id);
         $('#edit-offer-title').val($row.data('title'));
@@ -531,25 +539,26 @@ jQuery(document).ready(function($) {
             order_bump_offer_id: $('#edit-offer-order-bump-id').val()
         };
         cceApi('offers/' + id, 'POST', data, function(res) {
+
             if(res.success) location.reload();
         });
     });
 
     $('.cce-booking-action').on('click', function() {
-        const id = $(this).data('booking-id');
+        const id = $(this).attr('data-booking-id');
         const action = $(this).data('action');
         cceApi('bookings/' + id + '/status', 'POST', { status: action }, () => location.reload());
     });
 
     $('.cce-delete-booking').on('click', function() {
         if(!confirm('Delete booking?')) return;
-        cceApi('bookings/' + $(this).data('booking-id'), 'DELETE', {}, () => location.reload());
+        cceApi('bookings/' + $(this).attr('data-booking-id'), 'DELETE', {}, () => location.reload());
     });
 
     // Funnels: View Steps
     $('.cce-view-steps').on('click', function(e) {
         e.preventDefault();
-        const funnelId = $(this).data('funnel-id');
+        const funnelId = $(this).attr('data-funnel-id');
         const $row = $('#funnel-steps-' + funnelId);
         const $container = $('.steps-container-' + funnelId);
 
@@ -625,7 +634,7 @@ jQuery(document).ready(function($) {
     }
 
     $(document).on('click', '.cce-step-move, .cce-step-remove', function() {
-        const funnelId = $(this).data('funnel-id');
+        const funnelId = $(this).attr('data-funnel-id');
         const idx = $(this).data('idx');
         const dir = $(this).data('dir');
         const isRemove = $(this).hasClass('cce-step-remove');
@@ -647,7 +656,7 @@ jQuery(document).ready(function($) {
     });
 
     $(document).on('click', '.cce-step-config', function() {
-        const funnelId = $(this).data('funnel-id');
+        const funnelId = $(this).attr('data-funnel-id');
         const idx = $(this).data('idx');
         const type = $(this).data('type');
         const config = $(this).data('config');
@@ -704,13 +713,14 @@ jQuery(document).ready(function($) {
         const templateId = $(this).data('template');
         if(!confirm('Create new funnel from ' + templateId + ' template?')) return;
         cceApi('funnels/create-from-template', 'POST', { template_id: templateId }, function(res) {
+
             if(res.success) location.reload();
         });
     });
 
     // Funnel Step Management
     $('.cce-add-step-btn').on('click', function() {
-        $('#add-step-funnel-id').val($(this).data('funnel-id'));
+        $('#add-step-funnel-id').val($(this).attr('data-funnel-id'));
         $('#cce-add-step-modal').show();
     });
 
@@ -758,6 +768,7 @@ jQuery(document).ready(function($) {
             }
         };
         cceApi('automation/rules', 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
@@ -774,7 +785,7 @@ jQuery(document).ready(function($) {
 
     $('.cce-delete-rule').on('click', function() {
         if(!confirm('Delete rule?')) return;
-        cceApi('automation/rules/' + $(this).data('rule-id'), 'DELETE', {}, () => location.reload());
+        cceApi('automation/rules/' + $(this).attr('data-rule-id'), 'DELETE', {}, () => location.reload());
     });
 
     // Automation: Add Webhook
@@ -785,13 +796,14 @@ jQuery(document).ready(function($) {
             url: $(this).find('[name="url"]').val()
         };
         cceApi('automation/webhooks', 'POST', data, function(res) {
+
             if (res.success) location.reload();
         });
     });
 
     $(document).on('click', '.cce-delete-webhook', function() {
         if (!confirm('Delete this webhook?')) return;
-        const id = $(this).data('id');
+        const id = $(this).attr('data-id');
         cceApi('automation/webhooks/' + id, 'DELETE', {}, function(res) {
             if (res.success) $('#webhook-row-' + id).remove();
         });
@@ -806,6 +818,7 @@ jQuery(document).ready(function($) {
             content: $(this).find('[name="content"]').val()
         };
         cceApi('automation/templates', 'POST', JSON.stringify(data), function(res) {
+
             if(res.success) location.reload();
         });
     });
@@ -859,6 +872,7 @@ jQuery(document).ready(function($) {
         cceApi('leads/import', 'POST', JSON.stringify({ leads: leads }), function(res) {
             if (res.success) {
                 alert('Imported ' + res.data.count + ' leads!');
+
                 location.reload();
             }
         });
@@ -872,8 +886,8 @@ jQuery(document).ready(function($) {
         opacity: 0.7,
         update: function(event, ui) {
             if (this === ui.item.parent()[0]) {
-                const leadId = ui.item.data('lead-id');
-                const stageId = $(this).data('stage-id');
+                const leadId = ui.item.attr('data-lead-id');
+                const stageId = $(this).attr('data-stage-id');
 
                 const $column = $(this);
                 $column.css('opacity', '0.5');
@@ -882,7 +896,9 @@ jQuery(document).ready(function($) {
                     $column.css('opacity', '1');
                     if (res.success) {
                         console.log('Lead moved to stage:', stageId);
+                    alert('Lead stage updated successfully!');
                     } else {
+
                         location.reload();
                     }
                 });

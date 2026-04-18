@@ -21,6 +21,14 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/crm/stages/reorder', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'reorder_stages' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
         register_rest_route( $this->namespace, '/crm/activities', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,
@@ -299,6 +307,26 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         do_action( 'cce_lead_stage_changed', $lead_id, $stage_id );
 
         return $this->success( array( 'message' => 'Stage updated' ) );
+    }
+
+    /**
+     * Reorder CRM stages.
+     */
+    public function reorder_stages( $request ) {
+        global $wpdb;
+        $user_id = $this->get_current_user_id();
+        $params = $this->get_params( $request );
+        $stage_ids = $params['stage_ids'] ?? [];
+
+        foreach ( $stage_ids as $order => $id ) {
+            $wpdb->update(
+                "{$wpdb->prefix}cce_crm_stages",
+                array( 'stage_order' => $order ),
+                array( 'id' => absint( $id ), 'user_id' => $user_id )
+            );
+        }
+
+        return $this->success( array( 'message' => 'Stages reordered' ) );
     }
 
     /**

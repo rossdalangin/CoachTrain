@@ -192,7 +192,7 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
     public function create_from_template( $request ) {
         global $wpdb;
         $user_id = $this->get_current_user_id();
-        $params = $this->get_params( $request ); $template_id = sanitize_text_field( $params['template_id'] );
+        $template_id = sanitize_text_field( $request->get_param( 'template_id' ) );
 
         $title = 'New ' . ucwords( str_replace( '_', ' ', $template_id ) );
         $wpdb->insert( "{$wpdb->prefix}cce_funnels", array(
@@ -216,6 +216,21 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 ['title' => 'Application', 'type' => 'optin'],
                 ['title' => 'Schedule Call', 'type' => 'booking'],
                 ['title' => 'Confirmation', 'type' => 'thank_you']
+            ];
+        } elseif ( 'appointment_machine' === $template_id ) {
+            $steps = [
+                ['title' => 'Discovery Form', 'type' => 'optin'],
+                ['title' => 'Setter Triage Call', 'type' => 'booking'],
+                ['title' => 'Closer Strategy Session', 'type' => 'booking'],
+                ['title' => 'Success', 'type' => 'thank_you']
+            ];
+        } elseif ( 'hybrid_closer' === $template_id ) {
+            $steps = [
+                ['title' => 'Opt-in', 'type' => 'optin'],
+                ['title' => 'VSL Presentation', 'type' => 'thank_you'],
+                ['title' => 'Calendar', 'type' => 'booking'],
+                ['title' => 'Enrollment', 'type' => 'checkout'],
+                ['title' => 'Success', 'type' => 'thank_you']
             ];
         } elseif ( 'webinar' === $template_id ) {
             $steps = [
@@ -311,6 +326,8 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         $templates = array(
             array( 'id' => 'lead_magnet', 'title' => 'Lead Magnet Funnel', 'description' => 'Perfect for building your email list.' ),
             array( 'id' => 'consultation', 'title' => 'Consultation Funnel', 'description' => 'Ideal for high-ticket coaching bookings.' ),
+            array( 'id' => 'appointment_machine', 'title' => 'The Appointment Machine', 'description' => 'A dual-booking system for setters and closers.' ),
+            array( 'id' => 'hybrid_closer', 'title' => 'The Hybrid Closer', 'description' => 'The ultimate VSL-to-Checkout conversion system.' ),
             array( 'id' => 'webinar', 'title' => 'Webinar Funnel', 'description' => 'Best for automated sales presentations.' ),
         );
         return $this->success( $templates );

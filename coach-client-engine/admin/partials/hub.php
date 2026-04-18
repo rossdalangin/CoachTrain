@@ -54,6 +54,22 @@
             <a href="<?php echo plugin_dir_url(__FILE__) . '../../marketing/landing-page.html'; ?>" target="_blank" class="button button-secondary">View Design</a>
         </div>
 
+        <!-- Email Sequences -->
+        <div class="cce-card hub-item" data-tags="email,automation,copywriting,indoctrination">
+            <span class="dashicons dashicons-email-alt" style="font-size:30px; width:30px; height:30px; color:#0073aa;"></span>
+            <h3>Indoctrination Email Sequences</h3>
+            <p>Proven 7-day sequences to build trust and authority immediately after opt-in.</p>
+            <button type="button" class="button button-secondary cce-open-hub-resource" data-file="email-sequences.md">Open Sequence</button>
+        </div>
+
+        <!-- Video Assets -->
+        <div class="cce-card hub-item" data-tags="video,vsl,content,production">
+            <span class="dashicons dashicons-video-alt2" style="font-size:30px; width:30px; height:30px; color:#d63638;"></span>
+            <h3>High-Converting VSL Framework</h3>
+            <p>The slide-by-slide breakdown for your Video Sales Letter and landing page videos.</p>
+            <button type="button" class="button button-secondary cce-open-hub-resource" data-file="video-assets.md">Open Framework</button>
+        </div>
+
         <!-- Retention SOP -->
         <div class="cce-card hub-item" data-tags="retention,sop,onboarding,checklist,sales">
             <span class="dashicons dashicons-admin-users" style="font-size:30px; width:30px; height:30px; color:#00a32a;"></span>
@@ -157,7 +173,8 @@
         });
 
         $('.cce-open-hub-resource').on('click', function() {
-            const file = $(this).data('file');
+            const $btn = $(this);
+            const file = $btn.attr('data-file');
             $('#cce-hub-modal-content').html('Loading...');
             $('#cce-hub-modal').show();
 
@@ -176,7 +193,7 @@
                         $('#cce-hub-modal-content').html(content);
 
                         // Load progress
-                        const checklistId = 'cce_hub_progress_' + $(this).closest('.hub-item').find('h3').text().replace(/\s+/g, '_').toLowerCase();
+                        const checklistId = 'cce_hub_progress_' + $btn.closest('.hub-item').find('h3').text().replace(/\s+/g, '_').toLowerCase();
                         const saved = JSON.parse(localStorage.getItem(checklistId) || '[]');
                         $('#cce-hub-modal-content input[type="checkbox"]').each(function() {
                             const text = $(this).next('label').text() || $(this).parent().text();

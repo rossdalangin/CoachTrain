@@ -284,15 +284,8 @@
             $(this).serializeArray().forEach(item => data[item.name] = item.value);
             data.test_mode = $('[name="test_mode"]').is(':checked') ? 1 : 0;
 
-            $.ajax({
-                url: cceAdmin.restUrl + 'settings',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function(res) {
-                    if (res.success) alert('Settings saved successfully!');
-                }
+            cceApi('settings', 'POST', data, function(res) {
+                if (res.success) alert('Settings saved successfully!');
             });
         });
     });

@@ -94,18 +94,7 @@
                 offer_id: $(this).find('[name="offer_id"]').val(),
                 amount: $(this).find('[name="amount"]').val()
             };
-            if (typeof cceApi === 'function') {
-                cceApi('payments', 'POST', JSON.stringify(data), () => location.reload());
-            } else {
-                $.ajax({
-                    url: cceAdmin.restUrl + 'payments',
-                    method: 'POST',
-                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    success: function() { location.reload(); }
-                });
-            }
+            cceApi('payments', 'POST', data, () => location.reload());
         });
     });
     </script>
