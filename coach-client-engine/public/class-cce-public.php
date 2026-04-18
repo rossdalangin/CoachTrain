@@ -15,6 +15,7 @@ class CCE_Public {
 		add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
         add_shortcode( 'cce_funnel', array( $this, 'render_funnel' ) );
         add_action( 'template_redirect', array( $this, 'handle_payment_simulation' ) );
+        add_action( 'template_redirect', array( $this, 'track_funnel_visits' ) );
         add_action( 'rest_api_init', array( $this, 'register_portal_auth_routes' ) );
         add_action( 'init', array( $this, 'capture_utm_parameters' ) );
 	}
@@ -198,13 +199,6 @@ class CCE_Public {
         $current_step_index = absint( $_GET['step_idx'] ?? 0 );
         $current_step = $steps[$current_step_index] ?? $steps[0];
 
-        // Track visit
-        if ( ! is_admin() ) {
-            $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET visits = visits + 1 WHERE id = %d", $current_step->id ) );
-            // Store funnel title in cookie for lead source
-            setcookie('cce_funnel_source', $funnel_id, time() + HOUR_IN_SECONDS, '/');
-            setcookie('cce_active_funnel_step', $current_step->id, time() + HOUR_IN_SECONDS, '/');
-        }
 
         $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
 
@@ -589,6 +583,31 @@ class CCE_Public {
 		<?php
 		return ob_get_clean();
 	}
+
+    /**
+     * Track funnel visits via redirect hook to avoid "Headers already sent".
+     */
+    public function track_funnel_visits() {
+        if ( is_admin() ) return;
+
+        global $wpdb, $post;
+        if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'cce_funnel' ) ) return;
+
+        // Extract ID from shortcode in content
+        preg_match( '/\[cce_funnel\s+id="(\d+)"/i', $post->post_content, $matches );
+        if ( empty( $matches[1] ) ) return;
+
+        $funnel_id = absint( $matches[1] );
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
+        if ( empty( $steps ) ) return;
+
+        $step_idx = absint( $_GET['step_idx'] ?? 0 );
+        $current_step_id = $steps[$step_idx]->id ?? $steps[0]->id;
+
+        $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET visits = visits + 1 WHERE id = %d", $current_step_id ) );
+        setcookie( 'cce_funnel_source', $funnel_id, time() + HOUR_IN_SECONDS, '/' );
+        setcookie( 'cce_active_funnel_step', $current_step_id, time() + HOUR_IN_SECONDS, '/' );
+    }
 
 	/**
 	 * Render the lead capture form.

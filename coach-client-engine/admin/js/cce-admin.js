@@ -9,12 +9,8 @@ jQuery(document).ready(function($) {
             error: function(err) { console.error('CCE API Error:', err); }
         };
         if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-            if (typeof data === 'string') {
-                ajaxSettings.contentType = 'application/json';
-                ajaxSettings.data = data;
-            } else {
-                ajaxSettings.data = data;
-            }
+            ajaxSettings.contentType = 'application/json';
+            ajaxSettings.data = (typeof data === 'string') ? data : JSON.stringify(data);
         } else {
             ajaxSettings.data = data;
         }

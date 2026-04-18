@@ -8,11 +8,15 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
      * Constructor.
      */
     public function __construct() {
+        if ( did_action( 'cce_automation_init' ) ) {
+            return;
+        }
         add_action( 'cce_lead_created', array( $this, 'trigger_automation' ) );
         add_action( 'cce_booking_confirmed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_payment_completed', array( $this, 'trigger_automation' ) );
         add_action( 'cce_lead_stage_changed', array( $this, 'trigger_automation' ), 10, 2 );
         add_action( 'cce_delayed_email_event', array( $this, 'send_delayed_email' ), 10, 2 );
+        do_action( 'cce_automation_init' );
     }
 
     /**

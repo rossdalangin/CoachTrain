@@ -190,8 +190,8 @@ class Coach_Client_Engine {
                 'methods'             => 'GET',
                 'callback'            => function( $request ) {
                     $file = sanitize_text_field( $request->get_param('file') );
-                    $path = plugin_dir_path( dirname( __FILE__ ) ) . 'marketing/' . $file;
-                    if ( ! file_exists( $path ) ) return new WP_Error('not_found', 'File not found');
+                    $path = plugin_dir_path( __FILE__ ) . '../marketing/' . $file;
+                    if ( ! file_exists( $path ) ) return new WP_Error('not_found', 'File not found at ' . $path);
 
                     $content = file_get_contents( $path );
                     // Basic MD to HTML conversion

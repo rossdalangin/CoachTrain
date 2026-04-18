@@ -224,6 +224,20 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
                 ['title' => 'Book Strategy Session', 'type' => 'booking'],
                 ['title' => 'Enroll', 'type' => 'checkout']
             ];
+        } elseif ( 'vsl' === $template_id ) {
+            $steps = [
+                ['title' => 'Opt-in Page', 'type' => 'optin'],
+                ['title' => 'VSL Video', 'type' => 'thank_you'],
+                ['title' => 'Book Session', 'type' => 'booking'],
+                ['title' => 'Success', 'type' => 'thank_you']
+            ];
+        } elseif ( 'tripwire' === $template_id ) {
+            $steps = [
+                ['title' => 'Sales Page', 'type' => 'optin'],
+                ['title' => 'Checkout', 'type' => 'checkout'],
+                ['title' => 'Upsell', 'type' => 'checkout'],
+                ['title' => 'Success', 'type' => 'thank_you']
+            ];
         }
 
         if ( ! empty( $steps ) ) {
