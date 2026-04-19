@@ -60,13 +60,18 @@ abstract class CCE_REST_Controller extends WP_REST_Controller {
      * Get request parameters, prioritizing JSON.
      */
     public function get_params( $request ) {
-        $params = $request->get_json_params();
-        if ( ! is_array( $params ) ) {
-            $params = array();
+        $json_params = $request->get_json_params();
+        if ( ! is_array( $json_params ) ) {
+            $json_params = array();
         }
 
-        // Merge with route and query params
-        $all_params = array_merge( $request->get_params(), $params );
+        // WP REST API includes route, query, and post parameters in get_params()
+        $request_params = $request->get_params();
+        if ( ! is_array( $request_params ) ) {
+            $request_params = array();
+        }
+
+        $all_params = array_merge( $request_params, $json_params );
 
         return $all_params;
     }

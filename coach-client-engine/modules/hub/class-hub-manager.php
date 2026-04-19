@@ -76,10 +76,10 @@ class CCE_Hub_Manager extends CCE_REST_Controller {
         $params = $this->get_params( $request );
 
         $wpdb->update( "{$wpdb->prefix}cce_resources", array(
-            'title'    => sanitize_text_field( $params['title'] ),
-            'category' => sanitize_text_field( $params['category'] ),
-            'type'     => sanitize_text_field( $params['type'] ),
-            'url'      => esc_url_raw( $params['url'] ),
+            'title'    => sanitize_text_field( $params['title'] ?? '' ),
+            'category' => sanitize_text_field( $params['category'] ?? '' ),
+            'type'     => sanitize_text_field( $params['type'] ?? '' ),
+            'url'      => esc_url_raw( $params['url'] ?? '' ),
         ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Resource updated' ) );

@@ -13,7 +13,7 @@ window.cceApi = function(endpoint, method, data, success) {
     };
     if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         ajaxSettings.contentType = 'application/json';
-        ajaxSettings.data = (typeof data === 'string') ? data : data;
+        ajaxSettings.data = (typeof data === 'string') ? data : JSON.stringify(data);
     } else {
         ajaxSettings.data = data;
     }

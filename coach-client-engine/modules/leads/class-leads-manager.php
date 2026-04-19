@@ -113,9 +113,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         $params = $this->get_params( $request );
 
         $data = array(
-            'first_name' => sanitize_text_field( $params['first_name'] ),
-            'last_name'  => sanitize_text_field( $params['last_name'] ),
-            'email'       => sanitize_email( $params['email'] ),
+            'first_name' => sanitize_text_field( $params['first_name'] ?? '' ),
+            'last_name'  => sanitize_text_field( $params['last_name'] ?? '' ),
+            'email'       => sanitize_email( $params['email'] ?? '' ),
             'phone'       => sanitize_text_field( $params['phone'] ?? '' ),
             'status'      => sanitize_text_field( $params['status'] ?? 'cold' ),
             'tags'        => sanitize_text_field( $params['tags'] ?? '' ),
