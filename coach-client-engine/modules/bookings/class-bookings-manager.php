@@ -5,17 +5,6 @@
 class CCE_Bookings_Manager extends CCE_REST_Controller {
 
 	/**
-	 * Check if the user has permission to perform the request.
-	 */
-	public function check_permission( $request ) {
-		// Allow public booking creation, restrict reading to admins
-		if ( WP_REST_Server::CREATABLE === $request->get_method() ) {
-			return true;
-		}
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -28,7 +17,7 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_booking' ),
-				'permission_callback' => array( $this, 'check_permission' ),
+				'permission_callback' => '__return_true', // Public booking creation
 			),
 		) );
 

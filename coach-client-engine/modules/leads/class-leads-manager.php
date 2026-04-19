@@ -5,17 +5,6 @@
 class CCE_Leads_Manager extends CCE_REST_Controller {
 
 	/**
-	 * Check if the user has permission to perform the request.
-	 */
-	public function check_permission( $request ) {
-		// Allow public lead creation, restrict reading to admins
-		if ( WP_REST_Server::CREATABLE === $request->get_method() ) {
-			return true;
-		}
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -28,7 +17,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_lead' ),
-				'permission_callback' => array( $this, 'check_permission' ),
+				'permission_callback' => '__return_true', // Public lead capture
 			),
 		) );
 
@@ -98,7 +87,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
 
             $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
-                'user_id'      => get_current_user_id(),
+                'user_id'      => $this->get_current_user_id(),
                 'first_name'   => sanitize_text_field( $lead['first_name'] ?? '' ),
                 'last_name'    => sanitize_text_field( $lead['last_name'] ?? '' ),
                 'email'        => $email,

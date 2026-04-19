@@ -170,7 +170,7 @@ class CCE_Admin {
             return;
         }
         wp_enqueue_style( 'cce-admin-classic', plugin_dir_url( __FILE__ ) . '../admin/css/cce-admin-classic.css', array(), CCE_VERSION );
-        wp_enqueue_script( 'cce-admin-js', plugin_dir_url( __FILE__ ) . '../admin/js/cce-admin.js', array( 'jquery', 'jquery-ui-sortable' ), CCE_VERSION, true );
+        wp_enqueue_script( 'cce-admin-js', plugin_dir_url( __FILE__ ) . '../admin/js/cce-admin.js', array( 'jquery', 'jquery-ui-sortable' ), CCE_VERSION, false );
 
         wp_localize_script( 'cce-admin-js', 'cceAdmin', array(
             'restUrl' => esc_url_raw( rest_url( 'cce/v1/' ) ),

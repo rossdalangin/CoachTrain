@@ -61,9 +61,13 @@ abstract class CCE_REST_Controller extends WP_REST_Controller {
      */
     public function get_params( $request ) {
         $params = $request->get_json_params();
-        if ( empty( $params ) ) {
-            $params = $request->get_params();
+        if ( ! is_array( $params ) ) {
+            $params = array();
         }
-        return $params;
+
+        // Merge with route and query params
+        $all_params = array_merge( $request->get_params(), $params );
+
+        return $all_params;
     }
 }

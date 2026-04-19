@@ -211,19 +211,19 @@
             e.preventDefault();
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
-            cceApi('hub/resources', 'POST', JSON.stringify(data), function(res) {
+            cceApi('hub/resources', 'POST', data, function(res) {
                 if (res.success) location.reload();
             });
         });
 
         $('.cce-edit-hub-resource').on('click', function() {
-            const id = $(this).data('id');
+            const id = $(this).attr('data-id');
             const $row = $('#resource-row-' + id);
             $('#edit-resource-id').val(id);
-            $('#edit-resource-title').val($row.data('title'));
-            $('#edit-resource-category').val($row.data('category'));
-            $('#edit-resource-type').val($row.data('type'));
-            $('#edit-resource-url').val($row.data('url'));
+            $('#edit-resource-title').val($row.attr('data-title'));
+            $('#edit-resource-category').val($row.attr('data-category'));
+            $('#edit-resource-type').val($row.attr('data-type'));
+            $('#edit-resource-url').val($row.attr('data-url'));
             $('#cce-edit-hub-resource-modal').show();
         });
 
@@ -236,14 +236,14 @@
                 type: $('#edit-resource-type').val(),
                 url: $('#edit-resource-url').val()
             };
-            cceApi('hub/resources/' + id, 'POST', JSON.stringify(data), function(res) {
+            cceApi('hub/resources/' + id, 'POST', data, function(res) {
                 if (res.success) location.reload();
             });
         });
 
         $('.cce-delete-hub-resource').on('click', function() {
             if (!confirm('Delete this resource?')) return;
-            const id = $(this).data('id');
+            const id = $(this).attr('data-id');
             cceApi('hub/resources/' + id, 'DELETE', {}, function() {
                 location.reload();
             });
