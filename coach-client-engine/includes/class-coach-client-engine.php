@@ -152,6 +152,8 @@ class Coach_Client_Engine {
      * Register REST API routes.
      */
     public function register_rest_routes() {
+        $path = plugin_dir_path( dirname( __FILE__ ) );
+
         register_rest_route( 'cce/v1', '/maintenance/sample-data', array(
             array(
                 'methods'             => 'POST',
@@ -319,7 +321,8 @@ class Coach_Client_Engine {
         $onboarding_manager = new CCE_Onboarding_Manager();
         $onboarding_manager->register_routes();
 
-        require_once $path . 'modules/hub/class-hub-manager.php';
+        $root = plugin_dir_path( dirname( __FILE__ ) );
+        require_once $root . 'modules/hub/class-hub-manager.php';
         $hub_manager = new CCE_Hub_Manager();
         $hub_manager->register_routes();
 

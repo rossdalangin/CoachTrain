@@ -44,7 +44,14 @@ $engine = new Coach_Client_Engine();
         </div>
         <div class="cce-card">
             <h3>Revenue Today</h3>
-            <div class="value">$<?php echo number_format((float) $summary['revenue_today'], 2); ?></div>
+            <div class="value">
+                <?php
+                $currency_code = get_option('cce_currency', 'USD');
+                $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                $currency_sym = $currency_symbols[$currency_code] ?? '$';
+                echo $currency_sym . number_format((float) $summary['revenue_today'], 2);
+                ?>
+            </div>
         </div>
     </div>
 

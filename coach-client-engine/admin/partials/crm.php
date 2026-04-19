@@ -97,7 +97,12 @@
                         <span style="font-size:10px; background:#cbd5e0; padding:2px 6px; border-radius:10px; font-weight:bold;"><?php echo $count; ?></span>
                     </div>
                     <div style="font-size:11px; color:#718096; margin-bottom:15px; border-bottom:1px solid #cbd5e0; padding-bottom:5px;">
-                        Est. Value: <strong><?php echo $currency_symbol . number_format($pipeline_val, 0); ?></strong>
+                        <?php
+                        $currency_code = get_option('cce_currency', 'USD');
+                        $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+                        $currency_sym = $currency_symbols[$currency_code] ?? '$';
+                        ?>
+                        Est. Value: <strong><?php echo $currency_sym . number_format($pipeline_val, 0); ?></strong>
                     </div>
 
                     <div class="kanban-cards cce-kanban-column" data-stage-id="<?php echo $stage->id; ?>" style="min-height:100px;">
@@ -139,7 +144,7 @@
                                 <div style="margin-top:10px;">
                                     <select class="cce-stage-select" data-lead-id="<?php echo $lead->id; ?>" style="font-size:11px; width:100%;">
                                         <?php foreach ( $stages as $s ): ?>
-                                            <option value="<?php echo $s->id; ?>" <?php selected( $lead->crm_stage_id, $s->id ); ?>>
+                                            <option value="<?php echo $s->id; ?>" <?php selected( $lead->crm_stage_id ?? 0, $s->id ); ?>>
                                                 Move to: <?php echo esc_html( $s->name ); ?>
                                             </option>
                                         <?php endforeach; ?>
