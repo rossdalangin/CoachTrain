@@ -104,10 +104,10 @@ class CCE_Bookings_Manager extends CCE_REST_Controller {
 
 		$data = array(
             'user_id'            => $user_id,
-			'lead_id'            => absint( $params['lead_id'] ),
-			'start_time'         => sanitize_text_field( $params['start_time'] ),
-			'end_time'           => sanitize_text_field( $params['end_time'] ),
-			'timezone'           => sanitize_text_field( $params['timezone'] ),
+			'lead_id'            => absint( $params['lead_id'] ?? 0 ),
+			'start_time'         => sanitize_text_field( $params['start_time'] ?? '' ),
+			'end_time'           => sanitize_text_field( $params['end_time'] ?? '' ),
+			'timezone'           => sanitize_text_field( $params['timezone'] ?? 'UTC' ),
 			'status'             => 'pending',
 			'questionnaire_data' => json_encode( $params['questionnaire'] ?? array() ),
             'created_at'         => current_time( 'mysql' ),

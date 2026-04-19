@@ -59,7 +59,7 @@ class CCE_Onboarding_Manager extends CCE_REST_Controller {
 
         $result = $wpdb->insert( "{$wpdb->prefix}cce_onboarding_tasks", array(
             'user_id'     => $user_id,
-            'task_name'   => sanitize_text_field( $params['task_name'] ),
+            'task_name'   => sanitize_text_field( $params['task_name'] ?? '' ),
             'description' => sanitize_textarea_field( $params['description'] ?? '' ),
             'task_order'  => $order,
             'created_at'  => current_time( 'mysql' ),

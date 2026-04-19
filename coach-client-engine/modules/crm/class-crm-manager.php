@@ -221,7 +221,8 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         global $wpdb;
         $lead_id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $title = sanitize_text_field( $request->get_param( 'title' ) );
+        $params = $this->get_params( $request );
+        $title = sanitize_text_field( $params['title'] ?? '' );
 
         $wpdb->insert( "{$wpdb->prefix}cce_tasks", array(
             'user_id' => $user_id,
@@ -442,7 +443,8 @@ class CCE_CRM_Manager extends CCE_REST_Controller {
         global $wpdb;
         $lead_id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
-        $title = sanitize_text_field( $request->get_param( 'title' ) );
+        $params = $this->get_params( $request );
+        $title = sanitize_text_field( $params['title'] ?? '' );
 
         $wpdb->insert( "{$wpdb->prefix}cce_milestones", array(
             'user_id' => $user_id,

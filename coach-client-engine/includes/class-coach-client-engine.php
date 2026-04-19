@@ -207,22 +207,21 @@ class Coach_Client_Engine {
                     $file = sanitize_text_field( $request->get_param('file') );
                     $path = dirname( plugin_dir_path( __FILE__ ) ) . '/marketing/' . $file;
 
-                    if ( ! file_exists( $path ) ) {
+                    if ( ! file_exists( $path ) || is_dir( $path ) ) {
                         return new WP_Error('not_found', 'File not found at ' . $path);
                     }
 
                     $content = file_get_contents( $path );
-                    // Robust MD to HTML conversion
-                    // Robust MD to HTML conversion
+
+                    // Basic MD to HTML conversion (Non-catastrophic)
                     $content = preg_replace('/^# (.*)$/m', '<h1>$1</h1>', $content);
                     $content = preg_replace('/^## (.*)$/m', '<h2>$1</h2>', $content);
                     $content = preg_replace('/^### (.*)$/m', '<h3>$1</h3>', $content);
                     $content = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $content);
                     $content = preg_replace('/^> (.*)$/m', '<blockquote>$1</blockquote>', $content);
 
-                    // Improved list handling
+                    // List handling (Improved)
                     $content = preg_replace('/^- (.*)$/m', '<li>$1</li>', $content);
-                    $content = preg_replace('/(<li>.*<\/li>)/s', '<ul>$1</ul>', $content);
 
                     $content = preg_replace('/\[(.*?)\]\((.*?)\)/', '<a href="$2" target="_blank">$1</a>', $content);
                     $content = nl2br($content);

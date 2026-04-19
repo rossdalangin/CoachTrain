@@ -53,6 +53,10 @@ abstract class CCE_REST_Controller extends WP_REST_Controller {
 	 * Send an error response.
 	 */
 	public function error( $message = 'An error occurred', $code = 'error', $status = 400 ) {
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            // Include stack trace in debug mode? Maybe too much.
+            // Just ensure it is a valid WP_Error.
+        }
 		return new WP_Error( $code, $message, array( 'status' => $status ) );
 	}
 

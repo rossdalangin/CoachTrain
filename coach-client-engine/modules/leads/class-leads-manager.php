@@ -76,15 +76,16 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         if ( ! is_array( $leads ) ) return $this->error( 'Invalid data' );
 
         $count = 0;
+        $user_id = $this->get_current_user_id();
         foreach ( $leads as $lead ) {
             $email = sanitize_email( $lead['email'] ?? '' );
             if ( ! $email ) continue;
 
-            // Check if exists
-            $exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE email = %s", $email ) );
+            // Check if exists for this user
+            $exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE email = %s AND user_id = %d", $email, $user_id ) );
             if ( $exists ) continue;
 
-            $default_stage_id = $wpdb->get_var( "SELECT id FROM {$wpdb->prefix}cce_crm_stages ORDER BY stage_order ASC LIMIT 1" ) ?: 1;
+            $default_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC LIMIT 1", $user_id ) ) ?: 1;
 
             $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
                 'user_id'      => $this->get_current_user_id(),
@@ -93,7 +94,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
                 'email'        => $email,
                 'status'       => 'cold',
                 'crm_stage_id' => $default_stage_id,
-                'secure_token' => bin2hex( random_bytes( 32 ) ),
+                'secure_token' => wp_generate_password( 64, false ),
                 'source'       => 'Imported',
                 'created_at'   => current_time( 'mysql' ),
             ) );
@@ -169,8 +170,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
      */
     public function update_lead_tags( $request ) {
         global $wpdb;
-        $id = $request['id'];
-        $tags = sanitize_text_field( $request->get_param('tags') );
+        $id = absint( $request['id'] );
+        $params = $this->get_params( $request );
+        $tags = sanitize_text_field( $params['tags'] ?? '' );
         $user_id = $this->get_current_user_id();
 
         $wpdb->update(
@@ -230,14 +232,14 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
             }
         }
 
-        $token = bin2hex( random_bytes( 32 ) );
+        $token = wp_generate_password( 64, false );
         $default_stage_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_crm_stages WHERE user_id = %d ORDER BY stage_order ASC LIMIT 1", $user_id ) ) ?: 1;
 
 		$data = array(
             'user_id'      => $user_id,
-			'first_name'   => sanitize_text_field( $params['first_name'] ),
-			'last_name'    => sanitize_text_field( $params['last_name'] ),
-			'email'        => sanitize_email( $params['email'] ),
+			'first_name'   => sanitize_text_field( $params['first_name'] ?? '' ),
+			'last_name'    => sanitize_text_field( $params['last_name'] ?? '' ),
+			'email'        => sanitize_email( $params['email'] ?? '' ),
 			'phone'        => sanitize_text_field( $params['phone'] ?? '' ),
             'secure_token' => $token,
             'source'       => $source,

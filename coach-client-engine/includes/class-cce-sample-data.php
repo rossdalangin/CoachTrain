@@ -36,7 +36,7 @@ class CCE_Sample_Data {
                 'email'        => $l['email'],
                 'status'       => $l['status'],
                 'crm_stage_id' => $new_stage_id,
-                'secure_token' => bin2hex( random_bytes( 16 ) ),
+                'secure_token' => wp_generate_password( 32, false ),
                 'created_at'   => date('Y-m-d H:i:s', strtotime('-' . rand(1, 30) . ' days'))
             ) );
         }

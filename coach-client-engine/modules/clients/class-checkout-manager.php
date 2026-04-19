@@ -86,13 +86,13 @@ class CCE_Checkout_Manager extends CCE_REST_Controller {
         } elseif ( 'stripe' === $gateway ) {
             $stripe = new CCE_Stripe_Wrapper( get_user_meta( $user_id, 'cce_stripe_api_key', true ) );
             // In a real implementation, we would create a Stripe Checkout Session here
-            $redirect_url = 'https://checkout.stripe.com/pay/' . bin2hex(random_bytes(16));
+            $redirect_url = 'https://checkout.stripe.com/pay/' . wp_generate_password( 32, false );
         } elseif ( 'paypal' === $gateway ) {
             $paypal = new CCE_Paypal_Wrapper( get_user_meta( $user_id, 'cce_paypal_client_id', true ), '' );
-            $redirect_url = 'https://www.paypal.com/checkoutnow?token=' . bin2hex(random_bytes(10));
+            $redirect_url = 'https://www.paypal.com/checkoutnow?token=' . wp_generate_password( 20, false );
         }
 
-        $pending_id = 'PENDING_' . bin2hex( random_bytes( 8 ) );
+        $pending_id = 'PENDING_' . wp_generate_password( 16, false );
 		$wpdb->insert( "{$wpdb->prefix}cce_payments", array(
             'user_id'        => $user_id,
 			'lead_id'        => $lead_id,

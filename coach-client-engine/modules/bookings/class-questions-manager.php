@@ -59,7 +59,7 @@ class CCE_Questions_Manager extends CCE_REST_Controller {
 
         $wpdb->insert( "{$wpdb->prefix}cce_questions", array(
             'user_id'       => $user_id,
-            'question_text' => sanitize_text_field( $params['question_text'] ),
+            'question_text' => sanitize_text_field( $params['question_text'] ?? '' ),
             'question_type' => sanitize_text_field( $params['question_type'] ?? 'text' ),
             'is_required'   => (int) ($params['is_required'] ?? 1),
             'question_order' => $order

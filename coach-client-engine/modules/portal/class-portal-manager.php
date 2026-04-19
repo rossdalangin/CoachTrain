@@ -64,10 +64,10 @@ class CCE_Portal_Manager extends CCE_REST_Controller {
 
         $result = $wpdb->insert( "{$wpdb->prefix}cce_resources", array(
             'user_id'    => $user_id,
-            'title'      => sanitize_text_field( $params['title'] ),
+            'title'      => sanitize_text_field( $params['title'] ?? '' ),
             'category'   => sanitize_text_field( $params['category'] ?? 'Uncategorized' ),
-            'type'       => sanitize_text_field( $params['type'] ),
-            'url'        => esc_url_raw( $params['url'] ),
+            'type'       => sanitize_text_field( $params['type'] ?? '' ),
+            'url'        => esc_url_raw( $params['url'] ?? '' ),
             'visibility' => sanitize_text_field( $params['visibility'] ?? 'public' ),
             'created_at' => current_time( 'mysql' ),
         ) );

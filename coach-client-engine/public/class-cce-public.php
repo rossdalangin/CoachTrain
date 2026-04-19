@@ -81,7 +81,7 @@ class CCE_Public {
 
         $wpdb->update(
             "{$wpdb->prefix}cce_payments",
-            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . bin2hex(random_bytes(8)) ),
+            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . wp_generate_password( 16, false ) ),
             array( 'lead_id' => $lead_id, 'offer_id' => $offer_id, 'status' => 'pending' )
         );
 

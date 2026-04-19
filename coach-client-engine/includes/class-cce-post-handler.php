@@ -60,9 +60,9 @@ class CCE_Post_Handler {
 		global $wpdb;
 		$data = array(
             'user_id'              => get_current_user_id(),
-			'title'                => sanitize_text_field( $_POST['title'] ),
-			'price'                => (float) $_POST['price'],
-			'type'                 => sanitize_text_field( $_POST['type'] ),
+			'title'                => sanitize_text_field( $_POST['title'] ?? '' ),
+			'price'                => (float) ($_POST['price'] ?? 0),
+			'type'                 => sanitize_text_field( $_POST['type'] ?? 'one-time' ),
 			'dream_outcome'        => sanitize_textarea_field( $_POST['dream_outcome'] ?? '' ),
 			'perceived_likelihood' => sanitize_textarea_field( $_POST['perceived_likelihood'] ?? '' ),
 			'time_delay'           => sanitize_textarea_field( $_POST['time_delay'] ?? '' ),
@@ -88,11 +88,11 @@ class CCE_Post_Handler {
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}cce_testimonials", array(
             'user_id'     => get_current_user_id(),
-            'type'        => sanitize_text_field( $_POST['type'] ),
-            'title'       => sanitize_text_field( $_POST['title'] ),
-            'client_name' => sanitize_text_field( $_POST['client_name'] ),
-            'content'     => sanitize_textarea_field( $_POST['content'] ),
-            'rating'      => absint( $_POST['rating'] ),
+            'type'        => sanitize_text_field( $_POST['type'] ?? 'testimonial' ),
+            'title'       => sanitize_text_field( $_POST['title'] ?? '' ),
+            'client_name' => sanitize_text_field( $_POST['client_name'] ?? '' ),
+            'content'     => sanitize_textarea_field( $_POST['content'] ?? '' ),
+            'rating'      => absint( $_POST['rating'] ?? 5 ),
             'status'      => 'active',
             'created_at'  => current_time( 'mysql' ),
         ) );
@@ -114,9 +114,9 @@ class CCE_Post_Handler {
 
         $wpdb->insert( "{$wpdb->prefix}cce_leads", array(
             'user_id'      => $user_id,
-            'first_name'   => sanitize_text_field( $_POST['first_name'] ),
-            'last_name'    => sanitize_text_field( $_POST['last_name'] ),
-            'email'        => sanitize_email( $_POST['email'] ),
+            'first_name'   => sanitize_text_field( $_POST['first_name'] ?? '' ),
+            'last_name'    => sanitize_text_field( $_POST['last_name'] ?? '' ),
+            'email'        => sanitize_email( $_POST['email'] ?? '' ),
             'status'       => 'cold',
             'crm_stage_id' => $default_stage_id,
             'secure_token' => bin2hex( random_bytes( 32 ) ),
@@ -140,9 +140,9 @@ class CCE_Post_Handler {
         global $wpdb;
         $wpdb->insert( "{$wpdb->prefix}cce_bookings", array(
             'user_id'    => get_current_user_id(),
-            'lead_id'    => absint( $_POST['lead_id'] ),
-            'start_time' => sanitize_text_field( $_POST['start_time'] ),
-            'timezone'   => sanitize_text_field( $_POST['timezone'] ),
+            'lead_id'    => absint( $_POST['lead_id'] ?? 0 ),
+            'start_time' => sanitize_text_field( $_POST['start_time'] ?? '' ),
+            'timezone'   => sanitize_text_field( $_POST['timezone'] ?? 'UTC' ),
             'status'     => 'confirmed',
             'created_at' => current_time( 'mysql' ),
         ) );
