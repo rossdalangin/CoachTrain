@@ -47,7 +47,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/leads/(?P<id>\d+)', array(
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'delete_lead' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -157,6 +157,9 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         global $wpdb;
         $lead_id = absint( $request['id'] );
         $user_id = $this->get_current_user_id();
+
+        if ( ! $lead_id ) return $this->error( 'Invalid ID' );
+
         $wpdb->delete( "{$wpdb->prefix}cce_leads", array( 'id' => $lead_id, 'user_id' => $user_id ) );
         return $this->success( array( 'message' => 'Lead deleted' ) );
     }

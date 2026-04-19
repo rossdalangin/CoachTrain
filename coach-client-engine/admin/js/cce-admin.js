@@ -4,6 +4,7 @@ window.cceApi = function(endpoint, method, data, success) {
         url: cceAdmin.restUrl + endpoint,
         method: method,
         beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
+        xhrFields: { withCredentials: true },
         success: success,
         error: function(err) {
             console.error('CCE API Error:', err);

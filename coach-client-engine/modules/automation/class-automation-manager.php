@@ -38,7 +38,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/automation/rules/(?P<id>\d+)', array(
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'delete_rule' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -64,7 +64,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/automation/templates/(?P<id>\d+)', array(
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'delete_template' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -90,7 +90,7 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/automation/webhooks/(?P<id>\d+)', array(
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'delete_webhook' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
@@ -154,9 +154,9 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         $params = $this->get_params( $request );
 
         $wpdb->update( "{$wpdb->prefix}cce_email_templates", array(
-            'name'    => sanitize_text_field( $params['name'] ),
-            'subject' => sanitize_text_field( $params['subject'] ),
-            'content' => wp_kses_post( $params['content'] ),
+            'name'    => sanitize_text_field( $params['name'] ?? '' ),
+            'subject' => sanitize_text_field( $params['subject'] ?? '' ),
+            'content' => wp_kses_post( $params['content'] ?? '' ),
         ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Template updated' ) );
@@ -183,8 +183,8 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
         $params = $this->get_params( $request );
 
         $wpdb->update( "{$wpdb->prefix}cce_automation_rules", array(
-            'trigger_event' => sanitize_text_field( $params['trigger_event'] ),
-            'action_type'   => sanitize_text_field( $params['action_type'] ),
+            'trigger_event' => sanitize_text_field( $params['trigger_event'] ?? '' ),
+            'action_type'   => sanitize_text_field( $params['action_type'] ?? '' ),
             'config'        => json_encode( $params['config'] ?? array() ),
         ), array( 'id' => $id, 'user_id' => $user_id ) );
 

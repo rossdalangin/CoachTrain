@@ -168,6 +168,21 @@ class Coach_Client_Engine {
             )
         ) );
 
+        register_rest_route( 'cce/v1', '/maintenance/debug-auth', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => function() {
+                    return array(
+                        'success' => true,
+                        'user_id' => get_current_user_id(),
+                        'can_manage' => current_user_can('manage_options'),
+                        'nonce_verified' => true // If they reach here, nonce was ok enough for route
+                    );
+                },
+                'permission_callback' => '__return_true',
+            )
+        ) );
+
         register_rest_route( 'cce/v1', '/maintenance/clear-data', array(
             array(
                 'methods'             => 'POST',

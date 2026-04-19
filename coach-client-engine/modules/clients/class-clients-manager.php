@@ -68,9 +68,9 @@ class CCE_Clients_Manager extends CCE_REST_Controller {
         $params = $this->get_params( $request );
 
         $data = array(
-            'title'                => sanitize_text_field( $params['title'] ),
+            'title'                => sanitize_text_field( $params['title'] ?? '' ),
             'description'          => sanitize_textarea_field( $params['description'] ?? '' ),
-            'price'                => (float) $params['price'],
+            'price'                => (float) ($params['price'] ?? 0),
             'type'                 => sanitize_text_field( $params['type'] ?? 'one-time' ),
             'dream_outcome'        => sanitize_textarea_field( $params['dream_outcome'] ?? '' ),
             'perceived_likelihood' => sanitize_textarea_field( $params['perceived_likelihood'] ?? '' ),

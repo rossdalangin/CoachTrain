@@ -255,18 +255,11 @@
             const $btn = $(this);
             $btn.prop('disabled', true).text('Generating...');
 
-            $.ajax({
-                url: cceAdmin.restUrl + 'maintenance/sample-data',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function(res) {
-                    if (res.success) {
-                        alert(res.message);
-                        window.location.reload();
-                    }
-                },
-                error: function() {
-                    alert('An error occurred while generating sample data.');
+            cceApi('maintenance/sample-data', 'POST', {}, function(res) {
+                if (res.success) {
+                    alert(res.message);
+                    window.location.reload();
+                } else {
                     $btn.prop('disabled', false).text('Populate Sample Data');
                 }
             });

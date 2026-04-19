@@ -58,9 +58,9 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
         $wpdb->update( "{$wpdb->prefix}cce_testimonials", array(
             'type'        => sanitize_text_field( $params['type'] ?? 'testimonial' ),
             'title'       => sanitize_text_field( $params['title'] ?? '' ),
-            'client_name' => sanitize_text_field( $params['client_name'] ),
-            'content'     => sanitize_textarea_field( $params['content'] ),
-            'rating'      => absint( $params['rating'] ),
+            'client_name' => sanitize_text_field( $params['client_name'] ?? '' ),
+            'content'     => sanitize_textarea_field( $params['content'] ?? '' ),
+            'rating'      => absint( $params['rating'] ?? 5 ),
         ), array( 'id' => $id, 'user_id' => $user_id ) );
 
         return $this->success( array( 'message' => 'Testimonial updated' ) );

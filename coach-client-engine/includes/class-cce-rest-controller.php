@@ -26,7 +26,14 @@ abstract class CCE_REST_Controller extends WP_REST_Controller {
 	 * Check if the user has permission to perform the request.
 	 */
 	public function check_permission( $request ) {
-		return current_user_can( 'manage_options' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+            return new WP_Error(
+                'rest_forbidden',
+                __( 'You do not have sufficient permissions to access this endpoint.', 'coach-client-engine' ),
+                array( 'status' => 403 )
+            );
+        }
+        return true;
 	}
 
 	/**
