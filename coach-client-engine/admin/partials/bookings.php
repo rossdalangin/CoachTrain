@@ -157,24 +157,12 @@
                 question_type: $('#new-question-type').val(),
                 is_required: $('#new-question-required').is(':checked') ? 1 : 0
             };
-            $.ajax({
-                url: cceAdmin.restUrl + 'bookings/questions',
-                method: 'POST',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function() { location.reload(); }
-            });
+            cceApi('bookings/questions', 'POST', data, () => location.reload());
         });
 
         $(document).on('click', '.cce-delete-question', function() {
             if(!confirm('Delete question?')) return;
-            $.ajax({
-                url: cceAdmin.restUrl + 'bookings/questions/' + $(this).data('id'),
-                method: 'DELETE',
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function() { location.reload(); }
-            });
+            cceApi('bookings/questions/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
         });
 
         $('.cce-view-questionnaire').on('click', function(e) {

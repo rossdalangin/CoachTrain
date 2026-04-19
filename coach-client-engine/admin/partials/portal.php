@@ -107,65 +107,24 @@
         $('#cce-add-onboarding-task-form').on('submit', function(e) {
             e.preventDefault();
             const data = { task_name: $('#new-onboarding-task-name').val() };
-            if (typeof cceApi === 'function') {
-                cceApi('portal/onboarding-tasks', 'POST', JSON.stringify(data), () => location.reload());
-            } else {
-                $.ajax({
-                    url: cceAdmin.restUrl + 'portal/onboarding-tasks',
-                    method: 'POST',
-                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    success: function() { location.reload(); }
-                });
-            }
+            cceApi('portal/onboarding-tasks', 'POST', data, () => location.reload());
         });
 
         $(document).on('click', '.cce-delete-onboarding-task', function() {
             if(!confirm('Delete onboarding task?')) return;
-            if (typeof cceApi === 'function') {
-                cceApi('portal/onboarding-tasks/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
-            } else {
-                $.ajax({
-                    url: cceAdmin.restUrl + 'portal/onboarding-tasks/' + $(this).data('id'),
-                    method: 'DELETE',
-                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                    success: function() { location.reload(); }
-                });
-            }
+            cceApi('portal/onboarding-tasks/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
         });
 
         $('#cce-add-resource-form').on('submit', function(e) {
             e.preventDefault();
             const data = {};
             $(this).serializeArray().forEach(item => data[item.name] = item.value);
-
-            if (typeof cceApi === 'function') {
-                cceApi('portal/resources', 'POST', JSON.stringify(data), () => location.reload());
-            } else {
-                $.ajax({
-                    url: cceAdmin.restUrl + 'portal/resources',
-                    method: 'POST',
-                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    success: function() { location.reload(); }
-                });
-            }
+            cceApi('portal/resources', 'POST', data, () => location.reload());
         });
 
         $(document).on('click', '.cce-delete-resource', function() {
             if(!confirm('Delete this resource?')) return;
-            if (typeof cceApi === 'function') {
-                cceApi('portal/resources/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
-            } else {
-                $.ajax({
-                    url: cceAdmin.restUrl + 'portal/resources/' + $(this).data('id'),
-                    method: 'DELETE',
-                    beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                    success: function() { location.reload(); }
-                });
-            }
+            cceApi('portal/resources/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
         });
     });
     </script>

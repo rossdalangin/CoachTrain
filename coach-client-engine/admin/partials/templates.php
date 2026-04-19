@@ -86,16 +86,10 @@ jQuery(document).ready(function($) {
         const strategy = $btn.data('strategy');
         $btn.prop('disabled', true).text('Building Strategy...');
 
-        $.ajax({
-            url: cceAdmin.restUrl + 'maintenance/sample-data',
-            method: 'POST',
-            data: { model: strategy, linked: true },
-            beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-            success: function(res) {
-                if (res.success) {
-                    alert('Strategy deployed successfully! All Funnels, Offers, and Emails are now linked.');
-                    window.location.reload();
-                }
+        cceApi('maintenance/sample-data', 'POST', { model: strategy, linked: true }, function(res) {
+            if (res.success) {
+                alert('Strategy deployed successfully! All Funnels, Offers, and Emails are now linked.');
+                window.location.reload();
             }
         });
     });
@@ -107,19 +101,11 @@ jQuery(document).ready(function($) {
         const model = $btn.data('model');
         $btn.prop('disabled', true).text('Deploying...');
 
-        $.ajax({
-            url: cceAdmin.restUrl + 'maintenance/sample-data',
-            method: 'POST',
-            data: { model: model },
-            beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-            success: function(res) {
-                if (res.success) {
-                    alert(res.message);
-                    window.location.reload();
-                }
-            },
-            error: function() {
-                alert('An error occurred.');
+        cceApi('maintenance/sample-data', 'POST', { model: model }, function(res) {
+            if (res.success) {
+                alert(res.message);
+                window.location.reload();
+            } else {
                 $btn.prop('disabled', false).text('Deploy ' + model + ' Model');
             }
         });
@@ -128,15 +114,10 @@ jQuery(document).ready(function($) {
     $('#cce-clear-user-data').on('click', function() {
         if (!confirm('Are you absolutely sure you want to clear ALL your data? This cannot be undone.')) return;
 
-        $.ajax({
-            url: cceAdmin.restUrl + 'maintenance/clear-data',
-            method: 'POST',
-            beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-            success: function(res) {
-                if (res.success) {
-                    alert(res.message);
-                    window.location.reload();
-                }
+        cceApi('maintenance/clear-data', 'POST', {}, function(res) {
+            if (res.success) {
+                alert(res.message);
+                window.location.reload();
             }
         });
     });

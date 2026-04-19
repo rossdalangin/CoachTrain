@@ -178,28 +178,22 @@
             $('#cce-hub-modal-content').html('Loading...');
             $('#cce-hub-modal').show();
 
-            $.ajax({
-                url: cceAdmin.restUrl + 'maintenance/hub-resource',
-                method: 'GET',
-                data: { file: file },
-                beforeSend: function(xhr) { xhr.setRequestHeader('X-WP-Nonce', cceAdmin.nonce); },
-                success: function(res) {
-                    if (res.success) {
-                        let content = res.content;
-                        // Replace [ ] and [x] with checkboxes
-                        content = content.replace(/\[ \]/g, '<input type="checkbox">');
-                        content = content.replace(/\[x\]/g, '<input type="checkbox" checked>');
+            cceApi('maintenance/hub-resource', 'GET', { file: file }, function(res) {
+                if (res.success) {
+                    let content = res.content;
+                    // Replace [ ] and [x] with checkboxes
+                    content = content.replace(/\[ \]/g, '<input type="checkbox">');
+                    content = content.replace(/\[x\]/g, '<input type="checkbox" checked>');
 
-                        $('#cce-hub-modal-content').html(content);
+                    $('#cce-hub-modal-content').html(content);
 
-                        // Load progress
-                        const checklistId = 'cce_hub_progress_' + $btn.closest('.hub-item').find('h3').text().replace(/\s+/g, '_').toLowerCase();
-                        const saved = JSON.parse(localStorage.getItem(checklistId) || '[]');
-                        $('#cce-hub-modal-content input[type="checkbox"]').each(function() {
-                            const text = $(this).next('label').text() || $(this).parent().text();
-                            if (saved.includes(text)) $(this).prop('checked', true);
-                        });
-                    }
+                    // Load progress
+                    const checklistId = 'cce_hub_progress_' + $btn.closest('.hub-item').find('h3').text().replace(/\s+/g, '_').toLowerCase();
+                    const saved = JSON.parse(localStorage.getItem(checklistId) || '[]');
+                    $('#cce-hub-modal-content input[type="checkbox"]').each(function() {
+                        const text = $(this).next('label').text() || $(this).parent().text();
+                        if (saved.includes(text)) $(this).prop('checked', true);
+                    });
                 }
             });
         });
