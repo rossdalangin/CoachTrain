@@ -124,6 +124,8 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 
         $funnel_id = $wpdb->insert_id;
 
+        if ( ! isset( $data['steps'] ) || ! is_array( $data['steps'] ) ) return $this->success( array( 'id' => $funnel_id ) );
+
         foreach ( $data['steps'] as $step ) {
             $wpdb->insert( "{$wpdb->prefix}cce_funnel_steps", array(
                 'user_id'    => $user_id,
@@ -303,17 +305,19 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
         // Simplified: Delete and re-insert for this version
         $wpdb->delete( $table_name, array( 'funnel_id' => $funnel_id, 'user_id' => $user_id ) );
 
-        foreach ( $steps as $index => $step ) {
-            $wpdb->insert( $table_name, array(
-                'user_id'    => $user_id,
-                'funnel_id'  => $funnel_id,
-                'title'      => sanitize_text_field( $step['title'] ),
-                'step_order' => $index + 1,
-                'step_type'  => sanitize_text_field( $step['type'] ),
-                'config'     => json_encode( $step['config'] ?? array() ),
-                'tracking_scripts' => $step['tracking_scripts'] ?? '',
-                'logic'      => $step['logic'] ?? '',
-            ) );
+        if ( is_array( $steps ) ) {
+            foreach ( $steps as $index => $step ) {
+                $wpdb->insert( $table_name, array(
+                    'user_id'    => $user_id,
+                    'funnel_id'  => $funnel_id,
+                    'title'      => sanitize_text_field( $step['title'] ?? '' ),
+                    'step_order' => $index + 1,
+                    'step_type'  => sanitize_text_field( $step['type'] ?? 'thank_you' ),
+                    'config'     => json_encode( $step['config'] ?? array() ),
+                    'tracking_scripts' => $step['tracking_scripts'] ?? '',
+                    'logic'      => $step['logic'] ?? '',
+                ) );
+            }
         }
 
         return $this->success( array( 'message' => 'Steps saved' ) );

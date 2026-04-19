@@ -16,8 +16,8 @@ class CCE_Stripe_Wrapper {
 	public function create_payment_intent( $amount, $currency = 'usd' ) {
 		// Mock Stripe API call
 		return array(
-			'client_secret' => 'pi_' . bin2hex( random_bytes( 12 ) ) . '_secret_' . bin2hex( random_bytes( 12 ) ),
-			'id'            => 'pi_' . bin2hex( random_bytes( 12 ) ),
+			'client_secret' => 'pi_' . wp_generate_password( 24, false ) . '_secret_' . wp_generate_password( 24, false ),
+			'id'            => 'pi_' . wp_generate_password( 24, false ),
 		);
 	}
 }

@@ -119,7 +119,7 @@ class CCE_Post_Handler {
             'email'        => sanitize_email( $_POST['email'] ?? '' ),
             'status'       => 'cold',
             'crm_stage_id' => $default_stage_id,
-            'secure_token' => bin2hex( random_bytes( 32 ) ),
+            'secure_token' => wp_generate_password( 64, false ),
             'created_at'   => current_time( 'mysql' ),
         ) );
 

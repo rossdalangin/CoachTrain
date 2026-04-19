@@ -138,7 +138,7 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
         $ids = $params['ids'] ?? [];
         $action = $params['bulk_action'] ?? '';
 
-        if ( empty( $ids ) ) return $this->error( 'No IDs provided' );
+        if ( empty( $ids ) || ! is_array( $ids ) ) return $this->error( 'No IDs provided' );
 
         $ids_string = implode( ',', array_map( 'absint', $ids ) );
 
