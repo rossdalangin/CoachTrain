@@ -38,13 +38,21 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/automation/rules/(?P<id>\d+)', array(
 			array(
-				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
+				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_rule' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
             array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_rule' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/rules/(?P<id>\d+)/delete', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'delete_rule' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );
@@ -64,13 +72,21 @@ class CCE_Automation_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/automation/templates/(?P<id>\d+)', array(
 			array(
-				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
+				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_template' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
             array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_template' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/automation/templates/(?P<id>\d+)/delete', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'delete_template' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );

@@ -112,7 +112,7 @@
 
         $(document).on('click', '.cce-delete-onboarding-task', function() {
             if(!confirm('Delete onboarding task?')) return;
-            cceApi('portal/onboarding-tasks/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+            cceApi('portal/onboarding-tasks/' + $(this).attr('data-id') + '/delete', 'POST', {}, () => location.reload());
         });
 
         $('#cce-add-resource-form').on('submit', function(e) {

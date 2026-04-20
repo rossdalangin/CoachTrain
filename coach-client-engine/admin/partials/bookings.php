@@ -162,7 +162,7 @@
 
         $(document).on('click', '.cce-delete-question', function() {
             if(!confirm('Delete question?')) return;
-            cceApi('bookings/questions/' + $(this).data('id'), 'DELETE', {}, () => location.reload());
+            cceApi('bookings/questions/' + $(this).attr('data-id') + '/delete', 'POST', {}, () => location.reload());
         });
 
         $('.cce-view-questionnaire').on('click', function(e) {

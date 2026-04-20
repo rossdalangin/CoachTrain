@@ -21,6 +21,14 @@ class CCE_Funnels_Manager extends CCE_REST_Controller {
 			),
 		) );
 
+        register_rest_route( $this->namespace, '/funnels/(?P<id>\d+)/delete', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'delete_funnel' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
         register_rest_route( $this->namespace, '/funnels/templates', array(
 			array(
 				'methods'             => WP_REST_Server::READABLE,

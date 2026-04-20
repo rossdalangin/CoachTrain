@@ -47,13 +47,21 @@ class CCE_Leads_Manager extends CCE_REST_Controller {
 
         register_rest_route( $this->namespace, '/leads/(?P<id>\d+)', array(
 			array(
-				'methods'             => array( WP_REST_Server::DELETABLE, WP_REST_Server::CREATABLE ),
+				'methods'             => WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_lead' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 			array(
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_lead' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			),
+		) );
+
+        register_rest_route( $this->namespace, '/leads/(?P<id>\d+)/delete', array(
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'delete_lead' ),
 				'permission_callback' => array( $this, 'check_permission' ),
 			),
 		) );

@@ -423,7 +423,7 @@ jQuery(document).ready(function($) {
     // Generic Actions
     $(document).on('click', '.cce-delete-funnel', function() {
         if(!confirm('Delete funnel?')) return;
-        cceApi('funnels/' + $(this).attr('data-funnel-id'), 'DELETE', {}, () => location.reload());
+        cceApi('funnels/' + $(this).attr('data-funnel-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     $(document).on('click', '.cce-duplicate-funnel', function() {
@@ -433,7 +433,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-lead', function() {
         if(!confirm('Delete lead?')) return;
-        cceApi('leads/' + $(this).attr('data-lead-id'), 'DELETE', {}, () => location.reload());
+        cceApi('leads/' + $(this).attr('data-lead-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     $(document).on('click', '.cce-delete-offer', function() {
@@ -448,7 +448,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-resource', function() {
         if(!confirm('Delete resource?')) return;
-        cceApi('portal/resources/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
+        cceApi('portal/resources/' + $(this).attr('data-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     $(document).on('click', '.cce-delete-testimonial', function() {
@@ -458,7 +458,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-template', function() {
         if(!confirm('Delete template?')) return;
-        cceApi('automation/templates/' + $(this).attr('data-id'), 'DELETE', {}, () => location.reload());
+        cceApi('automation/templates/' + $(this).attr('data-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     $(document).on('submit', '#cce-broadcast-form', function(e) {
@@ -555,7 +555,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-booking', function() {
         if(!confirm('Delete booking?')) return;
-        cceApi('bookings/' + $(this).attr('data-booking-id'), 'DELETE', {}, () => location.reload());
+        cceApi('bookings/' + $(this).attr('data-booking-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     // Funnels: View Steps
@@ -788,7 +788,7 @@ jQuery(document).ready(function($) {
 
     $(document).on('click', '.cce-delete-rule', function() {
         if(!confirm('Delete rule?')) return;
-        cceApi('automation/rules/' + $(this).attr('data-rule-id'), 'DELETE', {}, () => location.reload());
+        cceApi('automation/rules/' + $(this).attr('data-rule-id') + '/delete', 'POST', {}, () => location.reload());
     });
 
     // Automation: Add Webhook
