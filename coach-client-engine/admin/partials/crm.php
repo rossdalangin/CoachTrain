@@ -83,7 +83,7 @@
             ];
 
             foreach ( $stages as $stage ):
-                $stage_leads = $wpdb->get_results( $wpdb->prepare( "SELECT id, first_name, last_name, tags, status FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
+                $stage_leads = $wpdb->get_results( $wpdb->prepare( "SELECT id, first_name, last_name, tags, status, crm_stage_id FROM {$wpdb->prefix}cce_leads WHERE crm_stage_id = %d AND user_id = %d", $stage->id, $user_id ) );
                 $count = count($stage_leads);
                 $weight = 0.1; // Default
                 foreach($weights as $key => $val) {
