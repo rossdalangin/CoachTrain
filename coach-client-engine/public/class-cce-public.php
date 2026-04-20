@@ -14,7 +14,83 @@ class CCE_Public {
 		add_shortcode( 'cce_checkout', array( $this, 'render_checkout' ) );
 		add_shortcode( 'cce_client_portal', array( $this, 'render_client_portal' ) );
         add_shortcode( 'cce_funnel', array( $this, 'render_funnel' ) );
+        add_action( 'template_redirect', array( $this, 'handle_payment_simulation' ) );
+        add_action( 'template_redirect', array( $this, 'track_funnel_visits' ) );
+        add_action( 'rest_api_init', array( $this, 'register_portal_auth_routes' ) );
+        add_action( 'init', array( $this, 'capture_utm_parameters' ) );
 	}
+
+    /**
+     * Capture UTM parameters.
+     */
+    public function capture_utm_parameters() {
+        $params = ['utm_source', 'utm_medium', 'utm_campaign'];
+        foreach ( $params as $p ) {
+            if ( isset( $_GET[$p] ) ) {
+                setcookie( 'cce_' . $p, sanitize_text_field( $_GET[$p] ), time() + DAY_IN_SECONDS, '/' );
+            }
+        }
+    }
+
+    /**
+     * Register portal auth routes.
+     */
+    public function register_portal_auth_routes() {
+        register_rest_route( 'cce/v1', '/portal/auth', array(
+            'methods' => 'POST',
+            'callback' => array( $this, 'handle_portal_login' ),
+            'permission_callback' => '__return_true',
+        ) );
+    }
+
+    /**
+     * Handle portal login.
+     */
+    public function handle_portal_login( $request ) {
+        global $wpdb;
+        $email = sanitize_email( $request->get_param( 'email' ) );
+
+        $lead = $wpdb->get_row( $wpdb->prepare( "SELECT id, secure_token FROM {$wpdb->prefix}cce_leads WHERE email = %s", $email ) );
+
+        if ( ! $lead ) {
+            return array( 'success' => false, 'message' => 'No record found with that email.' );
+        }
+
+        // Set cookie
+        setcookie( 'cce_lead_token', $lead->secure_token, time() + ( 30 * DAY_IN_SECONDS ), '/' );
+
+        return array( 'success' => true, 'secure_token' => $lead->secure_token );
+    }
+
+    /**
+     * Handle payment simulation for test mode.
+     */
+    public function handle_payment_simulation() {
+        if ( ! isset( $_GET['cce_simulate_payment'] ) ) return;
+
+        if ( ! wp_verify_nonce( $_GET['nonce'] ?? '', 'cce_sim_payment' ) ) {
+            wp_die( 'Security check failed' );
+        }
+
+        global $wpdb;
+        $lead_id = absint( $_GET['lead_id'] );
+        $offer_id = absint( $_GET['offer_id'] );
+        $gateway = sanitize_text_field( $_GET['gateway'] );
+
+        $user_id = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}cce_leads WHERE id = %d", $lead_id ) );
+
+        $wpdb->update(
+            "{$wpdb->prefix}cce_payments",
+            array( 'status' => 'completed', 'transaction_id' => 'SIM_' . wp_generate_password( 16, false ) ),
+            array( 'lead_id' => $lead_id, 'offer_id' => $offer_id, 'status' => 'pending' )
+        );
+
+        do_action( 'cce_payment_completed', $lead_id );
+        CCE_Activity_Logger::log( $lead_id, 'payment', 'TEST PAYMENT: Simulation completed for ' . $gateway );
+
+        wp_redirect( add_query_arg( 'payment_success', '1', wp_get_referer() ?: home_url() ) );
+        exit;
+    }
 
 	/**
 	 * Render checkout form.
@@ -23,17 +99,40 @@ class CCE_Public {
 		global $wpdb;
 		$atts = shortcode_atts( array(
 			'offer_id' => 1,
+            'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
+
+        $offer_id = absint( $atts['offer_id'] );
+        $offer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_offers WHERE id = %d", $offer_id ) );
+        $user_id = $atts['user_id'] ?: ( $offer ? $offer->user_id : get_the_author_meta( 'ID' ) );
+
+        $currency_code = get_option('cce_currency', 'USD');
+        $currency_symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£', 'CAD' => 'C$', 'AUD' => 'A$'];
+        $currency_symbol = $currency_symbols[$currency_code] ?? '$';
 
 		ob_start();
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
 		<div class="cce-checkout-wrapper">
-			<h3>Complete Your Purchase</h3>
+			<?php if ( $offer ): ?>
+                <h3>Enroll in <?php echo esc_html( $offer->title ); ?></h3>
+                <div class="cce-offer-summary" style="margin-bottom:20px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                    <p style="font-size:20px; font-weight:bold; color:#0073aa;">Price: <?php echo $currency_symbol . number_format($offer->price, 2); ?></p>
+                    <?php if ($offer->dream_outcome): ?>
+                        <p><strong>Your Outcome:</strong> <?php echo esc_html($offer->dream_outcome); ?></p>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <h3>Complete Your Purchase</h3>
+            <?php endif; ?>
+
 			<form id="cce-public-checkout-form">
-				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $atts['offer_id'] ); ?>">
+				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer_id ); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
 				<select name="gateway" required>
 					<option value="stripe">Stripe</option>
 					<option value="paypal">PayPal</option>
@@ -59,9 +158,12 @@ class CCE_Public {
 			.then(res => res.json())
 			.then(res => {
 				const msg = document.getElementById('cce-checkout-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Payment successful! Welcome aboard.</p>';
-				} else {
+				if (res.success && res.data.redirect_url) {
+					msg.innerHTML = '<p style="color:green">' + res.data.message + '</p>';
+                    window.location.href = res.data.redirect_url;
+				} else if (res.success) {
+                    msg.innerHTML = '<p style="color:green">Payment successful! Welcome aboard.</p>';
+                } else {
 					msg.innerHTML = '<p style="color:red">Payment failed. Please try again.</p>';
 				}
 			});
@@ -72,9 +174,6 @@ class CCE_Public {
 	}
 
 	/**
-	 * Render client portal.
-	 */
-    /**
 	 * Render funnel journey.
 	 */
 	public function render_funnel( $atts ) {
@@ -84,40 +183,68 @@ class CCE_Public {
 		), $atts );
 
         $funnel_id = absint( $atts['id'] );
+        $funnel = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE id = %d", $funnel_id ) );
+
+        if ( ! $funnel ) {
+            return '<p>Funnel not found.</p>';
+        }
+
+        $owner_id = $funnel->user_id;
         $steps = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
 
         if ( ! $steps ) {
-            return '<p>Funnel not found or has no steps.</p>';
+            return '<p>Funnel has no steps.</p>';
         }
 
-        $current_step_index = absint( $_GET['step'] ?? 0 );
+        $current_step_index = absint( $_GET['step_idx'] ?? 0 );
         $current_step = $steps[$current_step_index] ?? $steps[0];
 
+
+        $next_step_url = isset($steps[$current_step_index + 1]) ? add_query_arg('step_idx', $current_step_index + 1) : '';
+
+        // Conditional Logic Check
+        if ( ! empty( $current_step->logic ) ) {
+            $logic = json_decode( $current_step->logic, true );
+            if ( $logic && ! empty( $logic['redirect_tag'] ) ) {
+                $token = $_COOKIE['cce_lead_token'] ?? '';
+                $lead = $wpdb->get_row( $wpdb->prepare( "SELECT tags FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
+                if ( $lead && strpos( $lead->tags, $logic['trigger_tag'] ) !== false ) {
+                    $next_step_url = esc_url($logic['redirect_url']);
+                }
+            }
+        }
+
 		ob_start();
+        if ( ! empty( $current_step->tracking_scripts ) ) {
+            echo $current_step->tracking_scripts;
+        }
 		?>
-		<div class="cce-funnel-wrapper">
+		<div class="cce-funnel-wrapper" data-funnel-id="<?php echo $funnel_id; ?>" data-step-index="<?php echo $current_step_index; ?>">
 			<div class="cce-funnel-step">
                 <?php
                 switch ( $current_step->step_type ) {
                     case 'optin':
-                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title ) );
+                        echo $this->render_lead_capture_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'booking':
-                        echo $this->render_booking_form( array( 'title' => $current_step->title ) );
+                        echo $this->render_booking_form( array( 'title' => $current_step->title, 'redirect' => $next_step_url, 'user_id' => $owner_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'checkout':
-                        echo $this->render_checkout( array( 'offer_id' => 1 ) ); // offer_id logic
+                        $config = json_decode( $current_step->config, true );
+                        $offer_id = absint( $config['offer_id'] ?? 1 );
+                        echo $this->render_checkout( array( 'offer_id' => $offer_id, 'step_id' => $current_step->id ) );
                         break;
                     case 'thank_you':
-                        echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>Success! You are all set.</p>";
+                        $config = json_decode( $current_step->config, true );
+                        if ( ! empty( $config['redirect_url'] ) ) {
+                            echo "<script>window.location.href='" . esc_url($config['redirect_url']) . "';</script>";
+                        } else {
+                            $msg = $config['success_message'] ?: 'Success! You are all set.';
+                            echo "<h3>" . esc_html( $current_step->title ) . "</h3><p>" . wp_kses_post($msg) . "</p>";
+                        }
                         break;
                 }
                 ?>
-                <?php if ( isset( $steps[$current_step_index + 1] ) ): ?>
-                    <div style="margin-top:20px;">
-                        <a href="?step=<?php echo $current_step_index + 1; ?>" class="button">Next Step →</a>
-                    </div>
-                <?php endif; ?>
             </div>
 		</div>
 		<?php
@@ -132,22 +259,111 @@ class CCE_Public {
 		$lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) );
 
 		if ( ! $lead ) {
-			return '<p>Please log in or capture your lead info first.</p>';
+			?>
+            <div class="cce-client-portal cce-portal-login">
+                <h3>Access Your Private Portal</h3>
+                <p>Enter your email address to access your coaching roadmap and resources.</p>
+                <form id="cce-portal-login-form">
+                    <input type="email" id="portal-email" placeholder="you@example.com" required style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px;">
+                    <button type="submit" class="button" style="width:100%; padding:12px; background:var(--cce-primary, #0073aa); color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Access Portal</button>
+                </form>
+                <div id="portal-login-message" style="margin-top:15px;"></div>
+                <script>
+                document.getElementById('cce-portal-login-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('portal-email').value;
+                    fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/auth' ) ); ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            location.reload();
+                        } else {
+                            document.getElementById('portal-login-message').innerHTML = '<p style="color:red">' + res.message + '</p>';
+                        }
+                    });
+                });
+                </script>
+            </div>
+            <?php
+            return ob_get_clean();
 		}
+
+        $completed = json_decode( $lead->onboarding_progress ?: '[]', true );
+
+        $portal_manager = new CCE_Portal_Manager();
+        $resources_req = new WP_REST_Request();
+        // Since get_resources uses cookies to find the lead and its owner, we don't need to pass owner_id explicitly in the request params if the cookie is present.
+        $resources_res = $portal_manager->get_resources( $resources_req );
+        $resources = is_wp_error($resources_res) ? [] : $resources_res->get_data();
 		?>
 		<div class="cce-client-portal">
-			<h3>Your Client Dashboard</h3>
+			<h3>Welcome, <?php echo esc_html( $lead->first_name ); ?></h3>
 			<div style="display:flex; gap:20px;">
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
-					<h4>Resources</h4>
-					<ul>
-						<li>Welcome Pack (PDF)</li>
-						<li>High-Ticket Training (Video)</li>
-					</ul>
+					<h4>Your Coaching Roadmap</h4>
+                    <div id="cce-onboarding-tasks">
+                        <?php
+                        $tasks_db = $wpdb->get_results($wpdb->prepare("SELECT task_name FROM {$wpdb->prefix}cce_onboarding_tasks WHERE user_id = %d ORDER BY task_order ASC", $lead->user_id));
+                        $tasks = !empty($tasks_db) ? array_column($tasks_db, 'task_name') : ['Welcome Training', 'Community Access'];
+                        foreach ($tasks as $t):
+                            $is_done = in_array($t, $completed);
+                        ?>
+                        <p style="<?php echo $is_done ? 'text-decoration:line-through' : ''; ?>">
+                            <input type="checkbox" class="cce-portal-complete" data-step="<?php echo esc_attr($t); ?>" <?php checked($is_done); ?> <?php disabled($is_done); ?>>
+                            <?php echo esc_html($t); ?>
+                        </p>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <h4 style="margin-top:30px;">Resources</h4>
+                    <?php
+                    if ($resources):
+                        $categorized = [];
+                        foreach ($resources as $r) {
+                            $cat = $r->category ?: 'General';
+                            $categorized[$cat][] = $r;
+                        }
+                        foreach ($categorized as $cat => $items):
+                        ?>
+                            <h5 style="margin:15px 0 5px; color:#666; text-transform:uppercase; font-size:11px;"><?php echo esc_html($cat); ?></h5>
+                            <ul style="list-style:none; padding:0;">
+                                <?php foreach ($items as $r): ?>
+                                    <li style="margin-bottom:8px; padding:10px; background:#f9f9f9; border-radius:5px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                                            <span><strong>[<?php echo esc_html($r->type); ?>]</strong> <?php echo esc_html($r->title); ?></span>
+                                            <a href="<?php echo esc_url($r->url); ?>" class="button button-small cce-resource-link" data-id="<?php echo $r->id; ?>" target="_blank">Access</a>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>No resources available at your current level.</p>
+                    <?php endif; ?>
 				</div>
 				<div style="flex:1; border:1px solid #ddd; padding:20px;">
-					<h4>Your Progress</h4>
-					<p>Onboarding: <strong>Complete</strong></p>
+					<h4>Your Journey Milestones</h4>
+                    <div id="cce-portal-milestones" style="margin-bottom:30px;">
+                        <?php
+                        $milestones = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}cce_milestones WHERE lead_id = %d ORDER BY created_at ASC", $lead->id));
+                        if ($milestones): foreach ($milestones as $m): ?>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                <span style="font-size:20px;"><?php echo $m->is_completed ? '🏆' : '⚪'; ?></span>
+                                <span style="<?php echo $m->is_completed ? 'font-weight:bold; color:#00a32a;' : 'color:#666;'; ?>">
+                                    <?php echo esc_html($m->title); ?>
+                                    <?php if($m->is_completed) echo '<br><small style="font-weight:normal; color:#888;">Completed: ' . $m->completed_at . '</small>'; ?>
+                                </span>
+                            </div>
+                        <?php endforeach; else: ?>
+                            <p style="color:#888; font-size:12px;">Your milestones will appear here as we progress through the program.</p>
+                        <?php endif; ?>
+                    </div>
+
+					<h4>Your To-Do List</h4>
 					<?php
                         $has_booking = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d AND status != 'cancelled'", $lead->id ) );
                         if ( ! $has_booking ) {
@@ -155,11 +371,48 @@ class CCE_Public {
                             echo $this->render_booking_form( array( 'title' => '' ) );
                         } else {
                             echo '<p>Next Step: <strong>Attend Your Call</strong></p>';
+                            $booking = $wpdb->get_row( $wpdb->prepare( "SELECT start_time FROM {$wpdb->prefix}cce_bookings WHERE lead_id = %d ORDER BY created_at DESC LIMIT 1", $lead->id ) );
+                            if ($booking) echo '<p>Scheduled for: ' . esc_html( $booking->start_time ) . '</p>';
                         }
                     ?>
 				</div>
 			</div>
 		</div>
+        <script>
+        document.querySelectorAll('.cce-resource-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const resourceId = this.getAttribute('data-id');
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/resources/track' ) ); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resource_id: resourceId })
+                });
+            });
+        });
+
+        document.querySelectorAll('.cce-portal-complete').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    const stepName = this.getAttribute('data-step');
+                    fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/portal/onboarding/complete' ) ); ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                        },
+                        body: JSON.stringify({ step_name: stepName })
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            this.parentElement.style.textDecoration = 'line-through';
+                            this.disabled = true;
+                        }
+                    });
+                }
+            });
+        });
+        </script>
 		<?php
 		return ob_get_clean();
 	}
@@ -168,23 +421,56 @@ class CCE_Public {
 	 * Render testimonials.
 	 */
 	public function render_testimonials( $atts ) {
+        global $wpdb;
         $atts = shortcode_atts( array(
-			'type' => 'testimonial', // testimonial, case_study
+			'type' => 'testimonial',
+            'user_id' => 0,
 		), $atts );
 
+        $type = sanitize_text_field( $atts['type'] );
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		ob_start();
+
+        $query = "SELECT * FROM {$wpdb->prefix}cce_testimonials WHERE status = 'active' AND type = %s";
+        $params = array( $type );
+        if ( $user_id ) {
+            $query .= " AND user_id = %d";
+            $params[] = $user_id;
+        }
+        $query .= " ORDER BY RAND() LIMIT 3";
+
+        $testimonials = $wpdb->get_results( $wpdb->prepare( $query, $params ) );
 		?>
 		<div class="cce-testimonials-display">
             <?php if ( 'case_study' === $atts['type'] ): ?>
-                <div class="cce-case-study" style="border:1px solid #ddd; padding:20px; margin-bottom:10px; background:#fff;">
-                    <h4>How Sarah Doubled Her Revenue</h4>
-                    <p>Before using the Engine, Sarah was struggling to get 1 client/month. Now she gets 5 consistently.</p>
+                <div class="cce-case-study-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <?php if ($testimonials): foreach($testimonials as $cs): ?>
+                        <div class="cce-case-study" style="border:1px solid #eee; padding:20px; border-radius:10px;">
+                            <h4><?php echo esc_html($cs->title ?: 'Success Story'); ?></h4>
+                            <p><?php echo wp_trim_words(esc_html($cs->content), 20); ?></p>
+                            <strong>- <?php echo esc_html($cs->client_name); ?></strong>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div class="cce-case-study" style="border:1px solid #eee; padding:20px; border-radius:10px;">
+                            <h4>The $50k Month Strategy</h4>
+                            <p>How we helped a fitness coach scale using the Engine.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
-                <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
-                    <p>"The Coach Client Engine tripled my bookings in one month!"</p>
-                    <strong>- Sarah Jenkins</strong>
-                </div>
+                <?php if ( ! empty( $testimonials ) ): ?>
+                    <?php foreach ( $testimonials as $t ): ?>
+                        <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
+                            <p>"<?php echo esc_html( $t->content ); ?>"</p>
+                            <strong>- <?php echo esc_html( $t->client_name ); ?></strong>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="cce-testimonial-card" style="border:1px solid #ddd; padding:20px; margin-bottom:10px;">
+                        <p>"The Coach Client Engine tripled my bookings in one month!"</p>
+                        <strong>- Sarah Jenkins</strong>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 		</div>
 		<?php
@@ -198,16 +484,22 @@ class CCE_Public {
 		global $wpdb;
 		$atts = shortcode_atts( array(
 			'title' => 'Schedule Your Free Consultation',
+            'redirect' => '',
+            'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
 
 		ob_start();
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		$token = $_COOKIE['cce_lead_token'] ?? '';
 		$lead_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_leads WHERE secure_token = %s", $token ) ) ?: 0;
 		?>
 		<div class="cce-booking-form-wrapper">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
-			<form id="cce-public-booking-form">
+			<form class="cce-public-booking-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
 				<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead_id ); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
                 <div style="margin-bottom:15px;">
                     <label>Preferred Date & Time</label>
 				    <input type="datetime-local" name="start_time" required>
@@ -220,98 +512,166 @@ class CCE_Public {
 					<option value="America/Los_Angeles">PST</option>
 				</select>
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label>What is your #1 goal right now?</label>
-                    <textarea name="questionnaire[goal]" rows="3" required></textarea>
+                <div class="cce-dynamic-questions">
+                    <?php
+                    $q_query = "SELECT * FROM {$wpdb->prefix}cce_questions";
+                    if ( $user_id ) {
+                        $questions = $wpdb->get_results($wpdb->prepare($q_query . " WHERE user_id = %d ORDER BY question_order ASC", $user_id));
+                    } else {
+                        $questions = $wpdb->get_results($q_query . " ORDER BY question_order ASC");
+                    }
+                    if ($questions): foreach ($questions as $q):
+                        $req = $q->is_required ? 'required' : '';
+                        $name = "questionnaire[" . esc_attr($q->question_text) . "]";
+                    ?>
+                        <div style="margin-bottom:15px;">
+                            <label><?php echo esc_html($q->question_text); ?></label>
+                            <?php if ($q->question_type === 'textarea'): ?>
+                                <textarea name="<?php echo $name; ?>" rows="3" <?php echo $req; ?>></textarea>
+                            <?php else: ?>
+                                <input type="text" name="<?php echo $name; ?>" <?php echo $req; ?>>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div style="margin-bottom:15px;">
+                            <label>What is your #1 goal right now?</label>
+                            <textarea name="questionnaire[goal]" rows="3" required></textarea>
+                        </div>
+                    <?php endif; ?>
                 </div>
 				<button type="submit" class="button">Book My Session</button>
 			</form>
-			<div id="cce-booking-message"></div>
+			<div class="cce-booking-message"></div>
 		</div>
 		<script>
-		document.getElementById('cce-public-booking-form').addEventListener('submit', function(e) {
-			e.preventDefault();
-			const formData = new FormData(this);
-			const data = Object.fromEntries(formData.entries());
-			data.end_time = data.start_time; // Simplified for this version
+		document.querySelectorAll('.cce-public-booking-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                const redirect = this.getAttribute('data-redirect');
+                data.end_time = data.start_time;
 
-			fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
-				},
-				body: JSON.stringify(data)
-			})
-			.then(res => res.json())
-			.then(res => {
-				const msg = document.getElementById('cce-booking-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Booking confirmed! We will contact you soon.</p>';
-					this.reset();
-				} else {
-					msg.innerHTML = '<p style="color:red">Failed to book session. Please try again.</p>';
-				}
-			});
-		});
+                const $btn = this.querySelector('button');
+                const originalText = $btn.innerText;
+                $btn.disabled = true;
+                $btn.innerText = 'Processing...';
+
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/bookings' ) ); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    $btn.disabled = false;
+                    $btn.innerText = originalText;
+                    if (res.success) {
+                        if(redirect) {
+                            window.location.href = redirect;
+                        } else {
+                            this.nextElementSibling.innerHTML = '<p style="color:green">Booking confirmed!</p>';
+                        }
+                    }
+                });
+            });
+        });
 		</script>
 		<?php
 		return ob_get_clean();
 	}
 
+    /**
+     * Track funnel visits via redirect hook to avoid "Headers already sent".
+     */
+    public function track_funnel_visits() {
+        if ( is_admin() ) return;
+
+        global $wpdb, $post;
+        if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'cce_funnel' ) ) return;
+
+        // Extract ID from shortcode in content
+        preg_match( '/\[cce_funnel\s+id="(\d+)"/i', $post->post_content, $matches );
+        if ( empty( $matches[1] ) ) return;
+
+        $funnel_id = absint( $matches[1] );
+        $steps = $wpdb->get_results( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}cce_funnel_steps WHERE funnel_id = %d ORDER BY step_order ASC", $funnel_id ) );
+        if ( empty( $steps ) ) return;
+
+        $step_idx = absint( $_GET['step_idx'] ?? 0 );
+        $current_step_id = $steps[$step_idx]->id ?? $steps[0]->id;
+
+        $wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}cce_funnel_steps SET visits = visits + 1 WHERE id = %d", $current_step_id ) );
+        setcookie( 'cce_funnel_source', $funnel_id, time() + HOUR_IN_SECONDS, '/' );
+        setcookie( 'cce_active_funnel_step', $current_step_id, time() + HOUR_IN_SECONDS, '/' );
+    }
+
 	/**
 	 * Render the lead capture form.
 	 */
 	public function render_lead_capture_form( $atts ) {
-		// Start session if not started
-		if ( ! session_id() ) {
-			session_start();
-		}
-
 		$atts = shortcode_atts( array(
 			'title' => 'Get My Free Coaching Guide',
-			'type'  => 'inline', // inline, popup, sticky
+			'type'  => 'inline',
+            'redirect' => '',
+            'user_id'  => 0,
+            'step_id'  => 0,
 		), $atts );
 
 		ob_start();
+        $user_id = absint( $atts['user_id'] ) ?: get_the_author_meta( 'ID' );
 		$wrapper_class = 'cce-lead-form-wrapper cce-form-' . esc_attr( $atts['type'] );
 		?>
 		<div class="<?php echo esc_attr( $wrapper_class ); ?>">
 			<h3><?php echo esc_html( $atts['title'] ); ?></h3>
-			<form id="cce-public-lead-form">
+			<form class="cce-public-lead-form" data-redirect="<?php echo esc_url($atts['redirect']); ?>">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
+                <input type="hidden" name="step_id" value="<?php echo esc_attr( $atts['step_id'] ); ?>">
 				<input type="text" name="first_name" placeholder="First Name" required>
 				<input type="email" name="email" placeholder="Email Address" required>
 				<button type="submit" class="button">Send Me the Guide</button>
 			</form>
-			<div id="cce-form-message"></div>
+			<div class="cce-form-message"></div>
 		</div>
 		<script>
-		document.getElementById('cce-public-lead-form').addEventListener('submit', function(e) {
-			e.preventDefault();
-			const formData = new FormData(this);
-			const data = Object.fromEntries(formData.entries());
+		document.querySelectorAll('.cce-public-lead-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                const redirect = this.getAttribute('data-redirect');
 
-			fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/leads' ) ); ?>', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
-				},
-				body: JSON.stringify(data)
-			})
-			.then(res => res.json())
-			.then(res => {
-				const msg = document.getElementById('cce-form-message');
-				if (res.success) {
-					msg.innerHTML = '<p style="color:green">Success! Check your email.</p>';
-					this.reset();
-					// Store secure token in session via cookie
-					document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
-				} else {
-					msg.innerHTML = '<p style="color:red">Something went wrong. Please try again.</p>';
-				}
-			});
-		});
+                const $btn = this.querySelector('button');
+                const originalText = $btn.innerText;
+                $btn.disabled = true;
+                $btn.innerText = 'Processing...';
+
+                fetch('<?php echo esc_url_raw( rest_url( 'cce/v1/leads' ) ); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': '<?php echo wp_create_nonce( 'wp_rest' ); ?>'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    $btn.disabled = false;
+                    $btn.innerText = originalText;
+                    if (res.success) {
+                        document.cookie = "cce_lead_token=" + res.data.secure_token + ";path=/";
+                        if(redirect) {
+                            window.location.href = redirect;
+                        } else {
+                            this.nextElementSibling.innerHTML = '<p style="color:green">Success!</p>';
+                        }
+                    }
+                });
+            });
+        });
 		</script>
 		<?php
 		return ob_get_clean();

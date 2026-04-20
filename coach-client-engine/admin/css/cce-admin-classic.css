@@ -50,3 +50,8 @@
     font-size: 11px;
     font-weight: bold;
 }
+
+.status-tag.status-confirmed { background: #d4edda; color: #155724; }
+.status-tag.status-pending { background: #fff3cd; color: #856404; }
+.status-tag.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-tag.status-completed { background: #d1ecf1; color: #0c5460; }

@@ -10,6 +10,7 @@ Stores lead information.
 - `source`: VARCHAR(100) (e.g., Lead Magnet Funnel)
 - `status`: VARCHAR(50) (cold, warm, hot)
 - `crm_stage_id`: BIGINT(20)
+- `onboarding_progress`: LONGTEXT (JSON)
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 - `updated_at`: DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 
@@ -32,6 +33,10 @@ Stores coaching packages/offers.
 - `price`: DECIMAL(10, 2)
 - `currency`: VARCHAR(3) DEFAULT 'USD'
 - `type`: VARCHAR(50) (one-time, subscription)
+- `dream_outcome`: TEXT
+- `perceived_likelihood`: TEXT
+- `time_delay`: TEXT
+- `effort_sacrifice`: TEXT
 - `is_active`: TINYINT(1) DEFAULT 1
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
@@ -62,6 +67,41 @@ Stores transaction records.
 - `amount`: DECIMAL(10, 2)
 - `currency`: VARCHAR(3)
 - `status`: VARCHAR(50)
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
+## Table: `cce_testimonials`
+Stores client testimonials and social proof.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `client_name`: VARCHAR(255)
+- `content`: TEXT
+- `rating`: INT DEFAULT 5
+- `status`: VARCHAR(50) DEFAULT 'active'
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
+## Table: `cce_automation_rules`
+Stores customizable automation workflows.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `trigger_event`: VARCHAR(100) (e.g., cce_lead_created, cce_booking_confirmed)
+- `action_type`: VARCHAR(100) (e.g., send_email, add_tag, move_stage)
+- `config`: LONGTEXT (JSON)
+- `is_active`: TINYINT(1) DEFAULT 1
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
+## Table: `cce_email_templates`
+Stores custom email content for automations.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `name`: VARCHAR(255)
+- `subject`: VARCHAR(255)
+- `content`: LONGTEXT
+- `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
+
+## Table: `cce_resources`
+Stores coaching resources (PDFs, videos) shared in the portal.
+- `id`: BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+- `title`: VARCHAR(255)
+- `type`: VARCHAR(50) (PDF, Video, Link)
+- `url`: VARCHAR(255)
+- `visibility`: VARCHAR(50) (public, clients_only)
 - `created_at`: DATETIME DEFAULT CURRENT_TIMESTAMP
 
 ## Table: `cce_crm_stages`

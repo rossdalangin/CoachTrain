@@ -18,7 +18,7 @@ class CCE_Paypal_Wrapper {
 	public function create_order( $amount, $currency = 'USD' ) {
 		// Mock PayPal API call
 		return array(
-			'id'     => 'PAY-' . bin2hex( random_bytes( 8 ) ),
+			'id'     => 'PAY-' . wp_generate_password( 16, false ),
 			'status' => 'CREATED',
 		);
 	}

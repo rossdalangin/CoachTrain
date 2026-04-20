@@ -27,6 +27,7 @@ class CCE_Admin {
 		);
 
         $pages = [
+            'Mastery Hub' => 'cce-hub',
             'Leads'      => 'cce-leads',
             'Bookings'   => 'cce-bookings',
             'Clients'    => 'cce-clients',
@@ -36,14 +37,24 @@ class CCE_Admin {
             'Portal'     => 'cce-portal',
             'Proof'      => 'cce-proof',
             'Analytics'  => 'cce-analytics',
+            'Templates'  => 'cce-templates',
+            'Payments'   => 'cce-payments',
             'Settings'   => 'cce-settings',
         ];
 
+        $engine = new Coach_Client_Engine();
+        $is_pro = $engine->is_pro();
+
         foreach ( $pages as $title => $slug ) {
+            $menu_title = $title;
+            if ( in_array($slug, ['cce-automation', 'cce-analytics']) && !$is_pro ) {
+                $menu_title .= ' (PRO)';
+            }
+
             add_submenu_page(
                 'coach-client-engine',
                 $title,
-                $title,
+                $menu_title,
                 'manage_options',
                 $slug,
                 array( $this, 'render_' . strtolower( str_replace( ' ', '_', $title ) ) )
@@ -56,6 +67,13 @@ class CCE_Admin {
      */
     public function render_dashboard() {
         include plugin_dir_path( __FILE__ ) . '../admin/partials/dashboard.php';
+    }
+
+    /**
+     * Render Mastery Hub.
+     */
+    public function render_mastery_hub() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/hub.php';
     }
 
     /**
@@ -131,6 +149,20 @@ class CCE_Admin {
     }
 
     /**
+     * Render Templates.
+     */
+    public function render_templates() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/templates.php';
+    }
+
+    /**
+     * Render Payments.
+     */
+    public function render_payments() {
+        include plugin_dir_path( __FILE__ ) . '../admin/partials/payments.php';
+    }
+
+    /**
      * Enqueue admin assets.
      */
     public function enqueue_assets( $hook ) {
@@ -138,5 +170,11 @@ class CCE_Admin {
             return;
         }
         wp_enqueue_style( 'cce-admin-classic', plugin_dir_url( __FILE__ ) . '../admin/css/cce-admin-classic.css', array(), CCE_VERSION );
+        wp_enqueue_script( 'cce-admin-js', plugin_dir_url( __FILE__ ) . '../admin/js/cce-admin.js', array( 'jquery', 'jquery-ui-sortable' ), CCE_VERSION, false );
+
+        wp_localize_script( 'cce-admin-js', 'cceAdmin', array(
+            'restUrl' => esc_url_raw( rest_url( 'cce/v1/' ) ),
+            'nonce'   => wp_create_nonce( 'wp_rest' ),
+        ) );
     }
 }

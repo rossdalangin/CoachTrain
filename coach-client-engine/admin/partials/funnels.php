@@ -1,10 +1,13 @@
 <div class="wrap cce-admin-wrap">
     <h1>Funnel Engine</h1>
+    <p class="description">Your Funnel is the bridge between a complete stranger and a happy client. Use the pre-built templates below to launch your acquisition sequence in minutes.</p>
     <hr class="wp-header-end">
 
     <?php
     global $wpdb;
-    $funnels = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}cce_funnels" );
+    $user_id = get_current_user_id();
+    $funnels = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}cce_funnels WHERE user_id = %d", $user_id ) );
+    $offers = $wpdb->get_results( $wpdb->prepare( "SELECT id, title FROM {$wpdb->prefix}cce_offers WHERE is_active = 1 AND user_id = %d", $user_id ) );
     ?>
 
     <div class="cce-card">
@@ -15,35 +18,137 @@
                     <th>Title</th>
                     <th>Type</th>
                     <th>Status</th>
+                    <th>Shortcode</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ( $funnels as $funnel ): ?>
+                <?php if ($funnels): foreach ( $funnels as $funnel ): ?>
                     <tr>
                         <td><strong><?php echo esc_html( $funnel->title ); ?></strong></td>
                         <td><?php echo esc_html( strtoupper( $funnel->type ) ); ?></td>
                         <td><?php echo esc_html( strtoupper( $funnel->status ) ); ?></td>
-                        <td><a href="#" class="button">Edit Steps</a></td>
+                        <td>
+                            <code>[cce_funnel id="<?php echo $funnel->id; ?>"]</code>
+                            <button class="button button-small cce-copy-shortcode" data-shortcode='[cce_funnel id="<?php echo $funnel->id; ?>"]'>Copy</button>
+                        </td>
+                        <td>
+                            <a href="#" class="button cce-view-steps" data-funnel-id="<?php echo $funnel->id; ?>">View Steps</a>
+                            <button class="button cce-duplicate-funnel" data-funnel-id="<?php echo $funnel->id; ?>">Duplicate</button>
+                            <button class="button button-link-delete cce-delete-funnel" data-funnel-id="<?php echo $funnel->id; ?>" style="color:#d63638;">Delete</button>
+                        </td>
                     </tr>
-                <?php endforeach; ?>
+                    <tr id="funnel-steps-<?php echo $funnel->id; ?>" style="display:none;">
+                        <td colspan="5" style="background:#f9f9f9; padding:15px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h4>Steps in this funnel:</h4>
+                                <button class="button button-small cce-add-step-btn" data-funnel-id="<?php echo $funnel->id; ?>">+ Add Step</button>
+                            </div>
+                            <div class="steps-container-<?php echo $funnel->id; ?>" style="margin-top:10px;">
+                                <em>Loading steps...</em>
+                            </div>
+                            <div class="funnel-viz-<?php echo $funnel->id; ?>" style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px; display:none;">
+                                <h5>Visual Performance (Conversion Waterfall)</h5>
+                                <div class="viz-track-<?php echo $funnel->id; ?>" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; else: ?>
+                    <tr><td colspan="5">No funnels found. Create one from a template below!</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 
     <div class="cce-card" style="margin-top:20px;">
-        <h3>Pre-built Templates</h3>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-            <div class="cce-card" style="border:1px solid #ddd;">
-                <h4>Lead Magnet Funnel</h4>
-                <p>Visitor -> Opt-in -> Thank You</p>
-                <button class="button button-primary">Use Template</button>
+        <h3>Strategic Funnel Templates</h3>
+        <p style="font-size:12px; color:#666;">Each template is designed based on Russell Brunson's DotCom Secrets and Alex Hormozi's $100M frameworks.</p>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; margin-top:15px;">
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #0073aa; padding:20px;">
+                <h4 style="margin-top:0;">🧲 Lead Magnet</h4>
+                <p style="font-size:11px; height:40px;">Exchange a PDF for contact info. <br><strong>Steps:</strong> Opt-in → Thank You</p>
+                <button class="button button-primary cce-use-template" data-template="lead_magnet" style="width:100%;">Deploy</button>
             </div>
-            <div class="cce-card" style="border:1px solid #ddd;">
-                <h4>Consultation Funnel</h4>
-                <p>Visitor -> Opt-in -> Booking -> Thank You</p>
-                <button class="button button-primary">Use Template</button>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #ffb700; padding:20px;">
+                <h4 style="margin-top:0;">📅 Consultation</h4>
+                <p style="font-size:11px; height:40px;">The High-Ticket Standard. <br><strong>Steps:</strong> App → Booking → Success</p>
+                <button class="button button-primary cce-use-template" data-template="consultation" style="width:100%;">Deploy</button>
             </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #d63638; padding:20px;">
+                <h4 style="margin-top:0;">🚀 Appointment Machine</h4>
+                <p style="font-size:11px; height:40px;">SDR/Setter triage system. <br><strong>Steps:</strong> Form → Triage → Strategy</p>
+                <button class="button button-primary cce-use-template" data-template="appointment_machine" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #22c55e; padding:20px;">
+                <h4 style="margin-top:0;">🧬 Hybrid Closer</h4>
+                <p style="font-size:11px; height:40px;">VSL-to-Checkout hybrid. <br><strong>Steps:</strong> Opt-in → VSL → Calendar → Pay</p>
+                <button class="button button-primary cce-use-template" data-template="hybrid_closer" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #673ab7; padding:20px;">
+                <h4 style="margin-top:0;">🎥 Webinar</h4>
+                <p style="font-size:11px; height:40px;">Automated Selling. <br><strong>Steps:</strong> Reg → VSL → Booking → Pay</p>
+                <button class="button button-primary cce-use-template" data-template="webinar" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #ef4444; padding:20px;">
+                <h4 style="margin-top:0;">💎 High-Ticket VSL</h4>
+                <p style="font-size:11px; height:40px;">Direct persuasion. <br><strong>Steps:</strong> Opt-in → VSL → Booking → Success</p>
+                <button class="button button-primary cce-use-template" data-template="vsl" style="width:100%;">Deploy</button>
+            </div>
+            <div class="cce-card" style="border:1px solid #ddd; border-top: 3px solid #f97316; padding:20px;">
+                <h4 style="margin-top:0;">🎣 Tripwire</h4>
+                <p style="font-size:11px; height:40px;">Low-ticket front-end. <br><strong>Steps:</strong> Sales → Pay → Upsell → Success</p>
+                <button class="button button-primary cce-use-template" data-template="tripwire" style="width:100%;">Deploy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Step Modal -->
+    <div id="cce-add-step-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Add Funnel Step</h2>
+            <form id="cce-add-step-form">
+                <input type="hidden" id="add-step-funnel-id">
+                <p><label>Step Title</label><br><input type="text" id="add-step-title" class="widefat" required></p>
+                <p><label>Step Type</label><br>
+                    <select id="add-step-type" class="widefat">
+                        <option value="optin">Opt-in Form</option>
+                        <option value="booking">Booking/Scheduling</option>
+                        <option value="checkout">Checkout/Payment</option>
+                        <option value="thank_you">Thank You Page</option>
+                    </select>
+                </p>
+                <button type="submit" class="button button-primary">Add Step</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Step Config Modal -->
+    <div id="cce-step-config-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:#fff; margin:10% auto; padding:25px; width:400px; border-radius:12px; position:relative;">
+            <span class="cce-modal-close" style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px;">&times;</span>
+            <h2>Configure Step</h2>
+            <form id="cce-step-config-form">
+                <input type="hidden" id="config-funnel-id">
+                <input type="hidden" id="config-step-idx">
+
+                <div id="config-offer-selector" style="display:none;">
+                    <p><label>Link to Offer</label><br>
+                    <select id="config-offer-id" class="widefat">
+                        <option value="">Select Offer...</option>
+                        <?php foreach($offers as $o) echo "<option value='{$o->id}'>{$o->title}</option>"; ?>
+                    </select></p>
+                </div>
+
+                <div id="config-thankyou-selector" style="display:none;">
+                    <p><label>Custom Success Message</label><br>
+                    <textarea id="config-success-message" class="widefat" rows="3"></textarea></p>
+                    <p><label>OR Redirect URL</label><br>
+                    <input type="url" id="config-redirect-url" class="widefat" placeholder="https://..."></p>
+                </div>
+
+                <button type="submit" class="button button-primary">Save Config</button>
+            </form>
         </div>
     </div>
 </div>
