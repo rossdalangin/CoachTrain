@@ -1,43 +1,48 @@
-# Coach Client Engine: The Master Step-by-Step Guide
+# Coach Client Engine: The Master Implementation Blueprint
 
-## Phase 1: Foundation (The Settings)
-1. **License Key:** Enter your key in the **Settings** tab.
-2. **Branding:** Choose your brand's primary color. This will be automatically injected into all public forms and the client portal.
-3. **Payments:** Connect your Stripe or PayPal account. This allows the Engine to track actual revenue and closed deals.
+Welcome to the inner circle. This guide will take you from a fresh install to a 7-figure acquisition system in 6 simple phases.
 
-## Phase 2: Create Your "Grand Slam" Offer
-1. Navigate to the **Clients & Offers** tab.
-2. Fill out the **Value Equation**:
-   - **Dream Outcome:** What big win do they want?
-   - **Perceived Likelihood:** Why will they trust YOU to deliver?
-   - **Time Delay:** How fast do they get a small win?
-   - **Effort & Sacrifice:** What hard things do you remove for them?
+---
 
-## Phase 3: Launch Your First Funnel
-1. Click the **Funnel Engine** tab.
-2. Select **"Use Template"** on the **Consultation Funnel**.
-3. Click **"View Steps"** to see your sequence: Opt-in -> Booking -> Thank You.
-4. Copy the shortcode `[cce_funnel id="X"]` and paste it into any WordPress page.
+## 🛠 Phase 1: Foundations (The First 15 Minutes)
+1. **The Plugin Handshake:** Install and activate. Your new command center is in the "Coach Engine" sidebar menu.
+2. **Identity Setup:** Navigate to **Settings > General**. Set your Coach Name and Default Currency. This ensures all your offers and dashboards reflect your brand accurately.
+3. **The Gateway:** Go to **Settings > Payments**. Connect your Stripe Secret Key or PayPal Client ID. In a multi-coach environment, these keys remain private to your account.
+4. **License Unlock:** Enter your PRO license key. This activates the advanced Automation and Analytics engines.
 
-## Phase 4: Configure Your "Smart" Booking
-1. Go to the **Bookings** tab.
-2. Use the **Questionnaire Builder** to add qualification questions.
-3. *Recommended Question:* "What is your current monthly revenue?" (Helps you qualify leads before the call).
+## 🌪 Phase 2: The Funnel Engine (Building the Bridge)
+1. **Choose Your Weapon:** Go to **Funnels > Create from Template**.
+   - *For List Building:* Lead Magnet Funnel.
+   - *For High-Ticket:* Consultation Funnel.
+   - *For Automation:* Webinar Funnel.
+2. **Deploy & Embed:** Click "Deploy." The Engine creates all steps for you. Copy the `[cce_funnel id="X"]` shortcode and paste it onto a new WordPress page.
+3. **Step Config:** Edit each step. Ensure your "Checkout" step is linked to a valid Offer (Phase 3).
 
-## Phase 5: Automation (The Real Engine)
-1. Navigate to **Automation & Workflows**.
-2. Click **Create New Rule**.
-3. *Suggested Rule 1:* Trigger: "Consultation Booked" -> Action: "Move to CRM Stage: Booked".
-4. *Suggested Rule 2:* Trigger: "Lead Captured" -> Action: "Send Email: Welcome & Guide".
+## 💎 Phase 3: The Offer Builder (The Math of Value)
+1. **Craft the "Grand Slam":** Go to **Clients > Add Offer**.
+2. **Hormozi Variables:** Fill in the Dream Outcome and Perceived Likelihood. High-ticket coaching isn't about time; it's about transformation.
+3. **The Value Equation:**
+   - (Dream Outcome × Perceived Likelihood) / (Time Delay × Effort & Sacrifice) = **VALUE**.
+4. **Links:** Copy your "Direct Checkout Link" and use it in your outreach or sales calls.
 
-## Phase 6: Managing the Pipeline
-1. Open the **CRM & Pipeline** tab.
-2. Use the **Kanban Board** to see your lead flow.
-3. Check the **Engagement Score** on each card. If someone has a score over 30, they are "Hot"—call them!
-4. Log activities and create tasks directly from the Kanban cards.
+## ⚙️ Phase 4: Automation (The Silent Employee)
+1. **The Welcome Sequence:** Create a rule: `Trigger: New Lead` → `Action: Send Email`. Select the "Welcome Indoctrination" template.
+2. **CRM Automation:** Create a rule: `Trigger: Booking Confirmed` → `Action: Move Stage (Booked)`.
+3. **Qualifying Logic:** Use the **Questionnaire Builder** in the Bookings tab to filter out non-qualified leads before they talk to you.
 
-## Phase 7: The Client Experience
-1. Set up your **Client Portal** in the **Portal Management** tab.
-2. Create **Onboarding Tasks** like "Join the FB Group" or "Watch the Welcome Video".
-3. Upload **Resources** (PDFs, Videos) and set visibility to "Clients Only" for paid materials.
-4. Direct your clients to the portal using the `[cce_client_portal]` shortcode.
+## 🔒 Phase 5: Client Portal (The 5-Star Experience)
+1. **The Private Hub:** Create a page on your site and add the `[cce_client_portal]` shortcode.
+2. **Resource Seeding:** Go to **Portal > Resources**. Upload your welcome PDF, training videos, and community links.
+3. **Roadmap Builder:** Add onboarding tasks like "Watch Welcome Video" or "Join Slack." Clients can track their progress in real-time.
+
+## 📊 Phase 6: Analytics & Scaling (The CEO View)
+1. **Weekly Audit:** Every Monday, check **Analytics**.
+2. **Strategy Insights:** Read the dynamic advice. If your "Lead Conversion" is red, rewrite your opt-in headline using the frameworks in the **Mastery Hub**.
+3. **Projections:** Look at the "Next 30 Days" revenue. If it's too low, increase your top-of-funnel traffic.
+
+---
+
+## 🧠 Master Consultant FAQ
+- **Multi-Tenancy:** Yes, if you have multiple coaches on one WP site, each user sees *only* their own leads, funnels, and settings.
+- **Shortcode Power:** You can mix and match. Use `[cce_lead_capture]` on a blog post and `[cce_checkout]` on a custom sales page.
+- **Support:** Access the "Mastery Hub" for outreach scripts and VSL frameworks designed by the pros.

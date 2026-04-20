@@ -1,57 +1,60 @@
-# Coach Client Engine: Installation & Scaling Guide
+# Coach Client Engine: Marketing & Sales Supremacy Guide
 
-## 🛠 1. Quick Installation & Multi-Tenant Setup
-1. **Upload:** Upload the `coach-client-engine` folder to your `/wp-content/plugins/` directory.
-2. **Activate:** Activate through the 'Plugins' menu in WordPress.
-3. **Identity:** Go to **Coach Engine > Settings** and set your **Coach Name** and **Default Currency**. In a multi-tenant environment, these settings are unique to your user account.
-4. **License:** Enter your license key (starts with `PRO-` for full automation features).
+This guide is not about tech—it's about **Revenue**. Here is how to use the Engine to dominate your niche.
 
-## 🚀 2. Setting Up Your First Funnel
-1. Go to **Coach Engine > Funnels**.
-2. Click **"Create from Template"**.
-3. Select **"Consultation Funnel"**. This is the best for high-ticket coaching.
-4. Customize your steps. Use the `[cce_funnel id="X"]` shortcode to display it on any page.
+---
 
-## 3. Creating Your "Grand Slam" Offer
-1. Go to **Coach Engine > Clients**.
-2. Create a new Offer.
-3. Use the **Value Equation** fields to refine your pitch:
-    - **Dream Outcome:** What is the ultimate goal for your client?
-    - **Perceived Likelihood:** Why will they believe they can achieve it with you?
-    - **Time Delay:** How fast can they see a win?
-    - **Effort & Sacrifice:** How much "work" can you remove for them?
+## 1. The 30-Day Launch Blueprint (GTM)
+### Week 1: The Core Offer
+- Use the **Offer Builder** to define your $3k-$10k program.
+- Focus on a "One-Sentence Transformation": *I help [Niche] achieve [Dream Outcome] in [Timeframe] without [Pain Point].*
 
-## ⚙️ 4. Automation Power-Ups
-Automation is where you win back your time.
-1. **The Sequence:** Go to **Coach Engine > Automation**.
-2. **Create Rule:** Link `Trigger: New Lead Captured` to `Action: Send Email (Welcome Template)`.
-3. **CRM Integration:** Link `Trigger: Booking Confirmed` to `Action: Move Stage (Booked)`.
-4. **Task Delegation:** Link `Trigger: Payment Received` to `Action: Create Task (Onboard Client)`.
+### Week 2: The Indoctrination Funnel
+- Deploy the **Consultation Funnel**.
+- Record a 15-minute **VSL** (Video Sales Letter) using the framework in the Mastery Hub.
+- Drive traffic from your personal profile or LinkedIn to the Opt-in page.
 
-### 🛡 Webhook Hardening
-For high-ticket payments via Stripe/PayPal:
-- The Engine automatically handles `payment_intent.succeeded` events.
-- Ensure your Webhook Secret in **Settings > Payments** matches your Stripe Dashboard for secure processing.
+### Week 3: The Follow-Up Machine
+- Configure **Automation Rules** to send 3 emails in the first 48 hours.
+- Monitor the **CRM**. Move leads from "New" to "Contacted" as you send personalized Loom videos or DMs.
 
-## 5. Shortcodes Reference
-- `[cce_lead_capture]` - Lead magnet form. Attributes: `type="inline|popup|sticky"`, `title="Custom Title"`.
-- `[cce_booking]` - Scheduling calendar. Attributes: `title="Book Now"`.
-- `[cce_testimonials]` - Social proof wall. Attributes: `type="testimonial|case_study"`.
-- `[cce_checkout]` - Payment processing. Attributes: `offer_id="X"`.
-- `[cce_client_portal]` - Dedicated dashboard for active clients. (Requires email login if no session active).
-- `[cce_funnel id="123"]` - Embed a specific funnel journey.
+### Week 4: The Closing Sprint
+- Use the **High-Ticket Sales Playbook** for every discovery call.
+- Record payments using **manual recording** if they pay over the phone, or send a **checkout link** for immediate enrollment.
 
-## 🛠 6. Troubleshooting & Advanced Settings
-### Webhooks Not Registering?
-- Ensure your site is accessible via HTTPS.
-- Go to **Coach Engine > Settings > System Status** to verify all database tables were created successfully.
-- Check **Settings > Payments** to ensure your API keys match your Stripe/PayPal dashboard.
+---
 
-### Client Portal Access Issues
-- The portal uses a 30-day cookie for authentication.
-- If a client is blocked, they can re-enter their email on the portal page to receive a new secure session token.
+## 2. Advanced Marketing Strategies
+### The "Epiphany Bridge" Sequence
+Inside the **Automation** tab, create a series of 5 emails:
+1. **The Backstory:** Your struggle before the system.
+2. **The Desire:** What you wanted to achieve.
+3. **The Wall:** The obstacle that stopped you.
+4. **The Epiphany:** The moment you discovered the [Result] system.
+5. **The Plan:** How they can use the Engine to get the same result.
 
-## 🧠 7. Pro Tips for Consultants
-- **Lead Scoring:** Check your CRM Pipeline regularly. Leads with high "Activity" are your hottest prospects.
-- **Task Management:** Use the "Tasks" tab in a Lead's profile to never miss a follow-up.
-- **Conversion Tracking:** Check **Coach Engine > Analytics** every Monday to see which funnel is performing best.
+### CRM Lead Heat Management
+- **HOT (Red):** Leads who have visited the checkout page but didn't pay. REACH OUT IMMEDIATELY.
+- **WARM (Yellow):** Leads who booked a call but haven't attended yet. Send them a case study from the **Proof** tab.
+- **COLD (Blue):** New opt-ins. Put them through the automated nurture sequence.
+
+---
+
+## 3. High-Ticket Sales Framework (C-O-N-V-E-R-T)
+Use this during your consultation calls:
+- **C - Confirm** the agenda.
+- **O - Outline** the goals.
+- **N - Name** the problem (The Gap).
+- **V - Vision** of the future.
+- **E - Establish** the cost of inaction.
+- **R - Reveal** the solution (The Engine).
+- **T - Transaction** (Send the link).
+
+---
+
+## 4. Selling the Plugin (For Resellers)
+If you are white-labeling this plugin, focus your marketing on:
+- **Subscription Savings:** "Save $500/mo on SaaS fees."
+- **Data Ownership:** "Own your business, don't rent it from ClickFunnels."
+- **Speed:** "Deploy a 7-figure funnel in 60 seconds."
+- **Niche Focus:** "Built by high-ticket coaches, for high-ticket coaches."
