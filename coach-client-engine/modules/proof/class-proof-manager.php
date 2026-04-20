@@ -40,8 +40,7 @@ class CCE_Proof_Manager extends CCE_REST_Controller {
 				'methods'             => array( WP_REST_Server::EDITABLE, WP_REST_Server::CREATABLE ),
 				'callback'            => array( $this, 'update_testimonial' ),
 				'permission_callback' => array( $this, 'check_permission' ),
-			),
-		) );
+			);
 	}
 
     /**
