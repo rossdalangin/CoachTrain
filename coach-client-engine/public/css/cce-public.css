@@ -1,11 +1,107 @@
-.cce-lead-form-wrapper, .cce-booking-form-wrapper, .cce-checkout-wrapper, .cce-client-portal {
+:root {
+    --cce-pub-primary: #1e293b;
+    --cce-pub-accent: #d97706;
+    --cce-pub-accent-hover: #b45309;
+    --cce-pub-bg: #ffffff;
+    --cce-pub-text: #334155;
+    --cce-pub-border: #e2e8f0;
+    --cce-pub-radius: 10px;
+    --cce-pub-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.cce-lead-form-wrapper,
+.cce-booking-form-wrapper,
+.cce-checkout-wrapper,
+.cce-client-portal {
     max-width: 600px;
-    margin: 20px auto;
-    padding: 30px;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin: 40px auto;
+    padding: 40px;
+    border-radius: var(--cce-pub-radius);
+    background: var(--cce-pub-bg);
+    box-shadow: var(--cce-pub-shadow);
+    border: 1px solid var(--cce-pub-border);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: var(--cce-pub-text);
+}
+
+.cce-lead-form-wrapper h3,
+.cce-booking-form-wrapper h3,
+.cce-checkout-wrapper h3 {
+    margin-top: 0;
+    color: var(--cce-pub-primary);
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+}
+
+.cce-lead-form-wrapper input,
+.cce-booking-form-wrapper input,
+.cce-booking-form-wrapper select,
+.cce-checkout-wrapper select,
+.cce-lead-form-wrapper textarea {
+    width: 100%;
+    padding: 14px 16px;
+    margin: 12px 0;
+    border: 1px solid var(--cce-pub-border);
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cce-lead-form-wrapper input:focus,
+.cce-booking-form-wrapper input:focus {
+    outline: none;
+    border-color: var(--cce-pub-accent);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+.cce-lead-form-wrapper button,
+.cce-booking-form-wrapper button,
+.cce-checkout-wrapper button {
+    width: 100%;
+    padding: 16px;
+    background: var(--cce-pub-accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 10px;
+}
+
+.cce-lead-form-wrapper button:hover,
+.cce-booking-form-wrapper button:hover {
+    background: var(--cce-pub-accent-hover);
+}
+
+.cce-lead-form-wrapper button:active {
+    transform: scale(0.98);
+}
+
+.cce-testimonial-card {
+    background: #fffcf5;
+    border: 1px solid #fef3c7 !important;
+    border-radius: 12px;
+    font-style: italic;
+    position: relative;
+    padding: 24px 24px 24px 56px !important;
+    margin: 20px 0;
+}
+
+.cce-testimonial-card::before {
+    content: '“';
+    position: absolute;
+    left: 20px;
+    top: 10px;
+    font-size: 60px;
+    color: var(--cce-pub-accent);
+    opacity: 0.3;
+    font-family: serif;
 }
 
 .cce-form-popup {
@@ -30,59 +126,13 @@
     z-index: 9999;
     transform: translateY(100px);
     transition: transform 0.5s ease-out;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--cce-pub-shadow);
+    border: 1px solid var(--cce-pub-border);
 }
 
 .cce-form-sticky.active {
     transform: translateY(0);
-}
-
-.cce-lead-form-wrapper h3, .cce-booking-form-wrapper h3, .cce-checkout-wrapper h3 {
-    margin-top: 0;
-    color: #1a1a1a;
-    font-size: 24px;
-    text-align: center;
-}
-
-.cce-lead-form-wrapper input, .cce-booking-form-wrapper input, .cce-booking-form-wrapper select, .cce-checkout-wrapper select {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-sizing: border-box;
-}
-
-.cce-lead-form-wrapper button, .cce-booking-form-wrapper button, .cce-checkout-wrapper button {
-    width: 100%;
-    padding: 14px;
-    background: #0073aa;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.cce-lead-form-wrapper button:hover, .cce-booking-form-wrapper button:hover, .cce-checkout-wrapper button:hover {
-    background: #005177;
-}
-
-.cce-testimonial-card {
-    background: #f9f9f9;
-    border: none !important;
-    border-radius: 8px;
-    font-style: italic;
-    position: relative;
-    padding-left: 40px !important;
-}
-
-.cce-testimonial-card::before {
-    content: '"';
-    position: absolute;
-    left: 15px;
-    top: 10px;
-    font-size: 40px;
-    color: #0073aa;
 }
