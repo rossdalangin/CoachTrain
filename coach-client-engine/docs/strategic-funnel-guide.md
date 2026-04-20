@@ -4,18 +4,48 @@ The Funnel Engine is the heart of your high-ticket acquisition system. This guid
 
 ---
 
-## 🚀 1. Deploying a Template (The 60-Second Setup)
+## 🚀 1. How to Create and Manage Funnels
 
-To get started, you don't need to build from scratch. Use our titan-tested templates.
+The Funnel Engine allows you to build multi-step conversion journeys. You have two ways to create them:
 
+### A. One-Click Deployment (Recommended)
 1.  **Navigate to Funnels:** Go to **Coach Engine > Funnels** in your WordPress sidebar.
 2.  **Strategic Library:** Scroll down to the "Strategic Funnel Templates" section.
-3.  **Select Your Strategy:**
-    *   **Lead Magnet:** Best for building an email list quickly.
-    *   **Consultation:** The "Gold Standard" for selling $3k - $10k coaching.
-    *   **The Appointment Machine:** Advanced triage system for coaches with setters/closers.
-    *   **The Hybrid Closer:** Combines a VSL with direct checkout options.
-4.  **Click "Deploy":** The Engine will automatically create the funnel and all necessary steps in the background.
+3.  **Deploy:** Click the **"Deploy"** button on any card (e.g., Consultation).
+    - *The Engine will automatically create all the steps (Opt-in, Booking, etc.) with the correct strategic settings.*
+
+### B. Building from Scratch
+1.  **Duplicate:** Find an existing funnel and click **"Duplicate"** to start with a proven structure.
+2.  **Add Steps:** Click **"View Steps"** on any funnel, then click the **"+ Add Step"** button.
+
+---
+
+## 🛠 2. Customizing Your Funnel Steps
+
+"Where does the content come from?" is the most common question. The Coach Client Engine uses **Dynamic Rendering**. Instead of you writing HTML, the Engine renders professional, high-converting forms based on your settings.
+
+### Understanding Step Types (The Dropdown)
+When you add or edit a step, you choose a "Step Type." Here is what each one actually does:
+
+1.  **Opt-in Form (optin):**
+    *   **What's inside:** A professional name and email capture form.
+    *   **Process:** Captured data is sent to the **Leads** database and triggers any "New Lead" **Automation Rules**.
+    *   **How to Edit Content:** The form title is the **Step Title**. You can change it by clicking the gear icon (⚙).
+
+2.  **Booking/Scheduling (booking):**
+    *   **What's inside:** A dynamic calendar and qualification questionnaire.
+    *   **Process:** Leads choose a time and answer your questions. Once confirmed, they are moved to the "Booked" stage in the **CRM**.
+    *   **How to Edit Content:** The questions are managed in the **Bookings** tab. Change them there to update all funnels simultaneously.
+
+3.  **Checkout/Payment (checkout):**
+    *   **What's inside:** A frictionless high-ticket payment form for Stripe or PayPal.
+    *   **Process:** Upon payment, the lead is moved to the "Closed" stage in the **CRM** and can access the **Client Portal**.
+    *   **How to Edit Content:** Go to the **Clients** tab to edit the price, title, and "Dream Outcome" description of your offer.
+
+4.  **Thank You Page (thank_you):**
+    *   **What's inside:** A confirmation message OR a redirect to a VSL/Video.
+    *   **How to Edit Content:** Click the gear icon (⚙) on the step. You can enter a **Success Message** or a **Redirect URL**.
+    *   *Strategic Use:* In the "Hybrid Closer" funnel, the 2nd step (VSL Presentation) is a `thank_you` type that redirects to your video page.
 
 ---
 
