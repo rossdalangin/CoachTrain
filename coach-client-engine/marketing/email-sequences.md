@@ -65,3 +65,19 @@ Can't wait to see if we can do the same for you.
 Are you still interested in scaling your coaching business this year?
 
 - [Your Name]
+
+## Sequence 4: The "Ascension" (Post-Purchase)
+**Goal:** Upsell existing clients to your backend mastermind.
+
+### Email 1: The "What's Next" Shift
+**Subject:** Congrats on the first win! (Now what?)
+**Body:**
+Hi {{first_name}},
+
+You've just completed [Phase 1]. Most people stop here.
+
+But the real profit is in **Scale**.
+
+I'm opening 3 spots in our high-level Mastermind for coaches who want to hit $100k/mo.
+
+Want the details? Reply "SCALE" to this email.

@@ -19,6 +19,7 @@ The prospect must believe two things:
 - "How long has this been a problem?"
 - "What have you tried in the past that didn't work?"
 - "What happens if you don't fix this in the next 6 months?" (The Cost of Inaction)
+- **The Magic Question:** "If we had a magic wand and could solve this tomorrow, what would your business look like 12 months from now?"
 
 ### Phase 3: The Vision (5 mins)
 - "If we solved this today, what does your business look like 12 months from now?"
@@ -37,6 +38,8 @@ The prospect must believe two things:
 - **Price:** "Is it the price, or the value? If I could guarantee a 10x ROI, would the $5k be an issue?"
 - **Time:** "You don't have time because you don't have this system. This system is what buys you your time back."
 - **Think About It:** "I understand. What specifically do you need to think about? Usually, it's either the money, the system, or me. Which one is it for you?"
+- **Spouse:** "I totally get that. Does your spouse usually handle the financial side, or is it more about getting their blessing on the direction of the business?"
+- **The "Safety" Reframe:** "If you stay exactly where you are, is that 'safe'? Or is it more dangerous to keep losing money every month by not fixing this?"
 
 ## 5. Closing the Loop
 - **Payment:** Use the [cce_checkout] shortcode or send a direct link from the "Offers" module.

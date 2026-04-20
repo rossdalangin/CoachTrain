@@ -87,14 +87,19 @@ If you are the owner of this plugin and intend to sell licenses, please refer to
 
 ## 🚀 Consultant Strategy Guide (The "Hormozi/Brunson" Method)
 To get 3–5 high-paying clients monthly with this engine:
-1.  **The Grand Slam Offer:** Use the **Clients** tab to create an offer that is "so good they feel stupid saying no." Focus on outcomes, not hours.
-2.  **The Consultation Funnel:** Deploy a funnel using the **Funnels** tab.
+1.  **Build the Value Ladder:**
+    - **Lead Magnet (Free):** Use `[cce_lead_capture]` to build your list.
+    - **Frontend Offer ($27-$497):** A "Tripwire" offer to liquidate ad spend.
+    - **Core Offer ($3k-$10k):** Your main coaching program built in the **Offer Builder**.
+    - **Backend Mastermind ($25k+):** High-touch scaling for your best clients.
+2.  **The Grand Slam Offer:** Use the **Clients** tab to create an offer that is "so good they feel stupid saying no." Focus on outcomes, not hours.
+3.  **The Consultation Funnel:** Deploy a funnel using the **Funnels** tab.
     - Step 1: Add value with a Lead Magnet.
     - Step 2: Immediate invitation to book a "Strategy Session" (Consultation).
     - Step 3: Use the **Pre-call Questionnaire** to qualify leads.
-3.  **Speed to Lead:** Monitor your **CRM**. When a 'HOT' lead comes in, reach out within 5 minutes.
-4.  **Omnipresent Proof:** Embed the `[cce_testimonials]` shortcode on every page. High-ticket sales are built on trust.
-5.  **Analytics Mastery:** If your "Conversion Rate" is below 5%, refine your offer description or questionnaire.
+4.  **Speed to Lead:** Monitor your **CRM**. When a 'HOT' lead comes in, reach out within 5 minutes. Use the **Indoctrination Email Sequences** in the Mastery Hub to automate trust.
+5.  **Omnipresent Proof:** Embed the `[cce_testimonials]` shortcode on every page. High-ticket sales are built on trust.
+6.  **Analytics Mastery:** Use the **Strategic Insights** panel in Analytics. If your "Show Rate" is below 60%, add more automated reminders in the **Automation** tab.
 
 ## Licensing
 This plugin includes a freemium model. Use a license key starting with `PRO-` to unlock professional features.
